@@ -1,0 +1,33 @@
+﻿h1 {
+    font-weight: 200;
+    margin: 0.7em 0;
+}
+
+.album h2 {
+    font-size: 1.25rem;
+    margin: 0;
+    padding: 0;
+}
+
+hr {
+    margin: 0.5em 0;
+}
+
+author {
+    color: lightgray;
+    font-style: italic;
+}
+
+.rating {
+    color: #0dcaf0;
+    white-space: nowrap;
+}
+
+.price s {
+    color: lightgray;
+    font-size: 0.8em;
+}
+
+footer {
+    border-top: 1px solid #0dcaf0;
+}
