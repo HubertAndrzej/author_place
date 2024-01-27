@@ -6,11 +6,11 @@ public class AlbumsController : Controller
 {
     public IActionResult Index()
     {
-        return Content("Controller: Albums\nAction: Index");
+        return View();
     }
 
     public IActionResult Detail(int id)
     {
-        return Content($"Controller: Albums\nAction: Detail\nId: {id}");
+        return View();
     }
 }
