@@ -1,1 +1,74 @@
-﻿<h1>View: Detail Controller: Albums Action: Detail</h1>
+﻿<section class="album-info">
+    <div class="row">
+        <div class="col-md-9">
+            <h1>Album's Title</h1>
+        </div>
+        <div class="col-md-3 d-grid align-items-end">
+            <a href="#" class="btn btn-info btn-lg subscribe-album">Subscribe</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9">
+            <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi deserunt ea, autem eius enim corrupti
+                laborum obcaecati veritatis, error amet delectus quisquam. Provident nesciunt tenetur corrupti et, autem
+                nam inventore.
+            </p>
+            <p>
+                Doloremque earum repellendus consequatur similique magni nisi cupiditate ipsam ex eaque qui quia impedit
+                delectus tempora, recusandae tempore voluptatum dolorem saepe? Veniam deleniti ipsam nobis qui est?
+                Aperiam, ut suscipit?
+            </p>
+            <p>
+                Aliquid, omnis hic minus id aliquam odio mollitia eveniet nisi placeat molestias consectetur suscipit
+                facere aspernatur, assumenda deserunt accusantium quaerat inventore deleniti optio ducimus consequuntur.
+                Doloribus labore aliquam facere corrupti!
+            </p>
+            <p>
+                Nulla itaque ab laboriosam, architecto maiores numquam voluptates dolores? Molestiae dolorem laudantium
+                officiis aut! Voluptatibus quaerat adipisci atque tenetur aut, in quibusdam commodi sunt facilis
+                distinctio ratione quia fuga expedita.
+            </p>
+        </div>
+        <div class="col-md-3">
+            <aside>
+                <author>by Album's Author</author>
+                <div class="rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="price">EUR 17.99<br><s>EUR 19.99</s></div>
+                <img src="~/placeholder.jpg" class="img-fluid album-image" alt="Album's Title">
+            </aside>
+        </div>
+    </div>
+</section>
+<section class="album-songs">
+    <h2>Songs</h2>
+    @for (int i = 1; i <= 10; i++)
+    {
+        <hr>
+        <div class="row">
+            <div class="col-md-9">
+                <a href="#" class="link-info link-offset-2 link-underline-opacity-0 link-underline-opacity-25-hover">@i Song's Title </a>
+            </div>
+            <div class="col-md-3 song-duration">
+                <i class="far fa-clock"></i>
+                <time>1m 30s</time>
+            </div>
+        </div>
+    }
+    <hr>
+    <div class="row album-duration pb-5">
+        <div class="col-md-9">
+            Total
+        </div>
+        <div class="col-md-3">
+            <i class="far fa-clock"></i>
+            <time>15m 0s</time>
+        </div>
+    </div>
+</section>
