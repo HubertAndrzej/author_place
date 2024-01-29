@@ -15,6 +15,8 @@ public class AlbumsController : Controller
 
     public IActionResult Detail(int id)
     {
-        return View();
+        AlbumService albumService = new AlbumService();
+        AlbumDetailViewModel album = albumService.GetAlbum(id);
+        return View(album);
     }
 }
