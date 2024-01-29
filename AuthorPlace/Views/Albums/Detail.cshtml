@@ -1,1 +1,73 @@
-﻿<h1>View: Detail Controller: Albums Action: Detail</h1>
+﻿@model AlbumDetailViewModel
+<section class="album-info">
+    <div class="row">
+        <div class="col-md-9">
+            <h1>@Model.Title</h1>
+        </div>
+        <div class="col-md-3 d-grid align-items-end">
+            <a href="#" class="btn btn-info btn-lg subscribe-album">Subscribe</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9">
+            <p>@Model.Description</p>
+        </div>
+        <div class="col-md-3">
+            <aside>
+                <author>by @Model.Author</author>
+                <div class="rating" title="@Model.Rating">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (Model.Rating >= i)
+                        {
+                            <i class="fas fa-star"></i>
+                        }
+                        else if (Model.Rating > i - 1)
+                        {
+                            <i class="fas fa-star-half-alt"></i>
+                        }
+                        else
+                        {
+                            <i class="far fa-star"></i>
+                        }
+                    }
+                </div>
+                <div class="price">
+                    @Model.CurrentPrice
+                    @if (!Model.CurrentPrice!.Equals(Model.FullPrice!))
+                    {
+                        <br>
+                        <s>@Model.FullPrice</s>
+                    }
+                </div>
+                <img src="~/@Model.ImagePath" class="img-fluid course-image" alt="@Model.Title">
+            </aside>
+        </div>
+    </div>
+</section>
+<section class="album-songs">
+    <h2>Songs (@Model.Songs!.Count)</h2>
+    @foreach (SongViewModel song in Model.Songs)
+    {
+        <hr>
+        <div class="row">
+            <div class="col-md-9">
+                <a href="#" class="link-info link-offset-2 link-underline-opacity-0 link-underline-opacity-25-hover">@song.Title</a>
+            </div>
+            <div class="col-md-3 song-duration">
+                <i class="far fa-clock"></i>
+                <time>@song.Duration.ToString("m'm 's's'")</time>
+            </div>
+        </div>
+    }
+    <hr>
+    <div class="row album-duration pb-5">
+        <div class="col-md-9">
+            Total
+        </div>
+        <div class="col-md-3">
+            <i class="far fa-clock"></i>
+            <time>@Model.TotalAlbumDuration.ToString("m'm 's's'")</time>
+        </div>
+    </div>
+</section>

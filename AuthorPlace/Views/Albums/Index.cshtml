@@ -1,29 +1,45 @@
-﻿<h1>Album catalogue</h1>
-@for (int i = 1; i <= 10; i++)
+﻿@model List<AlbumViewModel>
+<h1>@ViewBag.Title</h1>
+@foreach (AlbumViewModel album in Model)
 {
-<hr>
-<div class="row album">
-    <div class="col-md-1">
-        <img src="~/placeholder.jpg" width="80">
+    <hr>
+    <div class="row album">
+        <div class="col-md-1">
+            <img src="@album.ImagePath" height="60" width="80" alt="@album.ImagePath">
+        </div>
+        <div class="col-md-5">
+            <h2>@album.Title</h2>
+            <author>by @album.Author</author>
+        </div>
+        <div class="col-md-2 rating" title="@album.Rating">
+        @for (int i = 1; i <= 5; i++)
+        {
+            if (album.Rating >= i)
+            {
+                <i class="fas fa-star"></i>
+            }
+            else if (album.Rating > i - 1)
+            {
+                <i class="fas fa-star-half-alt"></i>
+            }
+            else
+            {
+                <i class="far fa-star"></i>
+            }
+        }
+        </div>
+        <div class="col-md-2 price">
+        @album.CurrentPrice
+        @if (!album.CurrentPrice!.Equals(album.FullPrice!))
+        {
+            <br>
+            <s>@album.FullPrice</s>
+        }
+        </div>
+        <div class="col-md-2">
+            <a class="btn btn-outline-info" asp-action="Detail" asp-controller="Albums" asp-route-id="@album.Id">
+                Album nr @album.Id
+            </a>
+        </div>
     </div>
-    <div class="col-md-5">
-        <h2>Album's title</h2>
-        <author>by Author</author>
-    </div>
-    <div class="col-md-2 rating">
-        <i class="fas fa-star"></i>
-        <i class="fas fa-star"></i>
-        <i class="fas fa-star"></i>
-        <i class="fas fa-star"></i>
-        <i class="fas fa-star"></i>
-    </div>
-    <div class="col-md-2 price">
-        EUR 17.99
-        <br>
-        <s>EUR 19.99</s>
-    </div>
-    <div class="col-md-2">
-            <a class="btn btn-outline-info" asp-action="Detail" asp-controller="Albums" asp-route-id="@i">Album nr @i</a>
-    </div>
-</div>
 }

@@ -1,6 +1,24 @@
-﻿h1 {
+﻿author {
+    color: #0dcaf0;
+    font-style: italic;
+}
+
+footer {
+    border-top: 1px solid #0dcaf0;
+}
+
+h1 {
     font-weight: 200;
     margin: 0.7em 0;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 300;
+}
+
+hr {
+    margin: 0.5em 0;
 }
 
 .album h2 {
@@ -9,25 +27,42 @@
     padding: 0;
 }
 
-hr {
-    margin: 0.5em 0;
+.album-info {
+    margin-bottom: 2em;
 }
 
-author {
-    color: lightgray;
-    font-style: italic;
+.album-info aside {
+    background-color: lightcyan;
+    height: 100%;
+    padding: 1em;
+}
+
+.album-info .album-image {
+    margin-top: 1em;
+}
+
+.album-info .price {
+    font-size: 1.3rem;
+}
+
+.album-info .subscribe-album {
+    margin-bottom: 1em;
+}
+
+.album-songs .album-duration {
+    font-weight: bold;
+}
+
+.album-songs .song-duration i, .album-song .album-duration i {
+    margin-right: 0.3em;
+}
+
+.price s {
+    color: #0dcaf0;
+    font-size: 0.8em;
 }
 
 .rating {
     color: #0dcaf0;
     white-space: nowrap;
-}
-
-.price s {
-    color: lightgray;
-    font-size: 0.8em;
-}
-
-footer {
-    border-top: 1px solid #0dcaf0;
 }
