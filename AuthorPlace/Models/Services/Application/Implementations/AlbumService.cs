@@ -1,10 +1,11 @@
 ﻿using AuthorPlace.Models.Enums;
+using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ValueObjects;
 using AuthorPlace.Models.ViewModels;
 
-namespace AuthorPlace.Models.Services.Application;
+namespace AuthorPlace.Models.Services.Application.Implementations;
 
-public class AlbumService
+public class AlbumService : IAlbumService
 {
     public List<AlbumViewModel> GetAlbums()
     {
