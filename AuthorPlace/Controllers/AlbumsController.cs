@@ -10,6 +10,7 @@ public class AlbumsController : Controller
     {
         AlbumService albumService = new AlbumService();
         List<AlbumViewModel> albums = albumService.GetAlbums();
+        ViewBag.Title = "Album Catalogue";
         return View(albums);
     }
 
@@ -17,6 +18,7 @@ public class AlbumsController : Controller
     {
         AlbumService albumService = new AlbumService();
         AlbumDetailViewModel album = albumService.GetAlbum(id);
+        ViewBag.Title = album.Title;
         return View(album);
     }
 }
