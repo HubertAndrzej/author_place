@@ -6,7 +6,7 @@ using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMvc();
-builder.Services.AddScoped<IAlbumService, AlbumService>();
+builder.Services.AddScoped<IAlbumService, AdoNetAlbumService>();
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 
 WebApplication app = builder.Build();

@@ -16,9 +16,12 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
                 using (SqliteDataReader reader = command.ExecuteReader())
                 {
                     DataSet dataSet = new DataSet();
-                    DataTable dataTable = new DataTable();
-                    dataSet.Tables.Add(dataTable);
-                    dataTable.Load(reader);
+                    do
+                    {
+                        DataTable dataTable = new DataTable();
+                        dataSet.Tables.Add(dataTable);
+                        dataTable.Load(reader);
+                    } while (!reader.IsClosed);
                     return dataSet;
                 }
             }
