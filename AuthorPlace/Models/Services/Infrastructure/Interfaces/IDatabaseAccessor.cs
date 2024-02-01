@@ -4,5 +4,5 @@ namespace AuthorPlace.Models.Services.Infrastructure.Interfaces;
 
 public interface IDatabaseAccessor
 {
-    public DataSet Query(FormattableString query);
+    public Task<DataSet> QueryAsync(FormattableString query);
 }

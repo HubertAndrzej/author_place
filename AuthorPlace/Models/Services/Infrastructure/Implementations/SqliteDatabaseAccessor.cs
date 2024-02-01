@@ -6,7 +6,7 @@ namespace AuthorPlace.Models.Services.Infrastructure.Implementations;
 
 public class SqliteDatabaseAccessor : IDatabaseAccessor
 {
-    public DataSet Query(FormattableString formattableQuery)
+    public async Task<DataSet> QueryAsync(FormattableString formattableQuery)
     {
         object?[] queryArguments = formattableQuery.GetArguments();
         List<SqliteParameter> sqliteParameters = new List<SqliteParameter>();
@@ -19,11 +19,11 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
         string query = formattableQuery.ToString();
         using (SqliteConnection connection = new SqliteConnection("Data Source = Data/AuthorPlace.db"))
         {
-            connection.Open();
+            await connection.OpenAsync();
             using (SqliteCommand command = new SqliteCommand(query, connection))
             {
                 command.Parameters.AddRange(sqliteParameters);
-                using (SqliteDataReader reader = command.ExecuteReader())
+                using (SqliteDataReader reader = await command.ExecuteReaderAsync())
                 {
                     DataSet dataSet = new DataSet();
                     do

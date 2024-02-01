@@ -15,10 +15,10 @@ public class AdoNetAlbumService : IAlbumService
         this.databaseAccessor = databaseAccessor;
     }
 
-    public List<AlbumViewModel> GetAlbums()
+    public async Task<List<AlbumViewModel>> GetAlbumsAsync()
     {
         FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums";
-        DataSet dataSet = databaseAccessor.Query(query);
+        DataSet dataSet = await databaseAccessor.QueryAsync(query);
         DataTable dataTable = dataSet.Tables[0];
         List<AlbumViewModel> albumList = new List<AlbumViewModel>();
         foreach (DataRow albumRow in dataTable.Rows)
@@ -29,10 +29,10 @@ public class AdoNetAlbumService : IAlbumService
         return albumList;
     }
 
-    public AlbumDetailViewModel GetAlbum(int id)
+    public async Task<AlbumDetailViewModel> GetAlbumAsync(int id)
     {
         FormattableString query = $"SELECT Id, Title, Description, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id = {id}; SELECT Id, Title, Description, Duration FROM Songs WHERE AlbumId = {id};";
-        DataSet dataSet = databaseAccessor.Query(query);
+        DataSet dataSet = await databaseAccessor.QueryAsync(query);
         DataTable albumTable = dataSet.Tables[0];
         if (albumTable.Rows.Count != 1)
         {
