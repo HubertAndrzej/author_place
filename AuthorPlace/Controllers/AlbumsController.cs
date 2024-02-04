@@ -13,16 +13,16 @@ public class AlbumsController : Controller
         this.albumService = albumService;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        List<AlbumViewModel> albums = albumService.GetAlbums();
+        List<AlbumViewModel> albums = await albumService.GetAlbumsAsync();
         ViewBag.Title = "Album Catalogue";
         return View(albums);
     }
 
-    public IActionResult Detail(int id)
+    public async Task<IActionResult> Detail(int id)
     {
-        AlbumDetailViewModel album = albumService.GetAlbum(id);
+        AlbumDetailViewModel album = await albumService.GetAlbumAsync(id);
         ViewBag.Title = album.Title;
         return View(album);
     }
