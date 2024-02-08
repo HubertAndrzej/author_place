@@ -25,7 +25,7 @@ public class Album
     public string? ImagePath { get; private set; }
     public string Author { get; private set; }
     public string? Email { get; private set; }
-    public double? Rating { get; private set; }
+    public double Rating { get; private set; } = 0.0;
     public Money FullPrice { get; private set; } = new Money { Amount = 0.0m, Currency = Currency.EUR };
     public Money CurrentPrice { get; private set; } = new Money { Amount = 0.0m, Currency = Currency.EUR };
     public virtual ICollection<Song> Songs { get; private set; } = new List<Song>();
