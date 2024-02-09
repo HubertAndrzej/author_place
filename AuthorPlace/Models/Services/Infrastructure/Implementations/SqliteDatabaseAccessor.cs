@@ -1,11 +1,20 @@
-﻿using AuthorPlace.Models.Services.Infrastructure.Interfaces;
+﻿using AuthorPlace.Models.Options;
+using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Options;
 using System.Data;
 
 namespace AuthorPlace.Models.Services.Infrastructure.Implementations;
 
 public class SqliteDatabaseAccessor : IDatabaseAccessor
 {
+    private readonly IOptionsMonitor<ConnectionStringsOptions> connectionStringsOptions;
+
+    public SqliteDatabaseAccessor(IOptionsMonitor<ConnectionStringsOptions> connectionStringsOptions)
+    {
+        this.connectionStringsOptions = connectionStringsOptions;
+    }
+
     public async Task<DataSet> QueryAsync(FormattableString formattableQuery)
     {
         object?[] queryArguments = formattableQuery.GetArguments();
@@ -17,7 +26,8 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
             queryArguments[i] = "@" + i;
         }
         string query = formattableQuery.ToString();
-        using SqliteConnection connection = new("Data Source = Data/AuthorPlace.db");
+        string? connectionString = connectionStringsOptions.CurrentValue.Default;
+        using SqliteConnection connection = new(connectionString);
         await connection.OpenAsync();
         using SqliteCommand command = new(query, connection);
         command.Parameters.AddRange(sqliteParameters);

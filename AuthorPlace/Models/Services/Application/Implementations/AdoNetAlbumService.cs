@@ -1,7 +1,9 @@
 ﻿using AuthorPlace.Models.Extensions;
+using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.ViewModels;
+using Microsoft.Extensions.Options;
 using System.Data;
 
 namespace AuthorPlace.Models.Services.Application.Implementations;
@@ -9,10 +11,12 @@ namespace AuthorPlace.Models.Services.Application.Implementations;
 public class AdoNetAlbumService : IAlbumService
 {
     private readonly IDatabaseAccessor databaseAccessor;
+    private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
 
-    public AdoNetAlbumService(IDatabaseAccessor databaseAccessor)
+    public AdoNetAlbumService(IDatabaseAccessor databaseAccessor, IOptionsMonitor<AlbumsOptions> albumsOptions)
     {
         this.databaseAccessor = databaseAccessor;
+        this.albumsOptions = albumsOptions;
     }
 
     public async Task<List<AlbumViewModel>> GetAlbumsAsync()
@@ -20,7 +24,7 @@ public class AdoNetAlbumService : IAlbumService
         FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums";
         DataSet dataSet = await databaseAccessor.QueryAsync(query);
         DataTable dataTable = dataSet.Tables[0];
-        List<AlbumViewModel> albumList = new List<AlbumViewModel>();
+        List<AlbumViewModel> albumList = new();
         foreach (DataRow albumRow in dataTable.Rows)
         {
             AlbumViewModel album = albumRow.ToAlbumViewModel();
