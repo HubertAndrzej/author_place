@@ -4,12 +4,12 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace AuthorPlace.Models.Services.Application.Implementations;
 
-public class MemoryCachedAlbumService : ICachedAlbumService
+public class MemoryCacheAlbumService : ICachedAlbumService
 {
     private readonly IAlbumService albumService;
     private readonly IMemoryCache memoryCache;
 
-    public MemoryCachedAlbumService(IAlbumService albumService, IMemoryCache memoryCache)
+    public MemoryCacheAlbumService(IAlbumService albumService, IMemoryCache memoryCache)
     {
         this.albumService = albumService;
         this.memoryCache = memoryCache;

@@ -19,7 +19,7 @@ builder.Services.AddMvc(options =>
 builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
-builder.Services.AddTransient<ICachedAlbumService, MemoryCachedAlbumService>();
+builder.Services.AddTransient<ICachedAlbumService, MemoryCacheAlbumService>();
 builder.Services.AddResponseCaching();
 builder.Services.Configure<ConnectionStringsOptions>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<AlbumsOptions>(builder.Configuration.GetSection("Albums"));
@@ -27,8 +27,8 @@ builder.Services.Configure<MemoryCacheOptions>(builder.Configuration.GetSection(
 
 WebApplication app = builder.Build();
 app.UseExceptionHandler("/Error");
+app.UseStatusCodePagesWithReExecute("/Error");
 app.UseStaticFiles();
 app.UseResponseCaching();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
-app.MapFallbackToController("{*path}", "Index", "Error");
 app.Run();
