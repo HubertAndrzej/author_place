@@ -1,7 +1,8 @@
-﻿using AuthorPlace.Models.Services.Application.Interfaces;
+﻿using AuthorPlace.Models.Options;
+using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ViewModels;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace AuthorPlace.Models.Services.Application.Implementations;
@@ -10,11 +11,13 @@ public class DistributedCacheAlbumService : ICachedAlbumService
 {
     private readonly IAlbumService albumService;
     private readonly IDistributedCache distributedCache;
+    private readonly IOptionsMonitor<CacheDurationOptions> cacheDurationOptions;
 
-    public DistributedCacheAlbumService(IAlbumService albumService, IDistributedCache distributedCache)
+    public DistributedCacheAlbumService(IAlbumService albumService, IDistributedCache distributedCache, IOptionsMonitor<CacheDurationOptions> cacheDurationOptions)
     {
         this.albumService = albumService;
         this.distributedCache = distributedCache;
+        this.cacheDurationOptions = cacheDurationOptions;
     }
 
     public async Task<List<AlbumViewModel>> GetAlbumsAsync()
@@ -25,7 +28,9 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         {
             List<AlbumViewModel> albums = await albumService.GetAlbumsAsync();
             serializedObject = JsonConvert.SerializeObject(albums);
-            await distributedCache.SetStringAsync(key, serializedObject);
+            DistributedCacheEntryOptions cacheOptions = new();
+            cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
+            await distributedCache.SetStringAsync(key, serializedObject, cacheOptions);
             return albums;
         }
         else
@@ -41,10 +46,9 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         if (serializedObject == null)
         {
             AlbumDetailViewModel album = await albumService.GetAlbumAsync(id);
-
             serializedObject = JsonConvert.SerializeObject(album);
             DistributedCacheEntryOptions cacheOptions = new();
-            cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(60));
+            cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
             await distributedCache.SetStringAsync(key, serializedObject, cacheOptions);
             return album;
         }

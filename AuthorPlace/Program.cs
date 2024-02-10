@@ -19,12 +19,12 @@ builder.Services.AddMvc(options =>
 builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
-builder.Services.AddTransient<ICachedAlbumService, DistributedCacheAlbumService>();
+builder.Services.AddTransient<ICachedAlbumService, MemoryCacheAlbumService>();
 builder.Services.AddResponseCaching();
-builder.Services.AddDistributedMemoryCache();
 builder.Services.Configure<ConnectionStringsOptions>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<AlbumsOptions>(builder.Configuration.GetSection("Albums"));
 builder.Services.Configure<MemoryCacheOptions>(builder.Configuration.GetSection("MemoryCache"));
+builder.Services.Configure<CacheDurationOptions>(builder.Configuration.GetSection("CacheDuration"));
 
 WebApplication app = builder.Build();
 app.UseExceptionHandler("/Error");
