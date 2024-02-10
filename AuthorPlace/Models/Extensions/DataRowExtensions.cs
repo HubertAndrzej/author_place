@@ -9,7 +9,7 @@ public static class DataRowExtensions
 {
     public static AlbumViewModel ToAlbumViewModel(this DataRow albumRow)
     {
-        AlbumViewModel albumViewModel = new AlbumViewModel
+        AlbumViewModel albumViewModel = new()
         {
             Id = Convert.ToInt32(albumRow["Id"]),
             Title = Convert.ToString(albumRow["Title"]),
@@ -30,7 +30,7 @@ public static class DataRowExtensions
 
     public static AlbumDetailViewModel ToAlbumDetailViewModel(this DataRow albumRow)
     {
-        AlbumDetailViewModel albumDetailViewModel = new AlbumDetailViewModel
+        AlbumDetailViewModel albumDetailViewModel = new()
         {
             Id = Convert.ToInt32(albumRow["Id"]),
             Title = Convert.ToString(albumRow["Title"]),
@@ -53,7 +53,7 @@ public static class DataRowExtensions
 
     public static SongViewModel ToSongViewModel(this DataRow songRow)
     {
-        SongViewModel songViewModel = new SongViewModel
+        SongViewModel songViewModel = new()
         {
             Id = Convert.ToInt32(songRow["Id"]),
             Title = Convert.ToString(songRow["Title"]),

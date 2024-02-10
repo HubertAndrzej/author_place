@@ -1,4 +1,5 @@
-﻿using AuthorPlace.Models.Services.Application.Interfaces;
+﻿using AuthorPlace.Models.Exceptions;
+using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
@@ -8,10 +9,12 @@ namespace AuthorPlace.Models.Services.Application.Implementations;
 public class EFCoreAlbumService : IAlbumService
 {
     private readonly AuthorPlaceDbContext dbContext;
+    private readonly ILogger logger;
 
-    public EFCoreAlbumService(AuthorPlaceDbContext dbContext)
+    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, ILoggerFactory loggerFactory)
     {
         this.dbContext = dbContext;
+        this.logger = loggerFactory.CreateLogger("Albums");
     }
 
     public async Task<List<AlbumViewModel>> GetAlbumsAsync()
@@ -58,8 +61,13 @@ public class EFCoreAlbumService : IAlbumService
                 })
                 .ToList()
             });
-        AlbumDetailViewModel album = await queryLinq
-            .SingleAsync();
+        AlbumDetailViewModel? album = await queryLinq
+            .FirstOrDefaultAsync();
+        if (album == null)
+        {
+            logger.LogWarning("Album {id} not found", id);
+            throw new AlbumNotFoundException(id);
+        }
         return album;
     }
 }

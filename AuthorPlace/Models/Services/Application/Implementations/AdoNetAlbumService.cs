@@ -1,4 +1,5 @@
-﻿using AuthorPlace.Models.Extensions;
+﻿using AuthorPlace.Models.Exceptions;
+using AuthorPlace.Models.Extensions;
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
@@ -12,11 +13,13 @@ public class AdoNetAlbumService : IAlbumService
 {
     private readonly IDatabaseAccessor databaseAccessor;
     private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
+    private readonly ILogger logger;
 
-    public AdoNetAlbumService(IDatabaseAccessor databaseAccessor, IOptionsMonitor<AlbumsOptions> albumsOptions)
+    public AdoNetAlbumService(IDatabaseAccessor databaseAccessor, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
     {
         this.databaseAccessor = databaseAccessor;
         this.albumsOptions = albumsOptions;
+        this.logger = loggerFactory.CreateLogger("Albums");
     }
 
     public async Task<List<AlbumViewModel>> GetAlbumsAsync()
@@ -40,7 +43,8 @@ public class AdoNetAlbumService : IAlbumService
         DataTable albumTable = dataSet.Tables[0];
         if (albumTable.Rows.Count != 1)
         {
-            throw new InvalidOperationException($"Did not return exactly 1 row for Album {id}");
+            logger.LogWarning("Album {id} not found", id);
+            throw new AlbumNotFoundException(id);
         }
         DataRow albumRow = albumTable.Rows[0];
         AlbumDetailViewModel albumDetailViewModel = albumRow.ToAlbumDetailViewModel();
