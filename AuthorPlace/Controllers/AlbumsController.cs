@@ -8,7 +8,7 @@ public class AlbumsController : Controller
 {
     private readonly IAlbumService albumService;
 
-    public AlbumsController(IAlbumService albumService)
+    public AlbumsController(ICachedAlbumService albumService)
     {
         this.albumService = albumService;
     }
