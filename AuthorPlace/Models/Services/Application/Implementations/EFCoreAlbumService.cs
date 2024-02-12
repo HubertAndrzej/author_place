@@ -17,10 +17,12 @@ public class EFCoreAlbumService : IAlbumService
         this.logger = loggerFactory.CreateLogger("Albums");
     }
 
-    public async Task<List<AlbumViewModel>> GetAlbumsAsync()
+    public async Task<List<AlbumViewModel>> GetAlbumsAsync(string? search)
     {
+        search ??= "";
         IQueryable<AlbumViewModel> queryLinq = dbContext.Albums!
             .AsNoTracking()
+            .Where(album => album.Title.Contains(search))
             .Select(album => new AlbumViewModel
             {
                 Id = album.Id,

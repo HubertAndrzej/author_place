@@ -1,5 +1,17 @@
 ﻿@model List<AlbumViewModel>
-<h1>@ViewBag.Title</h1>
+<div class="row">
+    <div class="col-md-9">
+        <h1>@ViewBag.Title</h1>
+    </div>
+    <div class="col-md-3 d-flex align-items-center">
+        <form asp-controller="Albums" asp-action="Index" method="get">
+            <div class="input-group">
+                <input type="text" class="form-control input" name="search" placeholder="Search..." />
+                <button class="btn btn-outline-info"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+        </form>
+    </div>
+</div>
 @foreach (AlbumViewModel album in Model)
 {
     <hr>

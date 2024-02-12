@@ -22,9 +22,10 @@ public class AdoNetAlbumService : IAlbumService
         this.logger = loggerFactory.CreateLogger("Albums");
     }
 
-    public async Task<List<AlbumViewModel>> GetAlbumsAsync()
+    public async Task<List<AlbumViewModel>> GetAlbumsAsync(string? search)
     {
-        FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums";
+        search ??= "";
+        FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE '%{search}%'";
         DataSet dataSet = await databaseAccessor.QueryAsync(query);
         DataTable dataTable = dataSet.Tables[0];
         List<AlbumViewModel> albumList = new();

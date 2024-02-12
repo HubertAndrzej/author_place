@@ -57,6 +57,10 @@ hr {
     margin-right: 0.3em;
 }
 
+.input {
+    border-color: #0dcaf0;
+}
+
 .price s {
     color: #0dcaf0;
     font-size: 0.8em;
