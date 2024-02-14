@@ -12,12 +12,25 @@
         </form>
     </div>
 </div>
+<div class="row my-3">
+    <div class="col-md-1"></div>
+    <div class="col-md-5">
+        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="Title" asp-route-ascending="true">Title</a>
+    </div>
+    <div class="col-md-2">
+        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="Rating" asp-route-ascending="true">Rating</a>
+    </div>
+    <div class="col-md-2">
+        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="CurrentPrice" asp-route-ascending="true">Price</a>
+    </div>
+    <div class="col-md-2"></div>
+</div>
 @foreach (AlbumViewModel album in Model)
 {
     <hr>
-    <div class="row album">
+    <div class="row album my-3">
         <div class="col-md-1">
-            <img src="@album.ImagePath" height="60" width="60" alt="@album.Title">
+            <img src="@album.ImagePath" height="52" width="52" alt="@album.Title">
         </div>
         <div class="col-md-5">
             <h2>@album.Title</h2>

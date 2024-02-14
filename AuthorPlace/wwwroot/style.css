@@ -57,6 +57,10 @@ hr {
     margin-right: 0.3em;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 .input {
     border-color: #0dcaf0;
 }

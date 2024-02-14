@@ -13,9 +13,9 @@ public class AlbumsController : Controller
         this.albumService = albumService;
     }
 
-    public async Task<IActionResult> Index(string? search = null, int page = 1)
+    public async Task<IActionResult> Index(string? search = null, int page = 1, string orderby = "Rating", bool ascending = true)
     {
-        List<AlbumViewModel> albums = await albumService.GetAlbumsAsync(search, page);
+        List<AlbumViewModel> albums = await albumService.GetAlbumsAsync(search, page, orderby, ascending);
         ViewBag.Title = "Album Catalogue";
         return View(albums);
     }

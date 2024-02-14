@@ -1,5 +1,6 @@
 ﻿using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
+using AuthorPlace.Models.ValueObjects;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
 using System.Data;
@@ -21,6 +22,10 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
         List<SqliteParameter> sqliteParameters = new();
         for (int i = 0; i < queryArguments.Length; i++)
         {
+            if (queryArguments[i] is Sql)
+            {
+                continue;
+            }
             SqliteParameter parameter = new(i.ToString(), queryArguments[i]);
             sqliteParameters.Add(parameter);
             queryArguments[i] = "@" + i;
