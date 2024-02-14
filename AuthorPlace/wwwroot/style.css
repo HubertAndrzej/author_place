@@ -61,6 +61,23 @@ hr {
     border-color: #0dcaf0;
 }
 
+.pagination .page-link {
+    border-color: #0dcaf0;
+    color: #0dcaf0;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0dcaf0;
+    border-color: black;
+    color: white;
+}
+
+.pagination .page-link:hover {
+    color: black;
+    background-color: #0dcaf0;
+    border-color: black;
+}
+
 .price s {
     color: #0dcaf0;
     font-size: 0.8em;

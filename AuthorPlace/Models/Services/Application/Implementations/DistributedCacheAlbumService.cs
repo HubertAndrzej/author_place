@@ -20,13 +20,13 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         this.cacheDurationOptions = cacheDurationOptions;
     }
 
-    public async Task<List<AlbumViewModel>> GetAlbumsAsync(string? search)
+    public async Task<List<AlbumViewModel>> GetAlbumsAsync(string? search, int page)
     {
-        string key = $"Album";
+        string key = $"Albums{search}-{page}";
         string serializedObject = await distributedCache.GetStringAsync(key);
         if (serializedObject == null)
         {
-            List<AlbumViewModel> albums = await albumService.GetAlbumsAsync(search);
+            List<AlbumViewModel> albums = await albumService.GetAlbumsAsync(search, page);
             serializedObject = JsonConvert.SerializeObject(albums);
             DistributedCacheEntryOptions cacheOptions = new();
             cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));

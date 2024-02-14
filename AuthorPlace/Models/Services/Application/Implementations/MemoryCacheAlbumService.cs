@@ -19,12 +19,12 @@ public class MemoryCacheAlbumService : ICachedAlbumService
         this.cacheDurationOptions = cacheDurationOptions;
     }
 
-    public Task<List<AlbumViewModel>> GetAlbumsAsync(string? search)
+    public Task<List<AlbumViewModel>> GetAlbumsAsync(string? search, int page)
     {
-        return memoryCache.GetOrCreateAsync($"Albums{search}", cacheEntry =>
+        return memoryCache.GetOrCreateAsync($"Albums{search}-{page}", cacheEntry =>
         {
             cacheEntry.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
-            return albumService.GetAlbumsAsync(search);
+            return albumService.GetAlbumsAsync(search, page);
         });
     }
 

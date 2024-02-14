@@ -22,10 +22,13 @@ public class AdoNetAlbumService : IAlbumService
         this.logger = loggerFactory.CreateLogger("Albums");
     }
 
-    public async Task<List<AlbumViewModel>> GetAlbumsAsync(string? search)
+    public async Task<List<AlbumViewModel>> GetAlbumsAsync(string? search, int page)
     {
         search ??= "";
-        FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE '%{search}%'";
+        page = Math.Max(1, page);
+        int limit = albumsOptions.CurrentValue.PerPage;
+        int offset = (page - 1) * limit;
+        FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE '%{search}%' LIMIT {limit} OFFSET {offset}";
         DataSet dataSet = await databaseAccessor.QueryAsync(query);
         DataTable dataTable = dataSet.Tables[0];
         List<AlbumViewModel> albumList = new();
