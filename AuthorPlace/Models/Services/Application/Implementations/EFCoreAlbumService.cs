@@ -1,11 +1,10 @@
 ﻿using AuthorPlace.Models.Entities;
 using AuthorPlace.Models.Exceptions;
-using AuthorPlace.Models.Options;
+using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Linq.Dynamic.Core;
 
 namespace AuthorPlace.Models.Services.Application.Implementations;
@@ -13,40 +12,25 @@ namespace AuthorPlace.Models.Services.Application.Implementations;
 public class EFCoreAlbumService : IAlbumService
 {
     private readonly AuthorPlaceDbContext dbContext;
-    private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
     private readonly ILogger logger;
 
-    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
+    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, ILoggerFactory loggerFactory)
     {
         this.dbContext = dbContext;
-        this.albumsOptions = albumsOptions;
         this.logger = loggerFactory.CreateLogger("Albums");
     }
 
-    public async Task<List<AlbumViewModel>> GetAlbumsAsync(string? search, int page, string orderby, bool ascending)
+    public async Task<List<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
     {
-        search ??= "";
-        page = Math.Max(1, page);
-        int limit = albumsOptions.CurrentValue.PerPage;
-        int offset = (page - 1) * limit;
-        AlbumsOrderOptions options = albumsOptions.CurrentValue.Order!;
-        if (!options.Allow!.Contains(orderby))
-        {
-            orderby = options.By!;
-            ascending = options.Ascending;
-        }
-        if (orderby == "CurrentPrice")
-        {
-            orderby = "CurrentPrice.Amount.ToString()";
-        }
-        string direction = ascending ? "ASC" : "DESC";
+        string orderby = model.OrderBy == "CurrentPrice" ? "CurrentPrice.Amount.ToString()" : model.OrderBy;
+        string direction = model.Ascending ? "ASC" : "DESC";
         IQueryable<Album> baseQuery = dbContext.Albums!.OrderBy($"{orderby} {direction}");
 
         IQueryable<AlbumViewModel> queryLinq = baseQuery
             .AsNoTracking()
-            .Skip(offset)
-            .Take(limit)
-            .Where(album => album.Title.Contains(search))
+            .Skip(model.Offset)
+            .Take(model.Limit)
+            .Where(album => album.Title.Contains(model.Search!))
             .Select(album => new AlbumViewModel
             {
                 Id = album.Id,

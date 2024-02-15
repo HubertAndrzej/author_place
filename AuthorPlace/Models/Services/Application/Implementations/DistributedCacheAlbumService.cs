@@ -1,4 +1,5 @@
-﻿using AuthorPlace.Models.Options;
+﻿using AuthorPlace.Models.InputModels;
+using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ViewModels;
 using Microsoft.Extensions.Caching.Distributed;
@@ -20,13 +21,13 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         this.cacheDurationOptions = cacheDurationOptions;
     }
 
-    public async Task<List<AlbumViewModel>> GetAlbumsAsync(string? search, int page, string orderby, bool ascending)
+    public async Task<List<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
     {
-        string key = $"Albums{search}-{page}-{orderby}-{ascending}";
+        string key = $"Albums{model.Search}-{model.Page}-{model.OrderBy}-{model.Ascending}";
         string serializedObject = await distributedCache.GetStringAsync(key);
         if (serializedObject == null)
         {
-            List<AlbumViewModel> albums = await albumService.GetAlbumsAsync(search, page, orderby, ascending);
+            List<AlbumViewModel> albums = await albumService.GetAlbumsAsync(model);
             serializedObject = JsonConvert.SerializeObject(albums);
             DistributedCacheEntryOptions cacheOptions = new();
             cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));

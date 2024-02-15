@@ -1,4 +1,5 @@
-﻿using AuthorPlace.Models.Services.Application.Interfaces;
+﻿using AuthorPlace.Models.InputModels;
+using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,9 +14,9 @@ public class AlbumsController : Controller
         this.albumService = albumService;
     }
 
-    public async Task<IActionResult> Index(string? search = null, int page = 1, string orderby = "Rating", bool ascending = true)
+    public async Task<IActionResult> Index(AlbumListInputModel model)
     {
-        List<AlbumViewModel> albums = await albumService.GetAlbumsAsync(search, page, orderby, ascending);
+        List<AlbumViewModel> albums = await albumService.GetAlbumsAsync(model);
         ViewBag.Title = "Album Catalogue";
         return View(albums);
     }
