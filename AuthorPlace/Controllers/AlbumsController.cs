@@ -14,11 +14,16 @@ public class AlbumsController : Controller
         this.albumService = albumService;
     }
 
-    public async Task<IActionResult> Index(AlbumListInputModel model)
+    public async Task<IActionResult> Index(AlbumListInputModel input)
     {
-        List<AlbumViewModel> albums = await albumService.GetAlbumsAsync(model);
+        List<AlbumViewModel> albums = await albumService.GetAlbumsAsync(input);
         ViewBag.Title = "Album Catalogue";
-        return View(albums);
+        AlbumListViewModel viewModel = new()
+        {
+            Albums = albums,
+            Input = input
+        };
+        return View(viewModel);
     }
 
     public async Task<IActionResult> Detail(int id)

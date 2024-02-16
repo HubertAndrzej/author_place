@@ -1,4 +1,4 @@
-﻿@model List<AlbumViewModel>
+﻿@model AlbumListViewModel
 <div class="row">
     <div class="col-md-9">
         <h1>@ViewBag.Title</h1>
@@ -6,7 +6,7 @@
     <div class="col-md-3 d-flex align-items-center">
         <form asp-controller="Albums" asp-action="Index" method="get">
             <div class="input-group">
-                <input type="text" class="form-control input" name="search" placeholder="Search..." />
+                <input type="text" class="form-control input" name="search" value="@Model.Input!.Search" placeholder="Search..." />
                 <button class="btn btn-outline-info"><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
         </form>
@@ -15,17 +15,17 @@
 <div class="row my-3">
     <div class="col-md-1"></div>
     <div class="col-md-5">
-        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="Title" asp-route-ascending="true">Title</a>
+        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="Title" asp-route-search="@Model.Input!.Search" asp-route-ascending="@(Model.Input!.OrderBy == "Title" ? !Model.Input!.Ascending : true)">Title @if (Model.Input!.OrderBy == "Title") { <i class="fa-solid fa-@(Model.Input!.Ascending ? "up" : "down")-long"></i> }</a>
     </div>
     <div class="col-md-2">
-        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="Rating" asp-route-ascending="true">Rating</a>
+        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="Rating" asp-route-search="@Model.Input!.Search" asp-route-ascending="@(Model.Input!.OrderBy == "Rating" ? !Model.Input!.Ascending : true)">Rating @if (Model.Input!.OrderBy == "Rating") { <i class="fa-solid fa-@(Model.Input!.Ascending ? "up" : "down")-long"></i> }</a>
     </div>
     <div class="col-md-2">
-        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="CurrentPrice" asp-route-ascending="true">Price</a>
+        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="CurrentPrice" asp-route-search="@Model.Input!.Search" asp-route-ascending="@(Model.Input!.OrderBy == "CurrentPrice" ? !Model.Input!.Ascending : true)">Price @if (Model.Input!.OrderBy == "CurrentPrice") { <i class="fa-solid fa-@(Model.Input!.Ascending ? "up" : "down")-long"></i> }</a>
     </div>
     <div class="col-md-2"></div>
 </div>
-@foreach (AlbumViewModel album in Model)
+@foreach (AlbumViewModel album in Model.Albums!)
 {
     <hr>
     <div class="row album my-3">
@@ -63,7 +63,7 @@
         </div>
         <div class="col-md-2">
             <a class="btn btn-outline-info" asp-action="Detail" asp-controller="Albums" asp-route-id="@album.Id">
-                Album nr @album.Id
+                Album Details
             </a>
         </div>
     </div>
