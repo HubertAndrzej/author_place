@@ -2,10 +2,13 @@ using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Implementations;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
+using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
+
+bool useEFCore = true;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
@@ -16,7 +19,15 @@ builder.Services.AddMvc(options =>
     builder.Configuration.Bind("ResponseCache:Home", cacheProfile);
     options.CacheProfiles.Add("Home", cacheProfile);
 });
-builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>();
+if (useEFCore)
+{
+    builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>();
+}
+else
+{
+    builder.Services.AddScoped<IAlbumService, AdoNetAlbumService>();
+}
+builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
 builder.Services.AddTransient<ICachedAlbumService, MemoryCacheAlbumService>();
