@@ -22,7 +22,7 @@ public partial class AuthorPlaceDbContext : DbContext
             entity.HasKey(album => album.Id);
             entity.OwnsOne(album => album.CurrentPrice, builder =>
             {
-                builder.Property(money => money.Amount).HasColumnName("CurrentPrice_Amount");
+                builder.Property(money => money.Amount).HasConversion<double>().HasColumnName("CurrentPrice_Amount");
                 builder.Property(money => money.Currency).HasConversion<string>().HasColumnName("CurrentPrice_Currency");
             });
             entity.OwnsOne(album => album.FullPrice, builder =>

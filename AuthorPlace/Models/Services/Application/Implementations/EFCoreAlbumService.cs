@@ -22,7 +22,7 @@ public class EFCoreAlbumService : IAlbumService
 
     public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
     {
-        string orderby = model.OrderBy == "CurrentPrice" ? "CurrentPrice.Amount.ToString()" : model.OrderBy;
+        string orderby = model.OrderBy == "CurrentPrice" ? "CurrentPrice.Amount" : model.OrderBy;
         string direction = model.Ascending ? "ASC" : "DESC";
         IQueryable<Album> baseQuery = dbContext.Albums!
             .OrderBy($"{orderby} {direction}");
