@@ -11,31 +11,12 @@
         </a>
     </div>
 </div>
+<br>
 <section>
     <h2>Best rated</h2>
     @foreach(AlbumViewModel album in Model.BestRatingAlbums!)
     {
-        <hr>
-        <div class="row album my-3">
-            <div class="col-md-1">
-                <img src="@album.ImagePath" height="52" width="52" alt="@album.Title">
-            </div>
-            <div class="col-md-5">
-                <h2>@album.Title</h2>
-                <author>by @album.Author</author>
-            </div>
-            <div class="col-md-2 rating" title="@album.Rating">
-                <rating value="@album.Rating"></rating>
-            </div>
-            <div class="col-md-2 price">
-                <price current-price="@album.CurrentPrice" full-price="@album.FullPrice"></price>
-            </div>
-            <div class="col-md-2">
-                <a class="btn btn-outline-info" asp-action="Detail" asp-controller="Albums" asp-route-id="@album.Id">
-                    Album Details
-                </a>
-            </div>
-        </div>
+        <partial name="Albums/_AlbumLine" model="@album" />
     }
     <hr>
 </section>
@@ -45,27 +26,8 @@
     <h2>Recently added</h2>
     @foreach (AlbumViewModel album in Model.MostRecentAlbums!)
     {
-        <hr>
-        <div class="row album my-3">
-            <div class="col-md-1">
-                <img src="@album.ImagePath" height="52" width="52" alt="@album.Title">
-            </div>
-            <div class="col-md-5">
-                <h2>@album.Title</h2>
-                <author>by @album.Author</author>
-            </div>
-            <div class="col-md-2 rating" title="@album.Rating">
-                <rating value="@album.Rating"></rating>
-            </div>
-            <div class="col-md-2 price">
-                <price current-price="@album.CurrentPrice" full-price="@album.FullPrice"></price>
-            </div>
-            <div class="col-md-2">
-                <a class="btn btn-outline-info" asp-action="Detail" asp-controller="Albums" asp-route-id="@album.Id">
-                    Album Details
-                </a>
-            </div>
-        </div>
+        <partial name="Albums/_AlbumLine" model="@album" />
     }
     <hr>
 </section>
+<br>
