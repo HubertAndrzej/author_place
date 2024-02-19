@@ -14,15 +14,9 @@
 </div>
 <div class="row my-3">
     <div class="col-md-1"></div>
-    <div class="col-md-5">
-        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="Title" asp-route-search="@Model.Input!.Search" asp-route-ascending="@(Model.Input.OrderBy == "Title" ? !Model.Input.Ascending : true)">Title @if (Model.Input!.OrderBy == "Title") { <i class="fa-solid fa-@(Model.Input.Ascending ? "up" : "down")-long"></i> }</a>
-    </div>
-    <div class="col-md-2">
-        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="Rating" asp-route-search="@Model.Input!.Search" asp-route-ascending="@(Model.Input.OrderBy == "Rating" ? !Model.Input.Ascending : true)">Rating @if (Model.Input!.OrderBy == "Rating") { <i class="fa-solid fa-@(Model.Input.Ascending ? "up" : "down")-long"></i> }</a>
-    </div>
-    <div class="col-md-2">
-        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="CurrentPrice" asp-route-search="@Model.Input!.Search" asp-route-ascending="@(Model.Input.OrderBy == "CurrentPrice" ? !Model.Input.Ascending : true)">Price @if (Model.Input!.OrderBy == "CurrentPrice") { <i class="fa-solid fa-@(Model.Input.Ascending ? "up" : "down")-long"></i> }</a>
-    </div>
+    <div class="col-md-5"><order-link order-by="Title" Input="@Model.Input">Titolo</order-link></div>
+    <div class="col-md-2"><order-link order-by="Rating" Input="@Model.Input">Valutazione</order-link></div>
+    <div class="col-md-2"><order-link order-by="CurrentPrice" Input="@Model.Input">Prezzo</order-link></div>
     <div class="col-md-2"></div>
 </div>
 @foreach (AlbumViewModel album in Model.Albums!.Results!)
@@ -37,29 +31,10 @@
             <author>by @album.Author</author>
         </div>
         <div class="col-md-2 rating" title="@album.Rating">
-        @for (int i = 1; i <= 5; i++)
-        {
-            if (album.Rating >= i)
-            {
-                <i class="fas fa-star"></i>
-            }
-            else if (album.Rating > i - 1)
-            {
-                <i class="fas fa-star-half-alt"></i>
-            }
-            else
-            {
-                <i class="far fa-star"></i>
-            }
-        }
+            <rating value="@album.Rating"></rating>
         </div>
         <div class="col-md-2 price">
-        @album.CurrentPrice
-        @if (!album.CurrentPrice!.Equals(album.FullPrice!))
-        {
-            <br>
-            <s>@album.FullPrice</s>
-        }
+        <price current-price="@album.CurrentPrice" full-price="@album.FullPrice"></price>
         </div>
         <div class="col-md-2">
             <a class="btn btn-outline-info" asp-action="Detail" asp-controller="Albums" asp-route-id="@album.Id">

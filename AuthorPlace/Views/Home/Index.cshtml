@@ -1,4 +1,5 @@
 ﻿@model HomeViewModel
+<br>
 <div class="p-5 mb-4 bg-light rounded-3 jumbotron">
     <div class="container-fluid py-5">
         <h1 class="display-5 fw-bold text-info">@ViewBag.Title</h1>
@@ -24,29 +25,10 @@
                 <author>by @album.Author</author>
             </div>
             <div class="col-md-2 rating" title="@album.Rating">
-                @for (int i = 1; i <= 5; i++)
-                {
-                    if (album.Rating >= i)
-                    {
-                        <i class="fas fa-star"></i>
-                    }
-                    else if (album.Rating > i - 1)
-                    {
-                        <i class="fas fa-star-half-alt"></i>
-                    }
-                    else
-                    {
-                        <i class="far fa-star"></i>
-                    }
-                }
+                <rating value="@album.Rating"></rating>
             </div>
             <div class="col-md-2 price">
-                @album.CurrentPrice
-                @if (!album.CurrentPrice!.Equals(album.FullPrice!))
-                {
-                    <br>
-                    <s>@album.FullPrice</s>
-                }
+                <price current-price="@album.CurrentPrice" full-price="@album.FullPrice"></price>
             </div>
             <div class="col-md-2">
                 <a class="btn btn-outline-info" asp-action="Detail" asp-controller="Albums" asp-route-id="@album.Id">
@@ -73,29 +55,10 @@
                 <author>by @album.Author</author>
             </div>
             <div class="col-md-2 rating" title="@album.Rating">
-                @for (int i = 1; i <= 5; i++)
-                {
-                    if (album.Rating >= i)
-                    {
-                        <i class="fas fa-star"></i>
-                    }
-                    else if (album.Rating > i - 1)
-                    {
-                        <i class="fas fa-star-half-alt"></i>
-                    }
-                    else
-                    {
-                        <i class="far fa-star"></i>
-                    }
-                }
+                <rating value="@album.Rating"></rating>
             </div>
             <div class="col-md-2 price">
-                @album.CurrentPrice
-                @if (!album.CurrentPrice!.Equals(album.FullPrice!))
-                {
-                    <br>
-                    <s>@album.FullPrice</s>
-                }
+                <price current-price="@album.CurrentPrice" full-price="@album.FullPrice"></price>
             </div>
             <div class="col-md-2">
                 <a class="btn btn-outline-info" asp-action="Detail" asp-controller="Albums" asp-route-id="@album.Id">
