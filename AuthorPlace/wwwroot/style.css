@@ -3,7 +3,17 @@
     font-style: italic;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+body, html {
+    min-height: 100vh;
+}
+
 footer {
+    background-color: lightcyan;
     border-top: 1px solid #0dcaf0;
 }
 
@@ -57,6 +67,10 @@ hr {
     margin-right: 0.3em;
 }
 
+.background-lightcyan {
+    background-color: lightcyan;
+}
+
 .bold {
     font-weight: bold;
 }
@@ -69,6 +83,10 @@ hr {
     background-image: url('/jumbotron.jpg');
     background-repeat: no-repeat;
     background-size: cover;
+}
+
+.navbar-nav .nav-link.active {
+    color: lightcyan;
 }
 
 .navbar-nav .nav-link:hover {
