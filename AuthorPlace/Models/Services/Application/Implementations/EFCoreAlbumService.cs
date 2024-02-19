@@ -20,16 +20,15 @@ public class EFCoreAlbumService : IAlbumService
         this.logger = loggerFactory.CreateLogger("Albums");
     }
 
-    public async Task<List<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
+    public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
     {
         string orderby = model.OrderBy == "CurrentPrice" ? "CurrentPrice.Amount.ToString()" : model.OrderBy;
         string direction = model.Ascending ? "ASC" : "DESC";
-        IQueryable<Album> baseQuery = dbContext.Albums!.OrderBy($"{orderby} {direction}");
+        IQueryable<Album> baseQuery = dbContext.Albums!
+            .OrderBy($"{orderby} {direction}");
 
         IQueryable<AlbumViewModel> queryLinq = baseQuery
             .AsNoTracking()
-            .Skip(model.Offset)
-            .Take(model.Limit)
             .Where(album => album.Title.Contains(model.Search!))
             .Select(album => new AlbumViewModel
             {
@@ -42,8 +41,16 @@ public class EFCoreAlbumService : IAlbumService
                 CurrentPrice = album.CurrentPrice
             });
         List<AlbumViewModel> albums = await queryLinq
+            .Skip(model.Offset)
+            .Take(model.Limit)
             .ToListAsync();
-        return albums;
+        int totalCount = await queryLinq.CountAsync();
+        ListViewModel<AlbumViewModel> result = new()
+        {
+            Results = albums,
+            TotalCount = totalCount
+        };
+        return result;
     }
 
     public async Task<AlbumDetailViewModel> GetAlbumAsync(int id)

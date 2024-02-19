@@ -16,7 +16,7 @@ public class AlbumsController : Controller
 
     public async Task<IActionResult> Index(AlbumListInputModel input)
     {
-        List<AlbumViewModel> albums = await albumService.GetAlbumsAsync(input);
+        ListViewModel<AlbumViewModel> albums = await albumService.GetAlbumsAsync(input);
         ViewBag.Title = "Album Catalogue";
         AlbumListViewModel viewModel = new()
         {

@@ -20,7 +20,7 @@ public class MemoryCacheAlbumService : ICachedAlbumService
         this.cacheDurationOptions = cacheDurationOptions;
     }
 
-    public Task<List<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
+    public Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
     {
         return memoryCache.GetOrCreateAsync($"Albums{model.Search}-{model.Page}-{model.OrderBy}-{model.Ascending}", cacheEntry =>
         {

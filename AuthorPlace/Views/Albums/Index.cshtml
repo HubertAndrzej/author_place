@@ -15,17 +15,17 @@
 <div class="row my-3">
     <div class="col-md-1"></div>
     <div class="col-md-5">
-        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="Title" asp-route-search="@Model.Input!.Search" asp-route-ascending="@(Model.Input!.OrderBy == "Title" ? !Model.Input!.Ascending : true)">Title @if (Model.Input!.OrderBy == "Title") { <i class="fa-solid fa-@(Model.Input!.Ascending ? "up" : "down")-long"></i> }</a>
+        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="Title" asp-route-search="@Model.Input.Search" asp-route-ascending="@(Model.Input.OrderBy == "Title" ? !Model.Input.Ascending : true)">Title @if (Model.Input.OrderBy == "Title") { <i class="fa-solid fa-@(Model.Input.Ascending ? "up" : "down")-long"></i> }</a>
     </div>
     <div class="col-md-2">
-        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="Rating" asp-route-search="@Model.Input!.Search" asp-route-ascending="@(Model.Input!.OrderBy == "Rating" ? !Model.Input!.Ascending : true)">Rating @if (Model.Input!.OrderBy == "Rating") { <i class="fa-solid fa-@(Model.Input!.Ascending ? "up" : "down")-long"></i> }</a>
+        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="Rating" asp-route-search="@Model.Input.Search" asp-route-ascending="@(Model.Input.OrderBy == "Rating" ? !Model.Input.Ascending : true)">Rating @if (Model.Input.OrderBy == "Rating") { <i class="fa-solid fa-@(Model.Input.Ascending ? "up" : "down")-long"></i> }</a>
     </div>
     <div class="col-md-2">
-        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="CurrentPrice" asp-route-search="@Model.Input!.Search" asp-route-ascending="@(Model.Input!.OrderBy == "CurrentPrice" ? !Model.Input!.Ascending : true)">Price @if (Model.Input!.OrderBy == "CurrentPrice") { <i class="fa-solid fa-@(Model.Input!.Ascending ? "up" : "down")-long"></i> }</a>
+        <a class="link-info link-underline-opacity-0 link-underline-opacity-25-hover bold" asp-route-orderby="CurrentPrice" asp-route-search="@Model.Input.Search" asp-route-ascending="@(Model.Input.OrderBy == "CurrentPrice" ? !Model.Input.Ascending : true)">Price @if (Model.Input.OrderBy == "CurrentPrice") { <i class="fa-solid fa-@(Model.Input.Ascending ? "up" : "down")-long"></i> }</a>
     </div>
     <div class="col-md-2"></div>
 </div>
-@foreach (AlbumViewModel album in Model.Albums!)
+@foreach (AlbumViewModel album in Model.Albums!.Results!)
 {
     <hr>
     <div class="row album my-3">
@@ -69,26 +69,41 @@
     </div>
 }
 <hr>
+@{
+    int totalPages = (int) Math.Ceiling(Model.Albums.TotalCount / (decimal)Model.Input.Limit);
+    int currentPage = Model.Input.Page;
+}
 <nav class="my-5">
     <ul class="pagination justify-content-center">
-        <li class="page-item">
-            <a class="page-link">
-                <i class="fa-solid fa-arrow-left"></i>
-            </a>
-        </li>
-        <li class="page-item">
-            <a class="page-link" asp-route-page="1">1</a>
-        </li>
-        <li class="page-item">
-            <a class="page-link" asp-route-page="2">2</a>
-        </li>
-        <li class="page-item">
-            <a class="page-link" asp-route-page="3">3</a>
-        </li>
-        <li class="page-item">
-            <a class="page-link">
-                <i class="fa-solid fa-arrow-right"></i>
-            </a>
-        </li>
+        @if(currentPage > 1)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-route-search="@Model.Input.Search" asp-route-orderby="@Model.Input.OrderBy" asp-route-ascending="@Model.Input.Ascending" asp-route-page="@(currentPage - 1)">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+            </li>
+        }
+        @for(int p = Math.Max(1, currentPage - 3); p <= Math.Min(totalPages, currentPage + 3); p++)
+        {
+            if (p == currentPage)
+            {
+                <li class="page-item active">
+                    <a class="page-link" asp-route-search="@Model.Input.Search" asp-route-orderby="@Model.Input.OrderBy" asp-route-ascending="@Model.Input.Ascending" asp-route-page="@p">@p</a>
+                </li>
+            } else
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-route-search="@Model.Input.Search" asp-route-orderby="@Model.Input.OrderBy" asp-route-ascending="@Model.Input.Ascending" asp-route-page="@p">@p</a>
+                </li>
+            }
+        }
+        @if (currentPage < totalPages)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-route-search="@Model.Input.Search" asp-route-orderby="@Model.Input.OrderBy" asp-route-ascending="@Model.Input.Ascending" asp-route-page="@(currentPage + 1)">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </li>
+        }
     </ul>
 </nav>
