@@ -7,20 +7,19 @@ namespace AuthorPlace.Models.InputModels;
 [ModelBinder(BinderType = typeof(AlbumListInputModelBinder))]
 public class AlbumListInputModel
 {
-    public AlbumListInputModel(string search, int page, string orderby, bool ascending, AlbumsOptions albumsOptions)
+    public AlbumListInputModel(string search, int page, string orderby, bool ascending, int limit, AlbumsOrderOptions orderOptions)
     {
-        AlbumsOrderOptions options = albumsOptions.Order!;
-        if (!options.Allow!.Contains(orderby))
+        if (!orderOptions.Allow!.Contains(orderby))
         {
-            orderby = options.By!;
-            ascending = options.Ascending;
+            orderby = orderOptions.By!;
+            ascending = orderOptions.Ascending;
         }
 
         Search = search ?? "";
         Page = Math.Max(1, page);
         OrderBy = orderby;
         Ascending = ascending;
-        Limit = albumsOptions.PerPage;
+        Limit = Math.Max(1, limit);
         Offset = (Page - 1) * Limit;
     }
 

@@ -65,6 +65,12 @@ hr {
     border-color: #0dcaf0;
 }
 
+.jumbotron {
+    background-image: url('/jumbotron.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
 .pagination .page-link {
     border-color: #0dcaf0;
     color: #0dcaf0;

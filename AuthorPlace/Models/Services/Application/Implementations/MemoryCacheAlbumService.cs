@@ -2,6 +2,7 @@
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ViewModels;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
@@ -35,6 +36,24 @@ public class MemoryCacheAlbumService : ICachedAlbumService
         {
             cacheEntry.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
             return albumService.GetAlbumAsync(id);
+        });
+    }
+
+    public Task<List<AlbumViewModel>> GetBestRatingAlbumsAsync()
+    {
+        return memoryCache.GetOrCreateAsync($"BestRatingAlbums", cacheEntry =>
+        {
+            cacheEntry.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
+            return albumService.GetBestRatingAlbumsAsync();
+        });
+    }
+
+    public Task<List<AlbumViewModel>> GetMostRecentAlbumsAsync()
+    {
+        return memoryCache.GetOrCreateAsync($"MostRecentAlbums", cacheEntry =>
+        {
+            cacheEntry.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
+            return albumService.GetMostRecentAlbumsAsync();
         });
     }
 }

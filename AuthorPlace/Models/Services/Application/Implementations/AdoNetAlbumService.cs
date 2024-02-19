@@ -1,10 +1,12 @@
 ﻿using AuthorPlace.Models.Exceptions;
 using AuthorPlace.Models.Extensions;
 using AuthorPlace.Models.InputModels;
+using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.ValueObjects;
 using AuthorPlace.Models.ViewModels;
+using Microsoft.Extensions.Options;
 using System.Data;
 
 namespace AuthorPlace.Models.Services.Application.Implementations;
@@ -12,11 +14,13 @@ namespace AuthorPlace.Models.Services.Application.Implementations;
 public class AdoNetAlbumService : IAlbumService
 {
     private readonly IDatabaseAccessor databaseAccessor;
+    private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
     private readonly ILogger logger;
 
-    public AdoNetAlbumService(IDatabaseAccessor databaseAccessor, ILoggerFactory loggerFactory)
+    public AdoNetAlbumService(IDatabaseAccessor databaseAccessor, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
     {
         this.databaseAccessor = databaseAccessor;
+        this.albumsOptions = albumsOptions;
         this.logger = loggerFactory.CreateLogger("Albums");
     }
 
@@ -60,5 +64,19 @@ public class AdoNetAlbumService : IAlbumService
             albumDetailViewModel.Songs!.Add(songViewModel);
         }
         return albumDetailViewModel;
+    }
+
+    public async Task<List<AlbumViewModel>> GetBestRatingAlbumsAsync()
+    {
+        AlbumListInputModel inputModel = new(search: "", page: 1, orderby: "Rating", ascending: false, limit: albumsOptions.CurrentValue.InHome, orderOptions: albumsOptions.CurrentValue.Order!);
+        ListViewModel<AlbumViewModel> result = await GetAlbumsAsync(inputModel);
+        return result.Results!;
+    }
+
+    public async Task<List<AlbumViewModel>> GetMostRecentAlbumsAsync()
+    {
+        AlbumListInputModel inputModel = new(search: "", page: 1, orderby: "Id", ascending: false, limit: albumsOptions.CurrentValue.InHome, orderOptions: albumsOptions.CurrentValue.Order!);
+        ListViewModel<AlbumViewModel> result = await GetAlbumsAsync(inputModel);
+        return result.Results!;
     }
 }

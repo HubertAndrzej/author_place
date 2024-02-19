@@ -1,6 +1,108 @@
-﻿<h1>View: Index Controller: Home Action: Index</h1>
-<p>Tincidunt integer eu augue augue nunc elit dolor, luctus placerat scelerisque euismod, iaculis eu lacus nunc mi elit, vehicula ut laoreet ac, aliquam sit amet justo nunc tempor, metus vel.</p>
-<p>Placerat suscipit, orci nisl iaculis eros, a tincidunt nisi odio eget lorem nulla condimentum tempor mattis ut vitae feugiat augue cras ut metus a risus iaculis scelerisque eu ac ante.</p>
-<p>Fusce non varius purus aenean nec magna felis fusce vestibulum velit mollis odio sollicitudin lacinia aliquam posuere, sapien elementum lobortis tincidunt, turpis dui ornare nisl, sollicitudin interdum turpis nunc eget.</p>
-<p>Sem nulla eu ultricies orci praesent id augue nec lorem pretium congue sit amet ac nunc fusce iaculis lorem eu diam hendrerit at mattis purus dignissim vivamus mauris tellus, fringilla.</p>
-<p>Vel dapibus a, blandit quis erat vivamus elementum aliquam luctus etiam fringilla pretium sem vitae sodales mauris id nulla est praesent laoreet, metus vel auctor aliquam, eros purus vulputate leo.</p>
+﻿@model HomeViewModel
+<div class="p-5 mb-4 bg-light rounded-3 jumbotron">
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold text-info">@ViewBag.Title</h1>
+        <p class="col-md-8 fs-4">
+            Here you can find a vast collection of albums published by some of the best singers in the world. Discover our album catalogue, one of your favourite albums could be just waiting for you!
+        </p>
+        <a class="btn btn-outline-info btn-lg" asp-action="Index" asp-controller="Albums">
+            Go to album catalogue <i class="fa-solid fa-right-to-bracket"></i>
+        </a>
+    </div>
+</div>
+<section>
+    <h2>Best rated</h2>
+    @foreach(AlbumViewModel album in Model.BestRatingAlbums!)
+    {
+        <hr>
+        <div class="row album my-3">
+            <div class="col-md-1">
+                <img src="@album.ImagePath" height="52" width="52" alt="@album.Title">
+            </div>
+            <div class="col-md-5">
+                <h2>@album.Title</h2>
+                <author>by @album.Author</author>
+            </div>
+            <div class="col-md-2 rating" title="@album.Rating">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    if (album.Rating >= i)
+                    {
+                        <i class="fas fa-star"></i>
+                    }
+                    else if (album.Rating > i - 1)
+                    {
+                        <i class="fas fa-star-half-alt"></i>
+                    }
+                    else
+                    {
+                        <i class="far fa-star"></i>
+                    }
+                }
+            </div>
+            <div class="col-md-2 price">
+                @album.CurrentPrice
+                @if (!album.CurrentPrice!.Equals(album.FullPrice!))
+                {
+                    <br>
+                    <s>@album.FullPrice</s>
+                }
+            </div>
+            <div class="col-md-2">
+                <a class="btn btn-outline-info" asp-action="Detail" asp-controller="Albums" asp-route-id="@album.Id">
+                    Album Details
+                </a>
+            </div>
+        </div>
+    }
+    <hr>
+</section>
+<br>
+<br>
+<section>
+    <h2>Recently added</h2>
+    @foreach (AlbumViewModel album in Model.MostRecentAlbums!)
+    {
+        <hr>
+        <div class="row album my-3">
+            <div class="col-md-1">
+                <img src="@album.ImagePath" height="52" width="52" alt="@album.Title">
+            </div>
+            <div class="col-md-5">
+                <h2>@album.Title</h2>
+                <author>by @album.Author</author>
+            </div>
+            <div class="col-md-2 rating" title="@album.Rating">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    if (album.Rating >= i)
+                    {
+                        <i class="fas fa-star"></i>
+                    }
+                    else if (album.Rating > i - 1)
+                    {
+                        <i class="fas fa-star-half-alt"></i>
+                    }
+                    else
+                    {
+                        <i class="far fa-star"></i>
+                    }
+                }
+            </div>
+            <div class="col-md-2 price">
+                @album.CurrentPrice
+                @if (!album.CurrentPrice!.Equals(album.FullPrice!))
+                {
+                    <br>
+                    <s>@album.FullPrice</s>
+                }
+            </div>
+            <div class="col-md-2">
+                <a class="btn btn-outline-info" asp-action="Detail" asp-controller="Albums" asp-route-id="@album.Id">
+                    Album Details
+                </a>
+            </div>
+        </div>
+    }
+    <hr>
+</section>
