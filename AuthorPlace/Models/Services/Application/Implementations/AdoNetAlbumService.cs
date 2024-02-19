@@ -28,7 +28,7 @@ public class AdoNetAlbumService : IAlbumService
     {
         string orderby = model.OrderBy == "CurrentPrice" ? "CurrentPrice_Amount" : model.OrderBy;
         string direction = model.Ascending ? "ASC" : "DESC";
-        FormattableString albumsQuery = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE '%{model.Search}%' ORDER BY {(Sql) orderby} {(Sql) direction} LIMIT {model.Limit} OFFSET {model.Offset};";
+        FormattableString albumsQuery = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE {"%" + model.Search + "%"} ORDER BY {(Sql) orderby} {(Sql) direction} LIMIT {model.Limit} OFFSET {model.Offset};";
         IAsyncEnumerable<IDataRecord> albumsResults = databaseAccessor.QueryAsync(albumsQuery);
         List<AlbumViewModel> albumList = new();
         await foreach (IDataRecord dataRecord in albumsResults)
@@ -37,7 +37,7 @@ public class AdoNetAlbumService : IAlbumService
             albumList.Add(albumViewModel);
         }
         int count = 0;
-        FormattableString countQuery = $"SELECT COUNT(*) FROM Albums WHERE Title LIKE '%{model.Search}%';";
+        FormattableString countQuery = $"SELECT COUNT(*) FROM Albums WHERE Title LIKE {"%" + model.Search + "%"};";
         IAsyncEnumerable<IDataRecord> countResults = databaseAccessor.QueryAsync(countQuery);
         await foreach (IDataRecord dataRecord in countResults)
         {
