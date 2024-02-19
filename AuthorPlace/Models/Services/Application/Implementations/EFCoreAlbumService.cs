@@ -1,26 +1,39 @@
-﻿using AuthorPlace.Models.Exceptions;
+﻿using AuthorPlace.Models.Entities;
+using AuthorPlace.Models.Exceptions;
+using AuthorPlace.Models.InputModels;
+using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using System.Linq.Dynamic.Core;
 
 namespace AuthorPlace.Models.Services.Application.Implementations;
 
 public class EFCoreAlbumService : IAlbumService
 {
     private readonly AuthorPlaceDbContext dbContext;
+    private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
     private readonly ILogger logger;
 
-    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, ILoggerFactory loggerFactory)
+    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
     {
         this.dbContext = dbContext;
+        this.albumsOptions = albumsOptions;
         this.logger = loggerFactory.CreateLogger("Albums");
     }
 
-    public async Task<List<AlbumViewModel>> GetAlbumsAsync()
+    public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
     {
-        IQueryable<AlbumViewModel> queryLinq = dbContext.Albums!
+        string orderby = model.OrderBy == "CurrentPrice" ? "CurrentPrice.Amount" : model.OrderBy;
+        string direction = model.Ascending ? "ASC" : "DESC";
+        IQueryable<Album> baseQuery = dbContext.Albums!
+            .OrderBy($"{orderby} {direction}");
+
+        IQueryable<AlbumViewModel> queryLinq = baseQuery
             .AsNoTracking()
+            .Where(album => album.Title.Contains(model.Search!))
             .Select(album => new AlbumViewModel
             {
                 Id = album.Id,
@@ -32,8 +45,16 @@ public class EFCoreAlbumService : IAlbumService
                 CurrentPrice = album.CurrentPrice
             });
         List<AlbumViewModel> albums = await queryLinq
+            .Skip(model.Offset)
+            .Take(model.Limit)
             .ToListAsync();
-        return albums;
+        int totalCount = await queryLinq.CountAsync();
+        ListViewModel<AlbumViewModel> result = new()
+        {
+            Results = albums,
+            TotalCount = totalCount
+        };
+        return result;
     }
 
     public async Task<AlbumDetailViewModel> GetAlbumAsync(int id)
@@ -69,5 +90,19 @@ public class EFCoreAlbumService : IAlbumService
             throw new AlbumNotFoundException(id);
         }
         return album;
+    }
+
+    public async Task<List<AlbumViewModel>> GetBestRatingAlbumsAsync()
+    {
+        AlbumListInputModel inputModel = new(search: "", page: 1, orderby: "Rating", ascending: false, limit: albumsOptions.CurrentValue.InHome, orderOptions: albumsOptions.CurrentValue.Order!);
+        ListViewModel<AlbumViewModel> result = await GetAlbumsAsync(inputModel);
+        return result.Results!;
+    }
+
+    public async Task<List<AlbumViewModel>> GetMostRecentAlbumsAsync()
+    {
+        AlbumListInputModel inputModel = new(search: "", page: 1, orderby: "Id", ascending: false, limit: albumsOptions.CurrentValue.InHome, orderOptions: albumsOptions.CurrentValue.Order!);
+        ListViewModel<AlbumViewModel> result = await GetAlbumsAsync(inputModel);
+        return result.Results!;
     }
 }

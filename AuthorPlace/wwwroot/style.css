@@ -57,6 +57,41 @@ hr {
     margin-right: 0.3em;
 }
 
+.bold {
+    font-weight: bold;
+}
+
+.input {
+    border-color: #0dcaf0;
+}
+
+.jumbotron {
+    background-image: url('/jumbotron.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.navbar-nav .nav-link:hover {
+    color: black;
+}
+
+.pagination .page-link {
+    border-color: #0dcaf0;
+    color: #0dcaf0;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0dcaf0;
+    border-color: black;
+    color: white;
+}
+
+.pagination .page-link:hover {
+    color: black;
+    background-color: #0dcaf0;
+    border-color: black;
+}
+
 .price s {
     color: #0dcaf0;
     font-size: 0.8em;

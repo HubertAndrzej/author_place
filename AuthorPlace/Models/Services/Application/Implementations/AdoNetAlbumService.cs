@@ -1,8 +1,10 @@
 ﻿using AuthorPlace.Models.Exceptions;
 using AuthorPlace.Models.Extensions;
+using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
+using AuthorPlace.Models.ValueObjects;
 using AuthorPlace.Models.ViewModels;
 using Microsoft.Extensions.Options;
 using System.Data;
@@ -22,9 +24,11 @@ public class AdoNetAlbumService : IAlbumService
         this.logger = loggerFactory.CreateLogger("Albums");
     }
 
-    public async Task<List<AlbumViewModel>> GetAlbumsAsync()
+    public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
     {
-        FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums";
+        string orderby = model.OrderBy == "CurrentPrice" ? "CurrentPrice_Amount" : model.OrderBy;
+        string direction = model.Ascending ? "ASC" : "DESC";
+        FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE '%{model.Search}%' ORDER BY {(Sql) orderby} {(Sql) direction} LIMIT {model.Limit} OFFSET {model.Offset}; SELECT COUNT(*) FROM Albums WHERE Title LIKE '%{model.Search}%';";
         DataSet dataSet = await databaseAccessor.QueryAsync(query);
         DataTable dataTable = dataSet.Tables[0];
         List<AlbumViewModel> albumList = new();
@@ -33,7 +37,12 @@ public class AdoNetAlbumService : IAlbumService
             AlbumViewModel album = albumRow.ToAlbumViewModel();
             albumList.Add(album);
         }
-        return albumList;
+        ListViewModel<AlbumViewModel> result = new()
+        {
+            Results = albumList,
+            TotalCount = Convert.ToInt32(dataSet.Tables[1].Rows[0][0])
+        };
+        return result;
     }
 
     public async Task<AlbumDetailViewModel> GetAlbumAsync(int id)
@@ -55,5 +64,19 @@ public class AdoNetAlbumService : IAlbumService
             albumDetailViewModel.Songs!.Add(songViewModel);
         }
         return albumDetailViewModel;
+    }
+
+    public async Task<List<AlbumViewModel>> GetBestRatingAlbumsAsync()
+    {
+        AlbumListInputModel inputModel = new(search: "", page: 1, orderby: "Rating", ascending: false, limit: albumsOptions.CurrentValue.InHome, orderOptions: albumsOptions.CurrentValue.Order!);
+        ListViewModel<AlbumViewModel> result = await GetAlbumsAsync(inputModel);
+        return result.Results!;
+    }
+
+    public async Task<List<AlbumViewModel>> GetMostRecentAlbumsAsync()
+    {
+        AlbumListInputModel inputModel = new(search: "", page: 1, orderby: "Id", ascending: false, limit: albumsOptions.CurrentValue.InHome, orderOptions: albumsOptions.CurrentValue.Order!);
+        ListViewModel<AlbumViewModel> result = await GetAlbumsAsync(inputModel);
+        return result.Results!;
     }
 }

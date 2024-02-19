@@ -1,7 +1,9 @@
-﻿using AuthorPlace.Models.Options;
+﻿using AuthorPlace.Models.InputModels;
+using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ViewModels;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -20,13 +22,13 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         this.cacheDurationOptions = cacheDurationOptions;
     }
 
-    public async Task<List<AlbumViewModel>> GetAlbumsAsync()
+    public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
     {
-        string key = $"Album";
+        string key = $"Albums{model.Search}-{model.Page}-{model.OrderBy}-{model.Ascending}";
         string serializedObject = await distributedCache.GetStringAsync(key);
         if (serializedObject == null)
         {
-            List<AlbumViewModel> albums = await albumService.GetAlbumsAsync();
+            ListViewModel<AlbumViewModel> albums = await albumService.GetAlbumsAsync(model);
             serializedObject = JsonConvert.SerializeObject(albums);
             DistributedCacheEntryOptions cacheOptions = new();
             cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
@@ -35,7 +37,7 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         }
         else
         {
-            return JsonConvert.DeserializeObject<List<AlbumViewModel>>(serializedObject)!;
+            return JsonConvert.DeserializeObject<ListViewModel<AlbumViewModel>>(serializedObject)!;
         }
     }
 
@@ -55,6 +57,44 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         else
         {
             return JsonConvert.DeserializeObject<AlbumDetailViewModel>(serializedObject)!;
+        }
+    }
+
+    public async Task<List<AlbumViewModel>> GetBestRatingAlbumsAsync()
+    {
+        string key = $"BestRatingAlbums";
+        string serializedObject = await distributedCache.GetStringAsync(key);
+        if (serializedObject == null)
+        {
+            List<AlbumViewModel> albums = await albumService.GetBestRatingAlbumsAsync();
+            serializedObject = JsonConvert.SerializeObject(albums);
+            DistributedCacheEntryOptions cacheOptions = new();
+            cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
+            await distributedCache.SetStringAsync(key, serializedObject, cacheOptions);
+            return albums;
+        }
+        else
+        {
+            return JsonConvert.DeserializeObject<List<AlbumViewModel>>(serializedObject)!;
+        }
+    }
+
+    public async Task<List<AlbumViewModel>> GetMostRecentAlbumsAsync()
+    {
+        string key = $"MostRecentAlbums";
+        string serializedObject = await distributedCache.GetStringAsync(key);
+        if (serializedObject == null)
+        {
+            List<AlbumViewModel> albums = await albumService.GetMostRecentAlbumsAsync();
+            serializedObject = JsonConvert.SerializeObject(albums);
+            DistributedCacheEntryOptions cacheOptions = new();
+            cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
+            await distributedCache.SetStringAsync(key, serializedObject, cacheOptions);
+            return albums;
+        }
+        else
+        {
+            return JsonConvert.DeserializeObject<List<AlbumViewModel>>(serializedObject)!;
         }
     }
 }

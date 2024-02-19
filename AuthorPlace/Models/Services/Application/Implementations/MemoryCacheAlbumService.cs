@@ -1,6 +1,8 @@
-﻿using AuthorPlace.Models.Options;
+﻿using AuthorPlace.Models.InputModels;
+using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ViewModels;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
@@ -19,12 +21,12 @@ public class MemoryCacheAlbumService : ICachedAlbumService
         this.cacheDurationOptions = cacheDurationOptions;
     }
 
-    public Task<List<AlbumViewModel>> GetAlbumsAsync()
+    public Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
     {
-        return memoryCache.GetOrCreateAsync($"Albums", cacheEntry =>
+        return memoryCache.GetOrCreateAsync($"Albums{model.Search}-{model.Page}-{model.OrderBy}-{model.Ascending}", cacheEntry =>
         {
             cacheEntry.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
-            return albumService.GetAlbumsAsync();
+            return albumService.GetAlbumsAsync(model);
         });
     }
 
@@ -34,6 +36,24 @@ public class MemoryCacheAlbumService : ICachedAlbumService
         {
             cacheEntry.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
             return albumService.GetAlbumAsync(id);
+        });
+    }
+
+    public Task<List<AlbumViewModel>> GetBestRatingAlbumsAsync()
+    {
+        return memoryCache.GetOrCreateAsync($"BestRatingAlbums", cacheEntry =>
+        {
+            cacheEntry.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
+            return albumService.GetBestRatingAlbumsAsync();
+        });
+    }
+
+    public Task<List<AlbumViewModel>> GetMostRecentAlbumsAsync()
+    {
+        return memoryCache.GetOrCreateAsync($"MostRecentAlbums", cacheEntry =>
+        {
+            cacheEntry.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
+            return albumService.GetMostRecentAlbumsAsync();
         });
     }
 }
