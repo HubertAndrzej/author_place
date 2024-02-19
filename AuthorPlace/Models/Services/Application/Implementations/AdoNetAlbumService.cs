@@ -28,39 +28,50 @@ public class AdoNetAlbumService : IAlbumService
     {
         string orderby = model.OrderBy == "CurrentPrice" ? "CurrentPrice_Amount" : model.OrderBy;
         string direction = model.Ascending ? "ASC" : "DESC";
-        FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE '%{model.Search}%' ORDER BY {(Sql) orderby} {(Sql) direction} LIMIT {model.Limit} OFFSET {model.Offset}; SELECT COUNT(*) FROM Albums WHERE Title LIKE '%{model.Search}%';";
-        DataSet dataSet = await databaseAccessor.QueryAsync(query);
-        DataTable dataTable = dataSet.Tables[0];
+        FormattableString albumsQuery = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE '%{model.Search}%' ORDER BY {(Sql) orderby} {(Sql) direction} LIMIT {model.Limit} OFFSET {model.Offset};";
+        IAsyncEnumerable<IDataRecord> albumsResults = databaseAccessor.QueryAsync(albumsQuery);
         List<AlbumViewModel> albumList = new();
-        foreach (DataRow albumRow in dataTable.Rows)
+        await foreach (IDataRecord dataRecord in albumsResults)
         {
-            AlbumViewModel album = albumRow.ToAlbumViewModel();
-            albumList.Add(album);
+            AlbumViewModel albumViewModel = dataRecord.ToAlbumViewModel();
+            albumList.Add(albumViewModel);
+        }
+        int count = 0;
+        FormattableString countQuery = $"SELECT COUNT(*) FROM Albums WHERE Title LIKE '%{model.Search}%';";
+        IAsyncEnumerable<IDataRecord> countResults = databaseAccessor.QueryAsync(countQuery);
+        await foreach (IDataRecord dataRecord in countResults)
+        {
+            count = dataRecord.GetInt32(0);
+            break;
         }
         ListViewModel<AlbumViewModel> result = new()
         {
             Results = albumList,
-            TotalCount = Convert.ToInt32(dataSet.Tables[1].Rows[0][0])
+            TotalCount = count
         };
         return result;
     }
 
     public async Task<AlbumDetailViewModel> GetAlbumAsync(int id)
     {
-        FormattableString query = $"SELECT Id, Title, Description, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id = {id}; SELECT Id, Title, Description, Duration FROM Songs WHERE AlbumId = {id};";
-        DataSet dataSet = await databaseAccessor.QueryAsync(query);
-        DataTable albumTable = dataSet.Tables[0];
-        if (albumTable.Rows.Count != 1)
+        FormattableString albumQuery = $"SELECT Id, Title, Description, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id = {id};";
+        IAsyncEnumerable<IDataRecord> albumResults = databaseAccessor.QueryAsync(albumQuery);
+        AlbumDetailViewModel? albumDetailViewModel = null;
+        await foreach (IDataRecord dataRecord in albumResults)
+        {
+            albumDetailViewModel = dataRecord.ToAlbumDetailViewModel();
+            break;
+        }
+        if (albumDetailViewModel == null)
         {
             logger.LogWarning("Album {id} not found", id);
             throw new AlbumNotFoundException(id);
         }
-        DataRow albumRow = albumTable.Rows[0];
-        AlbumDetailViewModel albumDetailViewModel = albumRow.ToAlbumDetailViewModel();
-        DataTable songDataTable = dataSet.Tables[1];
-        foreach (DataRow songRow in songDataTable.Rows)
+        FormattableString songsQuery = $"SELECT Id, Title, Description, Duration FROM Songs WHERE AlbumId = {id};";
+        IAsyncEnumerable<IDataRecord> songsResults = databaseAccessor.QueryAsync(songsQuery);
+        await foreach (IDataRecord dataRecord in songsResults)
         {
-            SongViewModel songViewModel = songRow.ToSongViewModel();
+            SongViewModel songViewModel = dataRecord.ToSongViewModel();
             albumDetailViewModel.Songs!.Add(songViewModel);
         }
         return albumDetailViewModel;

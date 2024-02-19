@@ -16,7 +16,7 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
         this.connectionStringsOptions = connectionStringsOptions;
     }
 
-    public async Task<DataSet> QueryAsync(FormattableString formattableQuery)
+    public async IAsyncEnumerable<IDataRecord> QueryAsync(FormattableString formattableQuery)
     {
         object?[] queryArguments = formattableQuery.GetArguments();
         List<SqliteParameter> sqliteParameters = new();
@@ -37,13 +37,9 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
         using SqliteCommand command = new(query, connection);
         command.Parameters.AddRange(sqliteParameters);
         using SqliteDataReader reader = await command.ExecuteReaderAsync();
-        DataSet dataSet = new();
-        do
+        while (await reader.ReadAsync())
         {
-            DataTable dataTable = new();
-            dataSet.Tables.Add(dataTable);
-            dataTable.Load(reader);
-        } while (!reader.IsClosed);
-        return dataSet;
+            yield return reader;
+        }
     }
 }
