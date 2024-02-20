@@ -28,7 +28,7 @@ public class AdoNetAlbumService : IAlbumService
     {
         string orderby = model.OrderBy == "CurrentPrice" ? "CurrentPrice_Amount" : model.OrderBy;
         string direction = model.Ascending ? "ASC" : "DESC";
-        FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE '%{model.Search}%' ORDER BY {(Sql)orderby} {(Sql)direction} LIMIT {model.Limit} OFFSET {model.Offset}; SELECT COUNT(*) FROM Albums WHERE Title LIKE '%{model.Search}%';";
+        FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE {"%" + model.Search + "%"} ORDER BY {(Sql)orderby} {(Sql)direction} LIMIT {model.Limit} OFFSET {model.Offset}; SELECT COUNT(*) FROM Albums WHERE Title LIKE {"%" + model.Search + "%"};";
         DataSet dataSet = await databaseAccessor.ExecuteAsync(query);
         DataTable dataTable = dataSet.Tables[0];
         List<AlbumViewModel> albumList = new();

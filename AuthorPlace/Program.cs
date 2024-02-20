@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 
-Persistence persistence = Persistence.EfCore;
+Persistence persistence = Persistence.EFCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
@@ -22,9 +22,9 @@ builder.Services.AddMvc(options =>
 });
 IServiceCollection? albumService = persistence switch
 {
-    Persistence.EfCore => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>(),
     Persistence.AdoNet => builder.Services.AddTransient<IAlbumService, AdoNetAlbumService>(),
     Persistence.AdoNetAsync => builder.Services.AddTransient<IAlbumService, AdoNetAsyncAlbumService>(),
+    Persistence.EFCore => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>(),
     _ => builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>()
 };
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();

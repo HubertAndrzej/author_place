@@ -9,7 +9,7 @@ public static class DataRecordExtensions
 {
     public static AlbumViewModel ToAlbumViewModel(this IDataRecord dataRecord)
     {
-        AlbumViewModel albumViewModel = new()
+        return new AlbumViewModel
         {
             Id = Convert.ToInt32(dataRecord["Id"]),
             Title = Convert.ToString(dataRecord["Title"]),
@@ -25,12 +25,11 @@ public static class DataRecordExtensions
                     Convert.ToDecimal(dataRecord["CurrentPrice_Amount"])
                 )
         };
-        return albumViewModel;
     }
 
     public static AlbumDetailViewModel ToAlbumDetailViewModel(this IDataRecord dataRecord)
     {
-        AlbumDetailViewModel albumDetailViewModel = new()
+        return new AlbumDetailViewModel
         {
             Id = Convert.ToInt32(dataRecord["Id"]),
             Title = Convert.ToString(dataRecord["Title"]),
@@ -48,17 +47,15 @@ public static class DataRecordExtensions
                 ),
             Songs = new List<SongViewModel>()
         };
-        return albumDetailViewModel;
     }
 
     public static SongViewModel ToSongViewModel(this IDataRecord dataRecord)
     {
-        SongViewModel songViewModel = new()
+        return new SongViewModel
         {
             Id = Convert.ToInt32(dataRecord["Id"]),
             Title = Convert.ToString(dataRecord["Title"]),
             Duration = TimeSpan.Parse((string)dataRecord["Duration"]),
         };
-        return songViewModel;
     }
 }

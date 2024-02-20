@@ -111,7 +111,7 @@ public class EFCoreAlbumService : IAlbumService
     {
         string title = inputModel.Title!;
         string author = "Hub Sobo";
-        Album album = new Album(title, author);
+        Album album = new(title, author);
         dbContext.Add(album);
         await dbContext.SaveChangesAsync();
         return album.ToAlbumDetailViewModel();

@@ -9,7 +9,7 @@ public static class DataRowExtensions
 {
     public static AlbumViewModel ToAlbumViewModel(this DataRow albumRow)
     {
-        AlbumViewModel albumViewModel = new()
+        return new AlbumViewModel
         {
             Id = Convert.ToInt32(albumRow["Id"]),
             Title = Convert.ToString(albumRow["Title"]),
@@ -25,12 +25,11 @@ public static class DataRowExtensions
                     Convert.ToDecimal(albumRow["CurrentPrice_Amount"])
                 )
         };
-        return albumViewModel;
     }
 
     public static AlbumDetailViewModel ToAlbumDetailViewModel(this DataRow albumRow)
     {
-        AlbumDetailViewModel albumDetailViewModel = new()
+        return new AlbumDetailViewModel
         {
             Id = Convert.ToInt32(albumRow["Id"]),
             Title = Convert.ToString(albumRow["Title"]),
@@ -48,17 +47,15 @@ public static class DataRowExtensions
                 ),
             Songs = new List<SongViewModel>()
         };
-        return albumDetailViewModel;
     }
 
     public static SongViewModel ToSongViewModel(this DataRow songRow)
     {
-        SongViewModel songViewModel = new()
+        return new SongViewModel
         {
             Id = Convert.ToInt32(songRow["Id"]),
             Title = Convert.ToString(songRow["Title"]),
             Duration = TimeSpan.Parse((string)songRow["Duration"]),
         };
-        return songViewModel;
     }
 }
