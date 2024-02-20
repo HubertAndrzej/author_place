@@ -1,5 +1,6 @@
 ﻿using AuthorPlace.Models.Entities;
 using AuthorPlace.Models.Exceptions;
+using AuthorPlace.Models.Extensions;
 using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
@@ -104,5 +105,15 @@ public class EFCoreAlbumService : IAlbumService
         AlbumListInputModel inputModel = new(search: "", page: 1, orderby: "Id", ascending: false, limit: albumsOptions.CurrentValue.InHome, orderOptions: albumsOptions.CurrentValue.Order!);
         ListViewModel<AlbumViewModel> result = await GetAlbumsAsync(inputModel);
         return result.Results!;
+    }
+
+    public async Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel)
+    {
+        string title = inputModel.Title!;
+        string author = "Hub Sobo";
+        Album album = new Album(title, author);
+        dbContext.Add(album);
+        await dbContext.SaveChangesAsync();
+        return album.ToAlbumDetailViewModel();
     }
 }

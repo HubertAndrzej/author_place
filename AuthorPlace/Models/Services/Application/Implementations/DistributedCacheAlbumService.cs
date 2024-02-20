@@ -97,4 +97,9 @@ public class DistributedCacheAlbumService : ICachedAlbumService
             return JsonConvert.DeserializeObject<List<AlbumViewModel>>(serializedObject)!;
         }
     }
+
+    public Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel)
+    {
+        return albumService.CreateAlbumAsync(inputModel);
+    }
 }

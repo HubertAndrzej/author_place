@@ -9,4 +9,5 @@ public interface IAlbumService
     public Task<AlbumDetailViewModel> GetAlbumAsync(int id);
     public Task<List<AlbumViewModel>> GetBestRatingAlbumsAsync();
     public Task<List<AlbumViewModel>> GetMostRecentAlbumsAsync();
+    public Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel);
 }

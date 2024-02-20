@@ -1,3 +1,4 @@
+using AuthorPlace.Models.Enums;
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Implementations;
 using AuthorPlace.Models.Services.Application.Interfaces;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 
-bool useEFCore = true;
+Persistence persistence = Persistence.EfCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
@@ -19,14 +20,13 @@ builder.Services.AddMvc(options =>
     builder.Configuration.Bind("ResponseCache:Home", cacheProfile);
     options.CacheProfiles.Add("Home", cacheProfile);
 });
-if (useEFCore)
+IServiceCollection? albumService = persistence switch
 {
-    builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>();
-}
-else
-{
-    builder.Services.AddScoped<IAlbumService, AdoNetAlbumService>();
-}
+    Persistence.EfCore => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>(),
+    Persistence.AdoNet => builder.Services.AddTransient<IAlbumService, AdoNetAlbumService>(),
+    Persistence.AdoNetAsync => builder.Services.AddTransient<IAlbumService, AdoNetAsyncAlbumService>(),
+    _ => builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>()
+};
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();

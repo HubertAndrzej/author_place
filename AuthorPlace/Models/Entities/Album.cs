@@ -17,6 +17,10 @@ public class Album
         }
         Title = title;
         Author = author;
+        ImagePath = "/placeholder.jpg";
+        FullPrice = new Money(Currency.EUR, 0);
+        CurrentPrice = new Money(Currency.EUR, 0);
+        Songs = new HashSet<Song>();
     }
 
     public int Id { get; private set; }

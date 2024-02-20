@@ -42,8 +42,9 @@ public class AlbumsController : Controller
     }
 
     [HttpPost]
-    public IActionResult Create(AlbumCreateInputModel inputModel)
+    public async Task<IActionResult> Create(AlbumCreateInputModel inputModel)
     {
+        AlbumDetailViewModel album = await albumService.CreateAlbumAsync(inputModel);
         return RedirectToAction(nameof(Index));
     }
 }

@@ -56,4 +56,9 @@ public class MemoryCacheAlbumService : ICachedAlbumService
             return albumService.GetMostRecentAlbumsAsync();
         });
     }
+
+    public Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel)
+    {
+        return albumService.CreateAlbumAsync(inputModel);
+    }
 }

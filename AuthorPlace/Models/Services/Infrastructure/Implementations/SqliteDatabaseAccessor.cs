@@ -16,6 +16,37 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
         this.connectionStringsOptions = connectionStringsOptions;
     }
 
+    public async Task<DataSet> ExecuteAsync(FormattableString formattableQuery)
+    {
+        object?[] queryArguments = formattableQuery.GetArguments();
+        List<SqliteParameter> sqliteParameters = new();
+        for (int i = 0; i < queryArguments.Length; i++)
+        {
+            if (queryArguments[i] is Sql)
+            {
+                continue;
+            }
+            SqliteParameter parameter = new(i.ToString(), queryArguments[i]);
+            sqliteParameters.Add(parameter);
+            queryArguments[i] = "@" + i;
+        }
+        string query = formattableQuery.ToString();
+        string? connectionString = connectionStringsOptions.CurrentValue.Default;
+        using SqliteConnection connection = new(connectionString);
+        await connection.OpenAsync();
+        using SqliteCommand command = new(query, connection);
+        command.Parameters.AddRange(sqliteParameters);
+        using SqliteDataReader reader = await command.ExecuteReaderAsync();
+        DataSet dataSet = new();
+        do
+        {
+            DataTable dataTable = new();
+            dataSet.Tables.Add(dataTable);
+            dataTable.Load(reader);
+        } while (!reader.IsClosed);
+        return dataSet;
+    }
+
     public async IAsyncEnumerable<IDataRecord> QueryAsync(FormattableString formattableQuery)
     {
         object?[] queryArguments = formattableQuery.GetArguments();
