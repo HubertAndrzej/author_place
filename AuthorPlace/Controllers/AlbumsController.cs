@@ -1,8 +1,10 @@
 ﻿using AuthorPlace.Models.Entities;
+using AuthorPlace.Models.Exceptions;
 using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace AuthorPlace.Controllers;
 
@@ -44,7 +46,25 @@ public class AlbumsController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(AlbumCreateInputModel inputModel)
     {
-        AlbumDetailViewModel album = await albumService.CreateAlbumAsync(inputModel);
-        return RedirectToAction(nameof(Index));
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                AlbumDetailViewModel album = await albumService.CreateAlbumAsync(inputModel);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (AlbumUniqueException)
+            {
+                ModelState.AddModelError(nameof(AlbumDetailViewModel.Title), "This title is already used by this author");
+            }
+        }
+        ViewBag.Title = "New album";
+        return View(inputModel);
+    }
+
+    public async Task<IActionResult> IsAlbumUnique(string title, string author)
+    {
+        bool result = await albumService.IsAlbumUnique(title, author);
+        return Json(result);
     }
 }

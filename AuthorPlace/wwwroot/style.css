@@ -75,6 +75,10 @@ hr {
     font-weight: bold;
 }
 
+.field-validation-error {
+    color: red;
+}
+
 .input {
     border-color: #0dcaf0;
 }
@@ -118,4 +122,18 @@ hr {
 .rating {
     color: #0dcaf0;
     white-space: nowrap;
+}
+
+.validation-summary-errors ul {
+    list-style-type: none;
+    margin: 0 0 1em;
+    padding: 0;
+}
+
+.validation-summary-errors li {
+    background-color: rgba(255, 0, 0, 0.05);
+    border-left: 3px solid red;
+    color: darkred;
+    margin-bottom: 2px;
+    padding: 3px 0 3px 10px;
 }

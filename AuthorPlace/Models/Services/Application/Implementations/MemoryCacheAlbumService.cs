@@ -61,4 +61,9 @@ public class MemoryCacheAlbumService : ICachedAlbumService
     {
         return albumService.CreateAlbumAsync(inputModel);
     }
+
+    public async Task<bool> IsAlbumUnique(string title, string author)
+    {
+        return await albumService.IsAlbumUnique(title, author);
+    }
 }

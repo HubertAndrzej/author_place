@@ -6,6 +6,7 @@ using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.ValueObjects;
 using AuthorPlace.Models.ViewModels;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
 using System.Data;
 
@@ -95,12 +96,25 @@ public class AdoNetAsyncAlbumService : IAlbumService
     {
         string title = inputModel.Title!;
         string author = "Hub Sobo";
-        FormattableString insertQuery = ($"INSERT INTO Albums (Title, Author, ImagePath, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount) VALUES ({title}, {author}, '/placeholder.jpg', 'EUR', 0, 'EUR', 0);");
-        await databaseAccessor.ExecuteAsync(insertQuery);
-        FormattableString albumQuery = $"SELECT last_insert_rowid();";
-        DataSet dataSet = await databaseAccessor.ExecuteAsync(albumQuery);
-        int albumId = Convert.ToInt32(dataSet.Tables[0].Rows[0][0]);
-        AlbumDetailViewModel? albumDetailViewModel = await GetAlbumAsync(albumId);
-        return albumDetailViewModel;
+        try
+        {
+            FormattableString insertQuery = ($"INSERT INTO Albums (Title, Author, ImagePath, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount) VALUES ({title}, {author}, '/placeholder.jpg', 'EUR', 0, 'EUR', 0);");
+            await databaseAccessor.ExecuteAsync(insertQuery);
+            FormattableString albumQuery = $"SELECT last_insert_rowid();";
+            DataSet dataSet = await databaseAccessor.ExecuteAsync(albumQuery);
+            int albumId = Convert.ToInt32(dataSet.Tables[0].Rows[0][0]);
+            AlbumDetailViewModel? albumDetailViewModel = await GetAlbumAsync(albumId);
+            return albumDetailViewModel;
+        }
+        catch (SqliteException exception) when (exception.SqliteErrorCode == 19)
+        {
+            throw new AlbumUniqueException(title, author, exception);
+        }
+    }
+    public async Task<bool> IsAlbumUnique(string title, string author)
+    {
+        DataSet result = await databaseAccessor.ExecuteAsync($"SELECT COUNT(*) FROM Albums WHERE Title LIKE {title} AND Author LIKE {author};");
+        bool isAlbumUnique = Convert.ToInt32(result.Tables[0].Rows[0][0]) == 0;
+        return isAlbumUnique;
     }
 }

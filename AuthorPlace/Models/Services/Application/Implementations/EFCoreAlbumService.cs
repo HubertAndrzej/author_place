@@ -6,6 +6,7 @@ using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.ViewModels;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Linq.Dynamic.Core;
@@ -113,7 +114,20 @@ public class EFCoreAlbumService : IAlbumService
         string author = "Hub Sobo";
         Album album = new(title, author);
         dbContext.Add(album);
-        await dbContext.SaveChangesAsync();
+        try
+        {
+            await dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is SqliteException { SqliteErrorCode: 19 })
+        {
+            throw new AlbumUniqueException(title, author, exception);
+        }
         return album.ToAlbumDetailViewModel();
+    }
+
+    public async Task<bool> IsAlbumUnique(string title, string author)
+    {
+        bool isAlbumUnique = await dbContext.Albums!.AnyAsync(album => EF.Functions.Like(album.Title, title) && EF.Functions.Like(album.Author, author));
+        return !isAlbumUnique;
     }
 }
