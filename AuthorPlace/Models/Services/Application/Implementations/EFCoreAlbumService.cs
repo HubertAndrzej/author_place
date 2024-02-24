@@ -132,8 +132,11 @@ public class EFCoreAlbumService : IAlbumService
         album.ChangePrices(inputModel.FullPrice!, inputModel.CurrentPrice!);
         album.ChangeDescription(inputModel.Description!);
         album.ChangeEmail(inputModel.Email!);
-        string imagePath = await imagePersister.SaveAlbumImageAsync(inputModel.Id, inputModel.Image!);
-        album.ChangeImagePath(imagePath);
+        if (inputModel.Image != null)
+        {
+            string imagePath = await imagePersister.SaveAlbumImageAsync(inputModel.Id, inputModel.Image);
+            album.ChangeImagePath(imagePath);
+        }
         try
         {
             await dbContext.SaveChangesAsync();

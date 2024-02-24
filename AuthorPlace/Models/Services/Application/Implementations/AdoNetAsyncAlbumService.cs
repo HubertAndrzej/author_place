@@ -67,7 +67,7 @@ public class AdoNetAsyncAlbumService : IAlbumService
         }
         if (albumDetailViewModel == null)
         {
-            logger.LogWarning($"Album {id} not found");
+            logger.LogWarning("Album {id} not found", id);
             throw new AlbumNotFoundException(id);
         }
         FormattableString songsQuery = $"SELECT Id, Title, Description, Duration FROM Songs WHERE AlbumId={id};";
