@@ -15,12 +15,14 @@ namespace AuthorPlace.Models.Services.Application.Implementations;
 public class AdoNetAsyncAlbumService : IAlbumService
 {
     private readonly IDatabaseAccessor databaseAccessor;
+    private readonly IImagePersister imagePersister;
     private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
     private readonly ILogger logger;
 
-    public AdoNetAsyncAlbumService(IDatabaseAccessor databaseAccessor, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
+    public AdoNetAsyncAlbumService(IDatabaseAccessor databaseAccessor, IImagePersister imagePersister, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
     {
         this.databaseAccessor = databaseAccessor;
+        this.imagePersister = imagePersister;
         this.albumsOptions = albumsOptions;
         this.logger = loggerFactory.CreateLogger("Albums");
     }
@@ -55,7 +57,7 @@ public class AdoNetAsyncAlbumService : IAlbumService
 
     public async Task<AlbumDetailViewModel> GetAlbumAsync(int id)
     {
-        FormattableString albumQuery = $"SELECT Id, Title, Description, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id = {id};";
+        FormattableString albumQuery = $"SELECT Id, Title, Description, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id={id};";
         IAsyncEnumerable<IDataRecord> albumResults = databaseAccessor.QueryAsync(albumQuery);
         AlbumDetailViewModel? albumDetailViewModel = null;
         await foreach (IDataRecord dataRecord in albumResults)
@@ -65,10 +67,10 @@ public class AdoNetAsyncAlbumService : IAlbumService
         }
         if (albumDetailViewModel == null)
         {
-            logger.LogWarning("Album {id} not found", id);
+            logger.LogWarning($"Album {id} not found");
             throw new AlbumNotFoundException(id);
         }
-        FormattableString songsQuery = $"SELECT Id, Title, Description, Duration FROM Songs WHERE AlbumId = {id};";
+        FormattableString songsQuery = $"SELECT Id, Title, Description, Duration FROM Songs WHERE AlbumId={id};";
         IAsyncEnumerable<IDataRecord> songsResults = databaseAccessor.QueryAsync(songsQuery);
         await foreach (IDataRecord dataRecord in songsResults)
         {
@@ -98,7 +100,7 @@ public class AdoNetAsyncAlbumService : IAlbumService
         string author = "Hub Sobo";
         try
         {
-            FormattableString insertQuery = ($"INSERT INTO Albums (Title, Author, ImagePath, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount) VALUES ({title}, {author}, '/placeholder.jpg', 'EUR', 0, 'EUR', 0);");
+            FormattableString insertQuery = $"INSERT INTO Albums (Title, Author, ImagePath, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount) VALUES ({title}, {author}, '/placeholder.jpg', 'EUR', 0, 'EUR', 0);";
             await databaseAccessor.ExecuteAsync(insertQuery);
             FormattableString albumQuery = $"SELECT last_insert_rowid();";
             IAsyncEnumerable<IDataRecord> idResults = databaseAccessor.QueryAsync(albumQuery);
@@ -120,7 +122,7 @@ public class AdoNetAsyncAlbumService : IAlbumService
 
     public async Task<AlbumUpdateInputModel> GetAlbumForEditingAsync(int id)
     {
-        FormattableString albumQuery = $"SELECT Id, Title, Description, ImagePath, Email, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id = {id};";
+        FormattableString albumQuery = $"SELECT Id, Title, Description, ImagePath, Email, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id={id};";
         IAsyncEnumerable<IDataRecord> albumResults = databaseAccessor.QueryAsync(albumQuery);
         AlbumUpdateInputModel? albumUpdateInputModel = null;
         await foreach (IDataRecord dataRecord in albumResults)
@@ -138,19 +140,38 @@ public class AdoNetAsyncAlbumService : IAlbumService
 
     public async Task<AlbumDetailViewModel> UpdateAlbumAsync(AlbumUpdateInputModel inputModel)
     {
+        FormattableString countQuery = $"SELECT COUNT(*) FROM Albums WHERE Id={inputModel.Id}";
+        IAsyncEnumerable<IDataRecord> countResults = databaseAccessor.QueryAsync(countQuery);
+        int count = 0;
+        await foreach (IDataRecord dataRecord in countResults)
+        {
+            count = dataRecord.GetInt32(0);
+            break;
+        }
+        if (count == 0)
+        {
+            logger.LogWarning("Album {inputModel.Id} not found", inputModel.Id);
+            throw new AlbumNotFoundException(inputModel.Id);
+        }
         string author = await GetAuthorAsync(inputModel.Id);
         try
         {
-            FormattableString updateQuery = ($"UPDATE Albums SET Title={inputModel.Title}, Description={inputModel.Description}, Email={inputModel.Email}, CurrentPrice_Currency={inputModel.CurrentPrice!.Currency}, CurrentPrice_Amount={inputModel.CurrentPrice.Amount}, FullPrice_Currency={inputModel.FullPrice!.Currency}, FullPrice_Amount={inputModel.FullPrice.Amount} WHERE Id={inputModel.Id}");
+            FormattableString updateQuery = $"UPDATE Albums SET Title={inputModel.Title}, Description={inputModel.Description}, Email={inputModel.Email}, CurrentPrice_Currency={inputModel.CurrentPrice!.Currency}, CurrentPrice_Amount={inputModel.CurrentPrice.Amount}, FullPrice_Currency={inputModel.FullPrice!.Currency}, FullPrice_Amount={inputModel.FullPrice.Amount} WHERE Id={inputModel.Id}";
             await databaseAccessor.ExecuteAsync(updateQuery);
-            AlbumDetailViewModel? albumDetailViewModel = await GetAlbumAsync(inputModel.Id);
-            return albumDetailViewModel;
         }
         catch (SqliteException e) when (e.SqliteErrorCode == 19)
         {
             logger.LogWarning("Album with {inputModel.Title} by {author} already exists", inputModel.Title, author);
             throw new AlbumUniqueException(inputModel.Title!, author, e);
         }
+        if (inputModel.Image != null)
+        {
+            string imagePath = await imagePersister.SaveAlbumImageAsync(inputModel.Id, inputModel.Image);
+            FormattableString query = $"UPDATE Albums SET ImagePath={imagePath} WHERE Id={inputModel.Id};";
+            await databaseAccessor.ExecuteAsync(query);
+        }
+        AlbumDetailViewModel? albumDetailViewModel = await GetAlbumAsync(inputModel.Id);
+        return albumDetailViewModel;
     }
 
     public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)

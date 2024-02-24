@@ -75,6 +75,11 @@ hr {
     font-weight: bold;
 }
 
+.custom-file-label::after {
+    content: '\f07c' !important;
+    font-family: 'Font Awesome 5 Free';
+}
+
 .display-label {
     color: #0dcaf0;
 }

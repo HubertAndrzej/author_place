@@ -5,6 +5,7 @@ using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
+using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.ViewModels;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -17,12 +18,14 @@ namespace AuthorPlace.Models.Services.Application.Implementations;
 public class EFCoreAlbumService : IAlbumService
 {
     private readonly AuthorPlaceDbContext dbContext;
+    private readonly IImagePersister imagePersister;
     private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
     private readonly ILogger logger;
 
-    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
+    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, IImagePersister imagePersister, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
     {
         this.dbContext = dbContext;
+        this.imagePersister = imagePersister;
         this.albumsOptions = albumsOptions;
         this.logger = loggerFactory.CreateLogger("Albums");
     }
@@ -120,10 +123,17 @@ public class EFCoreAlbumService : IAlbumService
     {
         string author = await GetAuthorAsync(inputModel.Id);
         Album? album = await dbContext.Albums!.FindAsync(inputModel.Id);
-        album!.ChangeTitle(inputModel.Title!);
+        if (album == null)
+        {
+            logger.LogWarning("Album {inputModel.Id} not found", inputModel.Id);
+            throw new AlbumNotFoundException(inputModel.Id);
+        }
+        album.ChangeTitle(inputModel.Title!);
         album.ChangePrices(inputModel.FullPrice!, inputModel.CurrentPrice!);
         album.ChangeDescription(inputModel.Description!);
         album.ChangeEmail(inputModel.Email!);
+        string imagePath = await imagePersister.SaveAlbumImageAsync(inputModel.Id, inputModel.Image!);
+        album.ChangeImagePath(imagePath);
         try
         {
             await dbContext.SaveChangesAsync();

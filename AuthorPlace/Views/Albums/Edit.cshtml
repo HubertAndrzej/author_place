@@ -1,6 +1,6 @@
 ﻿@model AlbumUpdateInputModel
 <section class="album-info">
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         <div class="row">
             <div class="col-md-9">
                 <h1>@ViewBag.Title</h1>
@@ -29,31 +29,33 @@
             </div>
             <div class="col-md-3">
                 <aside>
-                    <div class="form-group mb-4">
+                    <div class="form-group mb-3">
                         <label class="display-label" asp-for="Email"></label>
                         <input type="email" asp-for="Email" class="form-control input">
                         <span asp-validation-for="Email"></span>
                     </div>
-                    <div class="form-group my-4">
+                    <div class="form-group my-3">
                         <label class="display-label" asp-for="FullPrice"></label>
                         <div class="input-group">
-                            <select asp-items="@Html.GetEnumSelectList<Currency>()" asp-for="FullPrice!.Currency" class="form-control input"></select>
+                            <select asp-items="@(Html.GetEnumSelectList<Currency>())" asp-for="FullPrice!.Currency" class="form-control input"></select>
                             <input type="number" step="0.01" asp-for="FullPrice!.Amount" class="form-control form-control-block input">
                             <span asp-validation-for="FullPrice"></span>
                         </div>
                     </div>
-                    <div class="form-group my-4">
+                    <div class="form-group my-3">
                         <label class="display-label" asp-for="CurrentPrice"></label>
                         <div class="input-group">
-                            <select asp-items="@Html.GetEnumSelectList<Currency>()" asp-for="CurrentPrice!.Currency" class="form-control input"></select>
+                            <select asp-items="@(Html.GetEnumSelectList<Currency>())" asp-for="CurrentPrice!.Currency" class="form-control input"></select>
                             <input type="number" step="0.01" asp-for="CurrentPrice!.Amount" class="form-control form-control-block input">
                             <span asp-validation-for="CurrentPrice"></span>
                         </div>
                     </div>
                     <div class="form-group mt-4">
                         <label class="display-label" asp-for="ImagePath"></label>
-                        <img src="@Model.ImagePath" class="img-fluid">
-                        <input type="hidden" asp-for="ImagePath">
+                        <img id="preview" src="@Model.ImagePath" class="img-fluid">
+                        <div class="mt-3">
+                            <input class="form-control input" type="file" onchange="updatePreview(this)">
+                        </div>
                     </div>
                 </aside>
             </div>
@@ -62,3 +64,12 @@
 </section>
 <partial name="_Validation"></partial>
 <partial name="_Summernote"></partial>
+<script>
+    function updatePreview(inputFile) {
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            $('#preview').attr('src', e.target.result);
+        };
+        reader.readAsDataURL(inputFile.files[0]);
+    }
+</script>

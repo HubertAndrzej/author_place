@@ -85,4 +85,9 @@ public class Album
         }
         Description = description;
     }
+
+    public void ChangeImagePath(string imagePath)
+    {
+        ImagePath = imagePath;
+    }
 }
