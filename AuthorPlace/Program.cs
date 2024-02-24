@@ -6,6 +6,7 @@ using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
@@ -40,6 +41,7 @@ builder.Services.Configure<AlbumsOptions>(builder.Configuration.GetSection("Albu
 builder.Services.Configure<MemoryCacheOptions>(builder.Configuration.GetSection("MemoryCache"));
 builder.Services.Configure<CacheDurationOptions>(builder.Configuration.GetSection("CacheDuration"));
 builder.Services.Configure<ImageSizeOptions>(builder.Configuration.GetSection("ImageSize"));
+builder.Services.Configure<KestrelServerOptions>(builder.Configuration.GetSection("Kestrel"));
 
 WebApplication app = builder.Build();
 app.UseExceptionHandler("/Error");
