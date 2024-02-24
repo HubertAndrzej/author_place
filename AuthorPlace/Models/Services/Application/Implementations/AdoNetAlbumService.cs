@@ -97,10 +97,10 @@ public class AdoNetAlbumService : IAlbumService
             AlbumDetailViewModel? albumDetailViewModel = await GetAlbumAsync(albumId);
             return albumDetailViewModel;
         }
-        catch (SqliteException e) when (e.SqliteErrorCode == 19)
+        catch (SqliteException exception) when (exception.SqliteErrorCode == 19)
         {
             logger.LogWarning("Album with {title} by {author} already exists", title, author);
-            throw new AlbumUniqueException(title, author, e);
+            throw new AlbumUniqueException(title, author, exception);
         }
     }
 
@@ -135,16 +135,24 @@ public class AdoNetAlbumService : IAlbumService
             FormattableString updateQuery = $"UPDATE Albums SET Title={inputModel.Title}, Description={inputModel.Description}, Email={inputModel.Email}, CurrentPrice_Currency={inputModel.CurrentPrice!.Currency}, CurrentPrice_Amount={inputModel.CurrentPrice.Amount}, FullPrice_Currency={inputModel.FullPrice!.Currency}, FullPrice_Amount={inputModel.FullPrice.Amount} WHERE Id={inputModel.Id}";
             await databaseAccessor.ExecuteAsync(updateQuery);
         }
-        catch (SqliteException e) when (e.SqliteErrorCode == 19)
+        catch (SqliteException exception) when (exception.SqliteErrorCode == 19)
         {
             logger.LogWarning("Album with {inputModel.Title} by {author} already exists", inputModel.Title, author);
-            throw new AlbumUniqueException(inputModel.Title!, author, e);
+            throw new AlbumUniqueException(inputModel.Title!, author, exception);
         }
         if (inputModel.Image != null)
         {
-            string imagePath = await imagePersister.SaveAlbumImageAsync(inputModel.Id, inputModel.Image);
-            FormattableString query = $"UPDATE Albums SET ImagePath={imagePath} WHERE Id={inputModel.Id};";
-            await databaseAccessor.ExecuteAsync(query);
+            try
+            {
+                string imagePath = await imagePersister.SaveAlbumImageAsync(inputModel.Id, inputModel.Image);
+                FormattableString query = $"UPDATE Albums SET ImagePath={imagePath} WHERE Id={inputModel.Id};";
+                await databaseAccessor.ExecuteAsync(query);
+            }
+            catch (Exception exception)
+            {
+                logger.LogWarning("The selected image could not be saved for album {inputModel.Id}", inputModel.Id);
+                throw new AlbumImageInvalidException(inputModel.Id, exception);
+            }
         }
         AlbumDetailViewModel? albumDetailViewModel = await GetAlbumAsync(inputModel.Id);
         return albumDetailViewModel;

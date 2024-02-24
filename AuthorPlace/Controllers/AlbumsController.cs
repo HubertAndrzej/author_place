@@ -79,9 +79,13 @@ public class AlbumsController : Controller
                 TempData["ConfirmationMessage"] = "Your album has been updated successfully";
                 return RedirectToAction(nameof(Detail), new { id = inputModel.Id });
             }
+            catch (AlbumImageInvalidException)
+            {
+                ModelState.AddModelError(nameof(AlbumUpdateInputModel.Image), "The selected image cover is not valid");
+            }
             catch (AlbumUniqueException)
             {
-                ModelState.AddModelError(nameof(AlbumDetailViewModel.Title), "This title is already used by this author");
+                ModelState.AddModelError(nameof(AlbumUpdateInputModel.Title), "This title is already used by this author");
             }
         }
         ViewBag.Title = "Update album";

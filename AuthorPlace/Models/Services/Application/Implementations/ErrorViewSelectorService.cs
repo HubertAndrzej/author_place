@@ -18,8 +18,8 @@ public class ErrorViewSelectorService : IErrorViewSelectorService
                 statusCode: HttpStatusCode.NotFound,
                 viewName: "NotFound"),
 
-            AlbumNotFoundException e => new ErrorViewData(
-                title: $"Album {e.AlbumId} not found",
+            AlbumNotFoundException albumNotFoundException => new ErrorViewData(
+                title: $"Album {albumNotFoundException.AlbumId} not found",
                 statusCode: HttpStatusCode.NotFound,
                 viewName: "AlbumNotFound"),
 

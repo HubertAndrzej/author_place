@@ -134,8 +134,16 @@ public class EFCoreAlbumService : IAlbumService
         album.ChangeEmail(inputModel.Email!);
         if (inputModel.Image != null)
         {
-            string imagePath = await imagePersister.SaveAlbumImageAsync(inputModel.Id, inputModel.Image);
-            album.ChangeImagePath(imagePath);
+            try
+            {
+                string imagePath = await imagePersister.SaveAlbumImageAsync(inputModel.Id, inputModel.Image);
+                album.ChangeImagePath(imagePath);
+            }
+            catch (Exception exception)
+            {
+                logger.LogWarning("The selected image could not be saved for album {inputModel.Id}", inputModel.Id);
+                throw new AlbumImageInvalidException(inputModel.Id, exception);
+            }
         }
         try
         {
