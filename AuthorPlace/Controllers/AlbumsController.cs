@@ -71,15 +71,18 @@ public class AlbumsController : Controller
     [HttpPost]
     public async Task<IActionResult> Edit(AlbumUpdateInputModel inputModel)
     {
-        try
+        if (ModelState.IsValid)
         {
-            AlbumDetailViewModel album = await albumService.UpdateAlbumAsync(inputModel);
-            TempData["ConfirmationMessage"] = "Your album has been updated successfully";
-            return RedirectToAction(nameof(Detail), new { id = inputModel.Id });
-        }
-        catch (AlbumUniqueException)
-        {
-            ModelState.AddModelError(nameof(AlbumDetailViewModel.Title), "This title is already used by this author");
+            try
+            {
+                AlbumDetailViewModel album = await albumService.UpdateAlbumAsync(inputModel);
+                TempData["ConfirmationMessage"] = "Your album has been updated successfully";
+                return RedirectToAction(nameof(Detail), new { id = inputModel.Id });
+            }
+            catch (AlbumUniqueException)
+            {
+                ModelState.AddModelError(nameof(AlbumDetailViewModel.Title), "This title is already used by this author");
+            }
         }
         ViewBag.Title = "Update album";
         return View(inputModel);
