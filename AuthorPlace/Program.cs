@@ -1,3 +1,4 @@
+using AuthorPlace.Customizations.ModelBinders;
 using AuthorPlace.Models.Enums;
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Implementations;
@@ -21,6 +22,7 @@ builder.Services.AddMvc(options =>
     CacheProfile cacheProfile = new();
     builder.Configuration.Bind("ResponseCache:Home", cacheProfile);
     options.CacheProfiles.Add("Home", cacheProfile);
+    options.ModelBinderProviders.Insert(0, new DecimalModelBinderProvider());
 });
 IServiceCollection? albumService = persistence switch
 {
@@ -42,11 +44,6 @@ builder.Services.Configure<CacheDurationOptions>(builder.Configuration.GetSectio
 WebApplication app = builder.Build();
 app.UseExceptionHandler("/Error");
 app.UseStatusCodePagesWithReExecute("/Error");
-app.UseRequestLocalization(new RequestLocalizationOptions
-{
-    DefaultRequestCulture = new RequestCulture(CultureInfo.InvariantCulture),
-    SupportedCultures = new[] { CultureInfo.InvariantCulture }
-});
 app.UseStaticFiles();
 app.UseResponseCaching();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
