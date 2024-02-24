@@ -32,13 +32,14 @@ IServiceCollection? albumService = persistence switch
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
+builder.Services.AddSingleton<IImagePersister, MagickNetImagePersister>();
 builder.Services.AddTransient<ICachedAlbumService, MemoryCacheAlbumService>();
-builder.Services.AddTransient<IImagePersister, InsecureImagePersister>();
 builder.Services.AddResponseCaching();
 builder.Services.Configure<ConnectionStringsOptions>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<AlbumsOptions>(builder.Configuration.GetSection("Albums"));
 builder.Services.Configure<MemoryCacheOptions>(builder.Configuration.GetSection("MemoryCache"));
 builder.Services.Configure<CacheDurationOptions>(builder.Configuration.GetSection("CacheDuration"));
+builder.Services.Configure<ImageSizeOptions>(builder.Configuration.GetSection("ImageSize"));
 
 WebApplication app = builder.Build();
 app.UseExceptionHandler("/Error");
