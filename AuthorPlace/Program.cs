@@ -4,10 +4,12 @@ using AuthorPlace.Models.Services.Application.Implementations;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
+using System.Globalization;
 
 Persistence persistence = Persistence.EFCore;
 
@@ -40,6 +42,11 @@ builder.Services.Configure<CacheDurationOptions>(builder.Configuration.GetSectio
 WebApplication app = builder.Build();
 app.UseExceptionHandler("/Error");
 app.UseStatusCodePagesWithReExecute("/Error");
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(CultureInfo.InvariantCulture),
+    SupportedCultures = new[] { CultureInfo.InvariantCulture }
+});
 app.UseStaticFiles();
 app.UseResponseCaching();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");

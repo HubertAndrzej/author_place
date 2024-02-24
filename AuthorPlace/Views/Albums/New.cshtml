@@ -8,6 +8,12 @@
     </div>
     <div class="row">
         <div class="col-md-8">
+            <label class="display-label" asp-for="Title"></label>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
             <input type="text" asp-for="Title" class="form-control input" placeholder="Choose a title for your album..." />
         </div>
         <div class="col-md-4 d-grid gap-2">
@@ -18,8 +24,7 @@
         <div class="col-md-8">
             <span asp-validation-for="Title"></span>
         </div>
-        <div class="col-md-4">
-        </div>
+        <div class="col-md-4"></div>
     </div>
 </form>
 <br>

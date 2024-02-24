@@ -35,6 +35,12 @@
     </header>
 
     <div class="container">
+        @if (TempData["ConfirmationMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissable mt-3" role="alert">
+                <i class="fa-solid fa-check"></i> @TempData["ConfirmationMessage"]
+            </div>
+        }
         @RenderBody()
         @RenderSection("Scripts", required: false)
     </div>

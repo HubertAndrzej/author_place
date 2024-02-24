@@ -2,6 +2,7 @@
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ViewModels;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -103,8 +104,25 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         return albumService.CreateAlbumAsync(inputModel);
     }
 
-    public async Task<bool> IsAlbumUnique(string title, string author)
+    public Task<AlbumUpdateInputModel> GetAlbumForEditingAsync(int id)
     {
-        return await albumService.IsAlbumUnique(title, author);
+        return albumService.GetAlbumForEditingAsync(id);
+    }
+
+    public async Task<AlbumDetailViewModel> UpdateAlbumAsync(AlbumUpdateInputModel inputModel)
+    {
+        AlbumDetailViewModel viewModel = await albumService.UpdateAlbumAsync(inputModel);
+        await distributedCache.RemoveAsync($"Album{inputModel.Id}");
+        return viewModel;
+    }
+
+    public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
+    {
+        return await albumService.IsAlbumUniqueAsync(title, author, id);
+    }
+
+    public async Task<string> GetAuthorAsync(int id)
+    {
+        return await albumService.GetAuthorAsync(id);
     }
 }

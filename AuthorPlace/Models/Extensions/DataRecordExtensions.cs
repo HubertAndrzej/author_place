@@ -1,4 +1,5 @@
 ﻿using AuthorPlace.Models.Enums;
+using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.ValueObjects;
 using AuthorPlace.Models.ViewModels;
 using System.Data;
@@ -17,13 +18,13 @@ public static class DataRecordExtensions
             Author = Convert.ToString(dataRecord["Author"]),
             Rating = Convert.ToDouble(dataRecord["Rating"]),
             FullPrice = new Money(
-                    Enum.Parse<Currency>((string)dataRecord["FullPrice_Currency"]),
-                    Convert.ToDecimal(dataRecord["FullPrice_Amount"])
-                ),
+                Enum.Parse<Currency>((string)dataRecord["FullPrice_Currency"]),
+                Convert.ToDecimal(dataRecord["FullPrice_Amount"])
+            ),
             CurrentPrice = new Money(
-                    Enum.Parse<Currency>((string)dataRecord["CurrentPrice_Currency"]),
-                    Convert.ToDecimal(dataRecord["CurrentPrice_Amount"])
-                )
+                Enum.Parse<Currency>((string)dataRecord["CurrentPrice_Currency"]),
+                Convert.ToDecimal(dataRecord["CurrentPrice_Amount"])
+            )
         };
     }
 
@@ -38,13 +39,13 @@ public static class DataRecordExtensions
             Author = Convert.ToString(dataRecord["Author"]),
             Rating = Convert.ToDouble(dataRecord["Rating"]),
             FullPrice = new Money(
-                    Enum.Parse<Currency>((string)dataRecord["FullPrice_Currency"]),
-                    Convert.ToDecimal(dataRecord["FullPrice_Amount"])
-                ),
+                Enum.Parse<Currency>((string)dataRecord["FullPrice_Currency"]),
+                Convert.ToDecimal(dataRecord["FullPrice_Amount"])
+            ),
             CurrentPrice = new Money(
-                    Enum.Parse<Currency>((string)dataRecord["CurrentPrice_Currency"]),
-                    Convert.ToDecimal(dataRecord["CurrentPrice_Amount"])
-                ),
+                Enum.Parse<Currency>((string)dataRecord["CurrentPrice_Currency"]),
+                Convert.ToDecimal(dataRecord["CurrentPrice_Amount"])
+            ),
             Songs = new List<SongViewModel>()
         };
     }
@@ -56,6 +57,26 @@ public static class DataRecordExtensions
             Id = Convert.ToInt32(dataRecord["Id"]),
             Title = Convert.ToString(dataRecord["Title"]),
             Duration = TimeSpan.Parse((string)dataRecord["Duration"]),
+        };
+    }
+
+    public static AlbumUpdateInputModel ToAlbumUpdateInputModel(this IDataRecord dataRecord)
+    {
+        return new AlbumUpdateInputModel
+        {
+            Id = Convert.ToInt32(dataRecord["Id"]),
+            Title = Convert.ToString(dataRecord["Title"]),
+            Description = Convert.ToString(dataRecord["Description"]),
+            Email = Convert.ToString(dataRecord["Email"]),
+            ImagePath = Convert.ToString(dataRecord["ImagePath"]),
+            FullPrice = new Money(
+                Enum.Parse<Currency>((string)dataRecord["FullPrice_Currency"]),
+                Convert.ToDecimal(dataRecord["FullPrice_Amount"])
+            ),
+            CurrentPrice = new Money(
+                Enum.Parse<Currency>((string)dataRecord["CurrentPrice_Currency"]),
+                Convert.ToDecimal(dataRecord["CurrentPrice_Amount"])
+            ),
         };
     }
 }

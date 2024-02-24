@@ -2,7 +2,7 @@
 <section class="album-info">
     <div class="row">
         <div class="col-md-9">
-            <h1>@Model.Title</h1>
+            <h1>@Model.Title <a class="btn btn-outline-info btn-sm" asp-action="Edit" asp-route-id="@Model.Id"><i class="fa-solid fa-pen-to-square"></i> Edit</a></h1>
         </div>
         <div class="col-md-3 d-grid align-items-end">
             <a href="#" class="btn btn-info btn-lg subscribe-album">Subscribe</a>

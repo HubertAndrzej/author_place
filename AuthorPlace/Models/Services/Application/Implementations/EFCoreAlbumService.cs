@@ -9,6 +9,7 @@ using AuthorPlace.Models.ViewModels;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Data;
 using System.Linq.Dynamic.Core;
 
 namespace AuthorPlace.Models.Services.Application.Implementations;
@@ -36,16 +37,7 @@ public class EFCoreAlbumService : IAlbumService
         IQueryable<AlbumViewModel> queryLinq = baseQuery
             .AsNoTracking()
             .Where(album => album.Title.Contains(model.Search!))
-            .Select(album => new AlbumViewModel
-            {
-                Id = album.Id,
-                Title = album.Title,
-                ImagePath = album.ImagePath,
-                Author = album.Author,
-                Rating = album.Rating,
-                FullPrice = album.FullPrice,
-                CurrentPrice = album.CurrentPrice
-            });
+            .Select(album => album.ToAlbumViewModel());
         List<AlbumViewModel> albums = await queryLinq
             .Skip(model.Offset)
             .Take(model.Limit)
@@ -63,27 +55,9 @@ public class EFCoreAlbumService : IAlbumService
     {
         IQueryable<AlbumDetailViewModel> queryLinq = dbContext.Albums!
             .AsNoTracking()
+            .Include(album => album.Songs)
             .Where(album => album.Id == id)
-            .Select(album => new AlbumDetailViewModel
-            {
-                Id = album.Id,
-                Title = album.Title,
-                ImagePath = album.ImagePath,
-                Author = album.Author,
-                Rating = album.Rating,
-                FullPrice = album.FullPrice,
-                CurrentPrice = album.CurrentPrice,
-                Description = album.Description,
-                Songs = album.Songs
-                .Select(song => new SongViewModel
-                {
-                    Id = song.Id,
-                    Title = song.Title,
-                    Description = song.Description,
-                    Duration = song.Duration
-                })
-                .ToList()
-            });
+            .Select(album => album.ToAlbumDetailViewModel());
         AlbumDetailViewModel? album = await queryLinq
             .FirstOrDefaultAsync();
         if (album == null)
@@ -120,14 +94,61 @@ public class EFCoreAlbumService : IAlbumService
         }
         catch (DbUpdateException exception) when (exception.InnerException is SqliteException { SqliteErrorCode: 19 })
         {
+            logger.LogWarning("Album with {title} by {author} not found", title, author);
             throw new AlbumUniqueException(title, author, exception);
         }
         return album.ToAlbumDetailViewModel();
     }
 
-    public async Task<bool> IsAlbumUnique(string title, string author)
+    public async Task<AlbumUpdateInputModel> GetAlbumForEditingAsync(int id)
     {
-        bool isAlbumUnique = await dbContext.Albums!.AnyAsync(album => EF.Functions.Like(album.Title, title) && EF.Functions.Like(album.Author, author));
+        IQueryable<AlbumUpdateInputModel> queryLinq = dbContext.Albums!
+            .AsNoTracking()
+            .Where(album => album.Id == id)
+            .Select(album => album.ToAlbumUpdateInputModel());
+
+        AlbumUpdateInputModel? viewModel = await queryLinq.FirstOrDefaultAsync();
+        if (viewModel == null)
+        {
+            logger.LogWarning("Album {id} not found", id);
+            throw new AlbumNotFoundException(id);
+        }
+        return viewModel;
+    }
+
+    public async Task<AlbumDetailViewModel> UpdateAlbumAsync(AlbumUpdateInputModel inputModel)
+    {
+        string author = await GetAuthorAsync(inputModel.Id);
+        Album? album = await dbContext.Albums!.FindAsync(inputModel.Id);
+        album!.ChangeTitle(inputModel.Title!);
+        album.ChangePrices(inputModel.FullPrice!, inputModel.CurrentPrice!);
+        album.ChangeDescription(inputModel.Description!);
+        album.ChangeEmail(inputModel.Email!);
+        try
+        {
+            await dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is SqliteException { SqliteErrorCode: 19 })
+        {
+            logger.LogWarning("Album with {inputModel.Title} by {author} not found", inputModel.Title, author);
+            throw new AlbumUniqueException(inputModel.Title!, author, exception);
+        }
+        return album.ToAlbumDetailViewModel();
+    }
+
+    public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
+    {
+        bool isAlbumUnique = await dbContext.Albums!.AnyAsync(album => EF.Functions.Like(album.Title, title) && EF.Functions.Like(album.Author, author) && album.Id != id);
         return !isAlbumUnique;
+    }
+
+    public async Task<string> GetAuthorAsync(int id)
+    {
+        IQueryable<string> queryLinq = dbContext.Albums!
+            .AsNoTracking()
+            .Where(album => album.Id == id)
+            .Select(album => album.Author);
+        string? author = await queryLinq.FirstOrDefaultAsync();
+        return author!;
     }
 }

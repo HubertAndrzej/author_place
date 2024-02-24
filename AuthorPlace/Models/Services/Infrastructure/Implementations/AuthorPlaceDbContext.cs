@@ -27,7 +27,7 @@ public partial class AuthorPlaceDbContext : DbContext
             });
             entity.OwnsOne(album => album.FullPrice, builder =>
             {
-                builder.Property(money => money.Amount).HasColumnName("FullPrice_Amount");
+                builder.Property(money => money.Amount).HasConversion<double>().HasColumnName("FullPrice_Amount");
                 builder.Property(money => money.Currency).HasConversion<string>().HasColumnName("FullPrice_Currency");
             });
             entity.HasMany(album => album.Songs).WithOne(song => song.Album).HasForeignKey(song => song.AlbumId);

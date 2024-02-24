@@ -1,10 +1,8 @@
-﻿using AuthorPlace.Models.Entities;
-using AuthorPlace.Models.Exceptions;
+﻿using AuthorPlace.Models.Exceptions;
 using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace AuthorPlace.Controllers;
 
@@ -36,35 +34,60 @@ public class AlbumsController : Controller
         return View(album);
     }
 
-    public IActionResult Create()
+    public IActionResult New()
     {
         AlbumCreateInputModel inputModel = new();
-        ViewBag.Title = "New album";
+        ViewBag.Title = "Create album";
         return View(inputModel);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(AlbumCreateInputModel inputModel)
+    public async Task<IActionResult> New(AlbumCreateInputModel inputModel)
     {
         if (ModelState.IsValid)
         {
             try
             {
                 AlbumDetailViewModel album = await albumService.CreateAlbumAsync(inputModel);
-                return RedirectToAction(nameof(Index));
+                TempData["ConfirmationMessage"] = "Your album has been created successfully";
+                return RedirectToAction(nameof(Edit), new { id = album.Id });
             }
             catch (AlbumUniqueException)
             {
                 ModelState.AddModelError(nameof(AlbumDetailViewModel.Title), "This title is already used by this author");
             }
         }
-        ViewBag.Title = "New album";
+        ViewBag.Title = "Create album";
         return View(inputModel);
     }
 
-    public async Task<IActionResult> IsAlbumUnique(string title, string author)
+    public async Task<IActionResult> Edit(int id)
     {
-        bool result = await albumService.IsAlbumUnique(title, author);
+        ViewBag.Title = "Update album";
+        AlbumUpdateInputModel inputModel = await albumService.GetAlbumForEditingAsync(id);
+        return View(inputModel);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Edit(AlbumUpdateInputModel inputModel)
+    {
+        try
+        {
+            AlbumDetailViewModel album = await albumService.UpdateAlbumAsync(inputModel);
+            TempData["ConfirmationMessage"] = "Your album has been updated successfully";
+            return RedirectToAction(nameof(Detail), new { id = inputModel.Id });
+        }
+        catch (AlbumUniqueException)
+        {
+            ModelState.AddModelError(nameof(AlbumDetailViewModel.Title), "This title is already used by this author");
+        }
+        ViewBag.Title = "Update album";
+        return View(inputModel);
+    }
+
+    public async Task<IActionResult> IsAlbumUnique(string title, string author, int id = 0)
+    {
+        bool result = await albumService.IsAlbumUniqueAsync(title, author, id);
         return Json(result);
     }
 }

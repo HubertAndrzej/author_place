@@ -1,4 +1,5 @@
 ﻿using AuthorPlace.Models.Entities;
+using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.ViewModels;
 
 namespace AuthorPlace.Models.Extensions;
@@ -43,6 +44,20 @@ public static class EntityExtensions
             Title = song.Title,
             Duration = song.Duration,
             Description = song.Description
+        };
+    }
+
+    public static AlbumUpdateInputModel ToAlbumUpdateInputModel(this Album album)
+    {
+        return new AlbumUpdateInputModel
+        {
+            Id = album.Id,
+            Title = album.Title,
+            Description = album.Description,
+            Email = album.Email,
+            ImagePath = album.ImagePath,
+            CurrentPrice = album.CurrentPrice,
+            FullPrice = album.FullPrice,
         };
     }
 }

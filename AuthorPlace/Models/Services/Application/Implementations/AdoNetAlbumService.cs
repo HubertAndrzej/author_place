@@ -97,14 +97,56 @@ public class AdoNetAlbumService : IAlbumService
         }
         catch (SqliteException e) when (e.SqliteErrorCode == 19)
         {
+            logger.LogWarning("Album with {title} by {author} already exists", title, author);
             throw new AlbumUniqueException(title, author, e);
         }
     }
 
-    public async Task<bool> IsAlbumUnique(string title, string author)
+    public async Task<AlbumUpdateInputModel> GetAlbumForEditingAsync(int id)
     {
-        DataSet result = await databaseAccessor.ExecuteAsync($"SELECT COUNT(*) FROM Albums WHERE Title LIKE {title} AND Author LIKE {author};");
+        FormattableString query = $"SELECT Id, Title, Description, ImagePath, Email, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id = {id};";
+        DataSet dataSet = await databaseAccessor.ExecuteAsync(query);
+        DataTable albumTable = dataSet.Tables[0];
+        if (albumTable.Rows.Count != 1)
+        {
+            logger.LogWarning("Album {id} not found", id);
+            throw new AlbumNotFoundException(id);
+        }
+        DataRow albumRow = albumTable.Rows[0];
+        AlbumUpdateInputModel albumUpdateInputModel = albumRow.ToAlbumUpdateInputModel();
+        return albumUpdateInputModel;
+    }
+
+    public async Task<AlbumDetailViewModel> UpdateAlbumAsync(AlbumUpdateInputModel inputModel)
+    {
+        string author = await GetAuthorAsync(inputModel.Id);
+        try
+        {
+            FormattableString updateQuery = ($"UPDATE Albums SET Title={inputModel.Title}, Description={inputModel.Description}, Email={inputModel.Email}, CurrentPrice_Currency={inputModel.CurrentPrice!.Currency}, CurrentPrice_Amount={inputModel.CurrentPrice.Amount}, FullPrice_Currency={inputModel.FullPrice!.Currency}, FullPrice_Amount={inputModel.FullPrice.Amount} WHERE Id={inputModel.Id}");
+            await databaseAccessor.ExecuteAsync(updateQuery);
+            AlbumDetailViewModel? albumDetailViewModel = await GetAlbumAsync(inputModel.Id);
+            return albumDetailViewModel;
+        }
+        catch (SqliteException e) when (e.SqliteErrorCode == 19)
+        {
+            logger.LogWarning("Album with {inputModel.Title} by {author} already exists", inputModel.Title, author);
+            throw new AlbumUniqueException(inputModel.Title!, author, e);
+        }
+    }
+
+    public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
+    {
+        FormattableString query = $"SELECT COUNT(*) FROM Albums WHERE Title LIKE {title} AND Author LIKE {author} AND Id<>{id};";
+        DataSet result = await databaseAccessor.ExecuteAsync(query);
         bool isAlbumUnique = Convert.ToInt32(result.Tables[0].Rows[0][0]) == 0;
         return isAlbumUnique;
+    }
+
+    public async Task<string> GetAuthorAsync(int id)
+    {
+        FormattableString query = $"SELECT Author FROM Albums WHERE Id LIKE {id};";
+        DataSet result = await databaseAccessor.ExecuteAsync(query);
+        string author = Convert.ToString(result.Tables[0].Rows[0][0])!;
+        return author;
     }
 }

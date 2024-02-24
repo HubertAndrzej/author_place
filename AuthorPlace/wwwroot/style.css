@@ -75,6 +75,10 @@ hr {
     font-weight: bold;
 }
 
+.display-label {
+    color: #0dcaf0;
+}
+
 .field-validation-error {
     color: red;
 }
