@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace AuthorPlace.Customizations.TagHelpers;
 
+[HtmlTargetElement(Attributes = "html-sanitize")]
 public class HtmlSanitizeTagHelper : TagHelper
 {
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
