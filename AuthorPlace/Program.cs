@@ -1,15 +1,20 @@
 using AuthorPlace.Customizations.ModelBinders;
 using AuthorPlace.Models.Enums;
+using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Implementations;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
+using AuthorPlace.Models.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
+using System;
 
 Persistence persistence = Persistence.EFCore;
 
@@ -23,6 +28,9 @@ builder.Services.AddMvc(options =>
     options.CacheProfiles.Add("Home", cacheProfile);
     options.ModelBinderProviders.Insert(0, new DecimalModelBinderProvider());
 });
+builder.Services.AddValidatorsFromAssemblyContaining<AlbumCreateValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AlbumUpdateValidator>();
+builder.Services.AddFluentValidationClientsideAdapters(clientSide => clientSide.Add(typeof(IRemotePropertyValidator), (context, description, validator) => new RemoteClientValidator(description, validator)));
 IServiceCollection? albumService = persistence switch
 {
     Persistence.AdoNet => builder.Services.AddTransient<IAlbumService, AdoNetAlbumService>(),
