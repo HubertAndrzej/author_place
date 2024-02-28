@@ -5,7 +5,6 @@ namespace AuthorPlace.Models.InputModels;
 
 public class AlbumUpdateInputModel : IValidatableObject
 {
-    [Required]
     public int Id { get; set; }
 
     [Display(Name = "Title")]
