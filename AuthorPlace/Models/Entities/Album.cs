@@ -17,17 +17,21 @@ public class Album
         }
         Title = title;
         Author = author;
+        ImagePath = "/placeholder.jpg";
+        FullPrice = new Money(Currency.EUR, 0);
+        CurrentPrice = new Money(Currency.EUR, 0);
+        Songs = new HashSet<Song>();
     }
 
     public int Id { get; private set; }
     public string Title { get; private set; }
     public string? Description { get; private set; }
-    public string? ImagePath { get; private set; }
+    public string ImagePath { get; private set; }
     public string Author { get; private set; }
     public string? Email { get; private set; }
-    public double Rating { get; private set; } = 0.0;
-    public Money FullPrice { get; private set; } = new Money { Amount = 0.0m, Currency = Currency.EUR };
-    public Money CurrentPrice { get; private set; } = new Money { Amount = 0.0m, Currency = Currency.EUR };
+    public double Rating { get; private set; }
+    public Money FullPrice { get; private set; }
+    public Money CurrentPrice { get; private set; }
     public virtual ICollection<Song> Songs { get; private set; } = new List<Song>();
 
     public void ChangeTitle(string title)
@@ -43,17 +47,47 @@ public class Album
     {
         if (fullPrice == null || currentPrice == null)
         {
-            throw new ArgumentException("Prices can't be null");
+            throw new ArgumentException("The prices must not be null");
         }
         if (fullPrice.Currency != currentPrice.Currency)
         {
-            throw new ArgumentException("Currencies don't match");
+            throw new ArgumentException("The currencies must match");
         }
         if (fullPrice.Amount < currentPrice.Amount)
         {
-            throw new ArgumentException("Full price can't be less than the current price");
+            throw new ArgumentException("The full price must be greater than the current price");
         }
         FullPrice = fullPrice;
         CurrentPrice = currentPrice;
+    }
+
+    public void ChangeEmail(string email)
+    {
+        if (string.IsNullOrEmpty(email))
+        {
+            throw new ArgumentException("The email must not be empty");
+        }
+        Email = email;
+    }
+
+    public void ChangeDescription(string description)
+    {
+        if (description != null)
+        {
+            if (description.Length < 50)
+            {
+                throw new Exception("The description must have at least 50 characters");
+            }
+            else if (description.Length > 5000)
+            {
+                throw new Exception("The description must have at most 5000 characters");
+            }
+        }
+        Description = description;
+    }
+
+    public void ChangeImagePath(string imagePath)
+    {
+        ImagePath = imagePath;
     }
 }

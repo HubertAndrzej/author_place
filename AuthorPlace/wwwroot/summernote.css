@@ -1,0 +1,15 @@
+﻿.note-editor.note-frame {
+    border: 1px #0dcaf0 solid;
+}
+
+.note-resizebar {
+    background: lightcyan;
+}
+
+.note-toolbar {
+    background: lightcyan;
+}
+
+.note-toolbar button {
+    border: 1px #0dcaf0 solid;
+}

@@ -24,20 +24,20 @@ public class OrderLinkTagHelper : AnchorTagHelper
 
         base.Process(context, output);
 
+        string html = (Input.OrderBy, Input.Ascending) switch
+        {
+            ("Title", true) => "<i class=\"fa-solid fa-arrow-up-a-z\"></i>",
+            ("Title", false) => "<i class=\"fa-solid fa-arrow-down-z-a\"></i>",
+            ("Rating", true) => "<i class=\"fa-solid fa-arrow-up-1-9\"></i>",
+            ("Rating", false) => "<i class=\"fa-solid fa-arrow-down-9-1\"></i>",
+            ("CurrentPrice", true) => "<i class=\"fa-solid fa-arrow-up-1-9\"></i>",
+            ("CurrentPrice", false) => "<i class=\"fa-solid fa-arrow-down-9-1\"></i>",
+            _ => ""
+        };
+
         if (Input.OrderBy == OrderBy)
         {
-            string direction = Input.Ascending ? "up" : "down";
-            string icon;
-            if (OrderBy == "Title")
-            {
-                icon = Input.Ascending ? "a-z" : "z-a";
-            }
-            else
-            {
-                icon = Input.Ascending ? "1-9" : "9-1";
-            }
-            
-            output.PostContent.SetHtmlContent($"<i class=\"fa-solid fa-arrow-{direction}-{icon}\"></i>");
+            output.PostContent.SetHtmlContent(html);
         }
     }
 }

@@ -2,7 +2,6 @@
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ViewModels;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
@@ -55,5 +54,32 @@ public class MemoryCacheAlbumService : ICachedAlbumService
             cacheEntry.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
             return albumService.GetMostRecentAlbumsAsync();
         });
+    }
+
+    public Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel)
+    {
+        return albumService.CreateAlbumAsync(inputModel);
+    }
+
+    public Task<AlbumUpdateInputModel> GetAlbumForEditingAsync(int id)
+    {
+        return albumService.GetAlbumForEditingAsync(id);
+    }
+
+    public async Task<AlbumDetailViewModel> UpdateAlbumAsync(AlbumUpdateInputModel inputModel)
+    {
+        AlbumDetailViewModel viewModel = await albumService.UpdateAlbumAsync(inputModel);
+        memoryCache.Remove($"Album{inputModel.Id}");
+        return viewModel;
+    }
+
+    public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
+    {
+        return await albumService.IsAlbumUniqueAsync(title, author, id);
+    }
+
+    public async Task<string> GetAuthorAsync(int id)
+    {
+        return await albumService.GetAuthorAsync(id);
     }
 }
