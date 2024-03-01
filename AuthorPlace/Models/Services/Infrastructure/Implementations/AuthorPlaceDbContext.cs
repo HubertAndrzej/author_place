@@ -30,6 +30,7 @@ public partial class AuthorPlaceDbContext : DbContext
                 builder.Property(money => money.Amount).HasConversion<double>().HasColumnName("FullPrice_Amount");
                 builder.Property(money => money.Currency).HasConversion<string>().HasColumnName("FullPrice_Currency");
             });
+            entity.HasIndex(entity => new { entity.Title, entity.Author }).IsUnique();
             entity.Property(album => album.RowVersion).IsRowVersion();
             entity.HasMany(album => album.Songs).WithOne(song => song.Album).HasForeignKey(song => song.AlbumId);
         });
