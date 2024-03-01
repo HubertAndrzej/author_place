@@ -105,7 +105,7 @@ public class AdoNetAlbumService : IAlbumService
 
     public async Task<AlbumUpdateInputModel> GetAlbumForEditingAsync(int id)
     {
-        FormattableString query = $"SELECT Id, Title, Description, ImagePath, Email, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id={id};";
+        FormattableString query = $"SELECT Id, Title, Description, ImagePath, Email, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency, RowVersion FROM Albums WHERE Id={id};";
         DataSet dataSet = await databaseAccessor.QueryAsync(query);
         DataTable albumTable = dataSet.Tables[0];
         if (albumTable.Rows.Count != 1)
@@ -128,12 +128,22 @@ public class AdoNetAlbumService : IAlbumService
             {
                 imagePath = await imagePersister.SaveAlbumImageAsync(inputModel.Id, inputModel.Image);
             }
-            FormattableString updateQuery = $"UPDATE Albums SET Title={inputModel.Title}, Description={inputModel.Description}, ImagePath=COALESCE({imagePath}, ImagePath), Email={inputModel.Email}, CurrentPrice_Currency={inputModel.CurrentPrice!.Currency}, CurrentPrice_Amount={inputModel.CurrentPrice.Amount}, FullPrice_Currency={inputModel.FullPrice!.Currency}, FullPrice_Amount={inputModel.FullPrice.Amount} WHERE Id={inputModel.Id}";
+            FormattableString updateQuery = $"UPDATE Albums SET Title={inputModel.Title}, Description={inputModel.Description}, ImagePath=COALESCE({imagePath}, ImagePath), Email={inputModel.Email}, CurrentPrice_Currency={inputModel.CurrentPrice!.Currency}, CurrentPrice_Amount={inputModel.CurrentPrice.Amount}, FullPrice_Currency={inputModel.FullPrice!.Currency}, FullPrice_Amount={inputModel.FullPrice.Amount} WHERE Id={inputModel.Id} AND RowVersion={inputModel.RowVersion}";
             int affectedRows = await databaseAccessor.CommandAsync(updateQuery);
             if (affectedRows == 0)
             {
-                logger.LogWarning("Album {inputModel.Id} not found", inputModel.Id);
-                throw new AlbumNotFoundException(inputModel.Id);
+                FormattableString countQuery = $"SELECT COUNT(*) FROM Albums WHERE Id={inputModel.Id};";
+                bool albumExists = await databaseAccessor.ScalarAsync<bool>(countQuery);
+                if (albumExists)
+                {
+                    logger.LogWarning("Update of album {inputModel.Id} failed", inputModel.Id);
+                    throw new OptimisticConcurrencyException();
+                }
+                else
+                {
+                    logger.LogWarning("Album {inputModel.Id} not found", inputModel.Id);
+                    throw new AlbumNotFoundException(inputModel.Id);
+                }
             }
         }
         catch (ConstraintViolationException exception)

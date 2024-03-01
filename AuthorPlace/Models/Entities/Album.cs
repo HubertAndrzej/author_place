@@ -32,6 +32,7 @@ public class Album
     public double Rating { get; private set; }
     public Money FullPrice { get; private set; }
     public Money CurrentPrice { get; private set; }
+    public string? RowVersion { get; private set; }
     public virtual ICollection<Song> Songs { get; private set; } = new List<Song>();
 
     public void ChangeTitle(string title)

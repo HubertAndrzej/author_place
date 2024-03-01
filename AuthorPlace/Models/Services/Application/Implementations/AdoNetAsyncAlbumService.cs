@@ -116,7 +116,7 @@ public class AdoNetAsyncAlbumService : IAlbumService
 
     public async Task<AlbumUpdateInputModel> GetAlbumForEditingAsync(int id)
     {
-        FormattableString albumQuery = $"SELECT Id, Title, Description, ImagePath, Email, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id={id};";
+        FormattableString albumQuery = $"SELECT Id, Title, Description, ImagePath, Email, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency, RowVersion FROM Albums WHERE Id={id};";
         IAsyncEnumerable<IDataRecord> albumResults = databaseAccessor.ExecuteAsync(albumQuery);
         AlbumUpdateInputModel? albumUpdateInputModel = null;
         await foreach (IDataRecord dataRecord in albumResults)
@@ -146,8 +146,18 @@ public class AdoNetAsyncAlbumService : IAlbumService
             int affectedRows = await databaseAccessor.CommandAsync(updateQuery);
             if (affectedRows == 0)
             {
-                logger.LogWarning("Album {inputModel.Id} not found", inputModel.Id);
-                throw new AlbumNotFoundException(inputModel.Id);
+                FormattableString countQuery = $"SELECT COUNT(*) FROM Albums WHERE Id={inputModel.Id};";
+                bool albumExists = await databaseAccessor.ScalarAsync<bool>(countQuery);
+                if (albumExists)
+                {
+                    logger.LogWarning("Update of album {inputModel.Id} failed", inputModel.Id);
+                    throw new OptimisticConcurrencyException();
+                }
+                else
+                {
+                    logger.LogWarning("Album {inputModel.Id} not found", inputModel.Id);
+                    throw new AlbumNotFoundException(inputModel.Id);
+                }
             }
         }
         catch (ConstraintViolationException exception)

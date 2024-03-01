@@ -132,6 +132,7 @@ public class EFCoreAlbumService : IAlbumService
         album.ChangePrices(inputModel.FullPrice!, inputModel.CurrentPrice!);
         album.ChangeDescription(inputModel.Description!);
         album.ChangeEmail(inputModel.Email!);
+        dbContext.Entry(album).Property(album => album.RowVersion).OriginalValue = inputModel.RowVersion!;
         if (inputModel.Image != null)
         {
             try
@@ -148,6 +149,11 @@ public class EFCoreAlbumService : IAlbumService
         try
         {
             await dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            logger.LogWarning("Update of album {inputModel.Id} failed", inputModel.Id);
+            throw new OptimisticConcurrencyException();
         }
         catch (DbUpdateException exception) when (exception.InnerException is SqliteException { SqliteErrorCode: 19 })
         {

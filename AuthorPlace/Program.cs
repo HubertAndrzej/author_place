@@ -1,6 +1,5 @@
 using AuthorPlace.Customizations.ModelBinders;
 using AuthorPlace.Models.Enums;
-using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Implementations;
 using AuthorPlace.Models.Services.Application.Interfaces;
@@ -14,7 +13,6 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
-using System;
 
 Persistence persistence = Persistence.EFCore;
 

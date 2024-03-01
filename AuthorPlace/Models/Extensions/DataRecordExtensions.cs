@@ -77,6 +77,7 @@ public static class DataRecordExtensions
                 Enum.Parse<Currency>((string)dataRecord["CurrentPrice_Currency"]),
                 Convert.ToDecimal(dataRecord["CurrentPrice_Amount"])
             ),
+            RowVersion = Convert.ToString(dataRecord["RowVersion"])
         };
     }
 }

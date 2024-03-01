@@ -27,6 +27,8 @@ public class AlbumUpdateInputModel : IValidatableObject
 
     public IFormFile? Image { get; set; }
 
+    public string? RowVersion { get; set; }
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (FullPrice!.Currency != CurrentPrice!.Currency)

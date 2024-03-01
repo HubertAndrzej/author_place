@@ -58,6 +58,7 @@ public static class EntityExtensions
             ImagePath = album.ImagePath,
             CurrentPrice = album.CurrentPrice,
             FullPrice = album.FullPrice,
+            RowVersion = album.RowVersion
         };
     }
 }

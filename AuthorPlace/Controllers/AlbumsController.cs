@@ -87,6 +87,10 @@ public class AlbumsController : Controller
             {
                 ModelState.AddModelError(nameof(AlbumUpdateInputModel.Title), "This title is already used by this author");
             }
+            catch (OptimisticConcurrencyException)
+            {
+                ModelState.AddModelError("", $"The update failed because another user updated the values ​​in the meantime. Please refresh the page to get the updated values");
+            }
         }
         ViewBag.Title = "Update album";
         return View(inputModel);
