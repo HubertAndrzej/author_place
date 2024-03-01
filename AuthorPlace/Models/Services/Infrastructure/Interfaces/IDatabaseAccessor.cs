@@ -4,6 +4,8 @@ namespace AuthorPlace.Models.Services.Infrastructure.Interfaces;
 
 public interface IDatabaseAccessor
 {
-    public Task<DataSet> ExecuteAsync(FormattableString query);
-    public IAsyncEnumerable<IDataRecord> QueryAsync(FormattableString query);
+    public Task<int> CommandAsync(FormattableString formattableSQL);
+    public Task<DataSet> QueryAsync(FormattableString formattableSQL);
+    public Task<T> ScalarAsync<T>(FormattableString formattableSQL);
+    public IAsyncEnumerable<IDataRecord> ExecuteAsync(FormattableString formattableSQL);
 }

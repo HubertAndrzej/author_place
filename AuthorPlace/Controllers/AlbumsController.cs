@@ -1,4 +1,4 @@
-﻿using AuthorPlace.Models.Exceptions;
+﻿using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ViewModels;

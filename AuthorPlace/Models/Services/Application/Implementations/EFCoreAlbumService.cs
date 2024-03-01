@@ -1,5 +1,5 @@
 ﻿using AuthorPlace.Models.Entities;
-using AuthorPlace.Models.Exceptions;
+using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.Extensions;
 using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.Options;
@@ -97,7 +97,7 @@ public class EFCoreAlbumService : IAlbumService
         }
         catch (DbUpdateException exception) when (exception.InnerException is SqliteException { SqliteErrorCode: 19 })
         {
-            logger.LogWarning("Album with {title} by {author} not found", title, author);
+            logger.LogWarning("Album with {title} by {author} already exists", title, author);
             throw new AlbumUniqueException(title, author, exception);
         }
         return album.ToAlbumDetailViewModel();

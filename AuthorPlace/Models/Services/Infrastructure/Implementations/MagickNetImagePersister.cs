@@ -1,4 +1,5 @@
-﻿using AuthorPlace.Models.Options;
+﻿using AuthorPlace.Models.Exceptions.Infrastructure;
+using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using ImageMagick;
 using Microsoft.Extensions.Options;
@@ -40,7 +41,11 @@ public class MagickNetImagePersister : IImagePersister
             image.Quality = 100;
             image.Write(internalPath, MagickFormat.Jpg);
             return relativePath;
-        } 
+        }
+        catch (Exception exception)
+        {
+            throw new ImagePersistenceException(exception);
+        }
         finally
         {
             semaphore.Release();

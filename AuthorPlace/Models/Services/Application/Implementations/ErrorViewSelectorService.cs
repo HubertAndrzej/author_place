@@ -1,4 +1,4 @@
-﻿using AuthorPlace.Models.Exceptions;
+﻿using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.Services.Application.Interfaces;
 using AuthorPlace.Models.ValueObjects;
 using Microsoft.AspNetCore.Diagnostics;
@@ -18,8 +18,8 @@ public class ErrorViewSelectorService : IErrorViewSelectorService
                 statusCode: HttpStatusCode.NotFound,
                 viewName: "NotFound"),
 
-            AlbumNotFoundException albumNotFoundException => new ErrorViewData(
-                title: $"Album {albumNotFoundException.AlbumId} not found",
+            AlbumNotFoundException e => new ErrorViewData(
+                title: $"Album {e.AlbumId} not found",
                 statusCode: HttpStatusCode.NotFound,
                 viewName: "AlbumNotFound"),
 

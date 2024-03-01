@@ -1,4 +1,5 @@
-﻿using AuthorPlace.Models.Options;
+﻿using AuthorPlace.Models.Exceptions.Infrastructure;
+using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.ValueObjects;
 using Microsoft.Data.Sqlite;
@@ -16,26 +17,25 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
         this.connectionStringsOptions = connectionStringsOptions;
     }
 
-    public async Task<DataSet> ExecuteAsync(FormattableString formattableQuery)
+    public async Task<int> CommandAsync(FormattableString formattableSQL)
     {
-        object?[] queryArguments = formattableQuery.GetArguments();
-        List<SqliteParameter> sqliteParameters = new();
-        for (int i = 0; i < queryArguments.Length; i++)
+        try
         {
-            if (queryArguments[i] is Sql)
-            {
-                continue;
-            }
-            SqliteParameter parameter = new(i.ToString(), queryArguments[i]);
-            sqliteParameters.Add(parameter);
-            queryArguments[i] = "@" + i;
+            using SqliteConnection connection = await GetConnection();
+            using SqliteCommand command = GetCommand(formattableSQL, connection);
+            int affectedRows = await command.ExecuteNonQueryAsync();
+            return affectedRows;
         }
-        string query = formattableQuery.ToString();
-        string? connectionString = connectionStringsOptions.CurrentValue.Default;
-        using SqliteConnection connection = new(connectionString);
-        await connection.OpenAsync();
-        using SqliteCommand command = new(query, connection);
-        command.Parameters.AddRange(sqliteParameters);
+        catch (SqliteException exception) when (exception.SqliteErrorCode == 19)
+        {
+            throw new ConstraintViolationException(exception);
+        }
+    }
+
+    public async Task<DataSet> QueryAsync(FormattableString formattableSQL)
+    {
+        using SqliteConnection connection = await GetConnection();
+        using SqliteCommand command = GetCommand(formattableSQL, connection);
         using SqliteDataReader reader = await command.ExecuteReaderAsync();
         DataSet dataSet = new();
         do
@@ -47,9 +47,36 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
         return dataSet;
     }
 
-    public async IAsyncEnumerable<IDataRecord> QueryAsync(FormattableString formattableQuery)
+    public async Task<T> ScalarAsync<T>(FormattableString formattableSQL)
     {
-        object?[] queryArguments = formattableQuery.GetArguments();
+        using SqliteConnection connection = await GetConnection();
+        using SqliteCommand command = GetCommand(formattableSQL, connection);
+        object? result = await command.ExecuteScalarAsync();
+        return (T)Convert.ChangeType(result!, typeof(T));
+    }
+
+    public async IAsyncEnumerable<IDataRecord> ExecuteAsync(FormattableString formattableSQL)
+    {
+        using SqliteConnection connection = await GetConnection();
+        using SqliteCommand command = GetCommand(formattableSQL, connection);
+        using SqliteDataReader reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            yield return reader;
+        }
+    }
+
+private async Task<SqliteConnection> GetConnection()
+    {
+        string? connectionString = connectionStringsOptions.CurrentValue.Default;
+        SqliteConnection connection = new(connectionString);
+        await connection.OpenAsync();
+        return connection;
+    }
+
+    private static SqliteCommand GetCommand(FormattableString formattableSQL, SqliteConnection connection)
+    {
+        object?[] queryArguments = formattableSQL.GetArguments();
         List<SqliteParameter> sqliteParameters = new();
         for (int i = 0; i < queryArguments.Length; i++)
         {
@@ -57,20 +84,13 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
             {
                 continue;
             }
-            SqliteParameter parameter = new(i.ToString(), queryArguments[i]);
+            SqliteParameter parameter = new(i.ToString(), queryArguments[i] ?? DBNull.Value);
             sqliteParameters.Add(parameter);
             queryArguments[i] = "@" + i;
         }
-        string query = formattableQuery.ToString();
-        string? connectionString = connectionStringsOptions.CurrentValue.Default;
-        using SqliteConnection connection = new(connectionString);
-        await connection.OpenAsync();
-        using SqliteCommand command = new(query, connection);
+        string query = formattableSQL.ToString();
+        SqliteCommand command = new(query, connection);
         command.Parameters.AddRange(sqliteParameters);
-        using SqliteDataReader reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            yield return reader;
-        }
+        return command;
     }
 }

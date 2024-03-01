@@ -1,4 +1,4 @@
-﻿namespace AuthorPlace.Models.Exceptions;
+﻿namespace AuthorPlace.Models.Exceptions.Application;
 
 public class AlbumNotFoundException : Exception
 {
