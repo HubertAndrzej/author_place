@@ -9,7 +9,7 @@
             </div>
             <div class="col-md-3 d-flex align-items-center justify-content-center">
                 <button type="submit" class="btn btn-outline-info mx-4"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-                <button type="submit" class="btn btn-outline-danger mx-4" asp-action="Remove" asp-route-id="@Model.Id"><i class="fa-solid fa-trash-can"></i> Remove</button>
+                <button type="button" class="btn btn-outline-danger mx-4" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="fa-solid fa-trash-can"></i> Remove</button>
             </div>
         </div>
         <div class="row">
@@ -32,6 +32,26 @@
                     <label class="display-label" asp-for="Duration"></label>
                     <input type="text" class="form-control form-control-lg input" asp-for="Duration" pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]" title="Please enter duration in hh:mm:ss format">
                     <span asp-validation-for="Duration"></span>
+                </div>
+            </div>
+        </div>
+    </form>
+    <form method="post" asp-action="Remove" asp-route-id="@Model.Id">
+        <input type="hidden" asp-for="AlbumId" />
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Confirm song remove</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete the song and all related data permanently?
+                        <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-outline-info" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-outline-danger">Delete song</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
