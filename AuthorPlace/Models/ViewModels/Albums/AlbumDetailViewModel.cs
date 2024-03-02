@@ -13,7 +13,7 @@ public class AlbumDetailViewModel
     public Money? FullPrice { get; set; }
     public Money? CurrentPrice { get; set; }
     public string? Description { get; set; }
-    public List<SongViewModel>? Songs { get; set; }
+    public List<SongViewModel> Songs { get; set; } = new List<SongViewModel>();
 
     public TimeSpan TotalAlbumDuration
     {

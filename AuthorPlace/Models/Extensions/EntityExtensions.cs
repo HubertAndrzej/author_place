@@ -3,6 +3,7 @@ using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.InputModels.Songs;
 using AuthorPlace.Models.ViewModels.Albums;
 using AuthorPlace.Models.ViewModels.Songs;
+using System.Linq;
 
 namespace AuthorPlace.Models.Extensions;
 
@@ -34,7 +35,7 @@ public static class EntityExtensions
             Rating = album.Rating,
             CurrentPrice = album.CurrentPrice,
             FullPrice = album.FullPrice,
-            Songs = album.Songs.Select(song => song.ToSongViewModel()).ToList()
+            Songs = album.Songs.OrderBy(song => song.Id).Select(song => song.ToSongViewModel()).ToList()
         };
     }
 

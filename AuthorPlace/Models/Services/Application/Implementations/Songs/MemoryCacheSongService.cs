@@ -33,9 +33,11 @@ public class MemoryCacheSongService : ICachedSongService
         });
     }
 
-    public Task<SongDetailViewModel> CreateSongAsync(SongCreateInputModel inputModel)
+    public async Task<SongDetailViewModel> CreateSongAsync(SongCreateInputModel inputModel)
     {
-        return songService.CreateSongAsync(inputModel);
+        SongDetailViewModel viewModel = await songService.CreateSongAsync(inputModel);
+        memoryCache.Remove($"Album{viewModel.AlbumId}");
+        return viewModel;
     }
 
     public Task<SongUpdateInputModel> GetSongForEditingAsync(int id)
@@ -46,7 +48,8 @@ public class MemoryCacheSongService : ICachedSongService
     public async Task<SongDetailViewModel> UpdateSongAsync(SongUpdateInputModel inputModel)
     {
         SongDetailViewModel viewModel = await songService.UpdateSongAsync(inputModel);
-        memoryCache.Remove($"Song{inputModel.Id}");
+        memoryCache.Remove($"Album{viewModel.AlbumId}");
+        memoryCache.Remove($"Song{viewModel.Id}");
         return viewModel;
     }
 }

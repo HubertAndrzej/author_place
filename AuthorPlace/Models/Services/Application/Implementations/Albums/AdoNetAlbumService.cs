@@ -61,7 +61,7 @@ public class AdoNetAlbumService : IAlbumService
         }
         DataRow albumRow = albumTable.Rows[0];
         AlbumDetailViewModel viewModel = albumRow.ToAlbumDetailViewModel();
-        FormattableString songQuery = $"SELECT Id, Title, Description, Duration FROM Songs WHERE AlbumId={id};";
+        FormattableString songQuery = $"SELECT Id, Title, Description, Duration FROM Songs WHERE AlbumId={id} ORDER BY Id;";
         dataSet = await databaseAccessor.QueryAsync(songQuery);
         DataTable songTable = dataSet.Tables[0];
         foreach (DataRow songRow in songTable.Rows)

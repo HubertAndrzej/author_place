@@ -10,6 +10,7 @@ using AuthorPlace.Models.Services.Application.Interfaces.Songs;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.Validators.Albums;
+using AuthorPlace.Models.Validators.Songs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +33,8 @@ builder.Services.AddMvc(options =>
 });
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumUpdateValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SongCreateValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SongUpdateValidator>();
 builder.Services.AddFluentValidationClientsideAdapters(clientSide => clientSide.Add(typeof(IRemotePropertyValidator), (context, description, validator) => new RemoteClientValidator(description, validator)));
 IServiceCollection? albumService = persistence switch
 {

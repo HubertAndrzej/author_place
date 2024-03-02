@@ -1,6 +1,7 @@
 ﻿@model SongCreateInputModel
 <h1>@ViewBag.Title</h1>
 <form method="post">
+    <input type="hidden" asp-for="AlbumId">
     <div class="row">
         <div class="col-md-12">
             <div asp-validation-summary="All"></div>

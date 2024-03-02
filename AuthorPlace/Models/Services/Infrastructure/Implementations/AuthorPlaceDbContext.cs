@@ -20,6 +20,8 @@ public partial class AuthorPlaceDbContext : DbContext
         {
             entity.ToTable("Albums");
             entity.HasKey(album => album.Id);
+            entity.HasIndex(entity => new { entity.Title, entity.Author }).IsUnique();
+            entity.Property(album => album.RowVersion).IsRowVersion();
             entity.OwnsOne(album => album.CurrentPrice, builder =>
             {
                 builder.Property(money => money.Amount).HasConversion<double>().HasColumnName("CurrentPrice_Amount");
@@ -30,8 +32,6 @@ public partial class AuthorPlaceDbContext : DbContext
                 builder.Property(money => money.Amount).HasConversion<double>().HasColumnName("FullPrice_Amount");
                 builder.Property(money => money.Currency).HasConversion<string>().HasColumnName("FullPrice_Currency");
             });
-            entity.HasIndex(entity => new { entity.Title, entity.Author }).IsUnique();
-            entity.Property(album => album.RowVersion).IsRowVersion();
             entity.HasMany(album => album.Songs).WithOne(song => song.Album).HasForeignKey(song => song.AlbumId);
         });
 
@@ -39,8 +39,8 @@ public partial class AuthorPlaceDbContext : DbContext
         {
             entity.ToTable("Songs");
             entity.HasKey(song => song.Id);
-            entity.HasOne(song => song.Album).WithMany(album => album.Songs).HasForeignKey(song => song.AlbumId);
             entity.Property(song => song.RowVersion).IsRowVersion();
+            entity.HasOne(song => song.Album).WithMany(album => album.Songs).HasForeignKey(song => song.AlbumId);
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -21,12 +21,12 @@ public class AdoNetSongService : ISongService
 
     public async Task<SongDetailViewModel> GetSongAsync(int id)
     {
-        FormattableString songQuery = $"SELECT Id, CourseId, Title, Description, Duration FROM Lessons WHERE ID={id};";
+        FormattableString songQuery = $"SELECT Id, AlbumId, Title, Description, Duration FROM Songs WHERE Id={id};";
         DataSet dataSet = await databaseAccessor.QueryAsync(songQuery);
         DataTable albumTable = dataSet.Tables[0];
         if (albumTable.Rows.Count != 1)
         {
-            logger.LogWarning("Album {id} not found", id);
+            logger.LogWarning("Song {id} not found", id);
             throw new SongNotFoundException(id);
         }
         DataRow songRow = albumTable.Rows[0];
