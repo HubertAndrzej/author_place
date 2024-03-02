@@ -36,7 +36,7 @@ public class MemoryCacheSongService : ICachedSongService
     public async Task<SongDetailViewModel> CreateSongAsync(SongCreateInputModel inputModel)
     {
         SongDetailViewModel viewModel = await songService.CreateSongAsync(inputModel);
-        memoryCache.Remove($"Album{viewModel.AlbumId}");
+        memoryCache.Remove($"Album{inputModel.AlbumId}");
         return viewModel;
     }
 
@@ -48,8 +48,15 @@ public class MemoryCacheSongService : ICachedSongService
     public async Task<SongDetailViewModel> UpdateSongAsync(SongUpdateInputModel inputModel)
     {
         SongDetailViewModel viewModel = await songService.UpdateSongAsync(inputModel);
-        memoryCache.Remove($"Album{viewModel.AlbumId}");
-        memoryCache.Remove($"Song{viewModel.Id}");
+        memoryCache.Remove($"Album{inputModel.AlbumId}");
+        memoryCache.Remove($"Song{inputModel.Id}");
         return viewModel;
+    }
+
+    public async Task RemoveSongAsync(SongDeleteInputModel inputModel)
+    {
+        await songService.RemoveSongAsync(inputModel);
+        memoryCache.Remove($"Album{inputModel.AlbumId}");
+        memoryCache.Remove($"Song{inputModel.Id}");
     }
 }

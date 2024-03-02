@@ -46,7 +46,7 @@ public class AdoNetSongService : ISongService
 
     public async Task<SongUpdateInputModel> GetSongForEditingAsync(int id)
     {
-        FormattableString query = $"SELECT Id, Title, Description, Duration, RowVersion FROM Songs WHERE Id={id}";
+        FormattableString query = $"SELECT Id, AlbumId, Title, Description, Duration, RowVersion FROM Songs WHERE Id={id}";
         DataSet dataSet = await databaseAccessor.QueryAsync(query);
         DataTable songTable = dataSet.Tables[0];
         if (songTable.Rows.Count != 1)
@@ -80,5 +80,16 @@ public class AdoNetSongService : ISongService
         }
         SongDetailViewModel? viewModel = await GetSongAsync(inputModel.Id);
         return viewModel;
+    }
+
+    public async Task RemoveSongAsync(SongDeleteInputModel inputModel)
+    {
+        FormattableString deleteQuery = $"DELETE FROM Songs WHERE Id={inputModel.Id};";
+        int affectedRows = await databaseAccessor.CommandAsync(deleteQuery);
+        if (affectedRows == 0)
+        {
+            logger.LogWarning("Song {inputModel.Id} not found", inputModel.Id);
+            throw new SongNotFoundException(inputModel.Id);
+        }
     }
 }

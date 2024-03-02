@@ -9,4 +9,5 @@ public interface ISongService
     public Task<SongDetailViewModel> CreateSongAsync(SongCreateInputModel inputModel);
     public Task<SongUpdateInputModel> GetSongForEditingAsync(int id);
     public Task<SongDetailViewModel> UpdateSongAsync(SongUpdateInputModel inputModel);
+    public Task RemoveSongAsync(SongDeleteInputModel inputModel);
 }

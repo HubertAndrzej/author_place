@@ -44,7 +44,7 @@ public class DistributedCacheSongService : ICachedSongService
     public async Task<SongDetailViewModel> CreateSongAsync(SongCreateInputModel inputModel)
     {
         SongDetailViewModel viewModel = await songService.CreateSongAsync(inputModel);
-        await distributedCache.RemoveAsync($"Album{viewModel.AlbumId}");
+        await distributedCache.RemoveAsync($"Album{inputModel.AlbumId}");
         return viewModel;
     }
 
@@ -56,8 +56,15 @@ public class DistributedCacheSongService : ICachedSongService
     public async Task<SongDetailViewModel> UpdateSongAsync(SongUpdateInputModel inputModel)
     {
         SongDetailViewModel viewModel = await songService.UpdateSongAsync(inputModel);
-        await distributedCache.RemoveAsync($"Album{viewModel.AlbumId}");
-        await distributedCache.RemoveAsync($"Song{viewModel.Id}");
+        await distributedCache.RemoveAsync($"Album{inputModel.AlbumId}");
+        await distributedCache.RemoveAsync($"Song{inputModel.Id}");
         return viewModel;
+    }
+
+    public async Task RemoveSongAsync(SongDeleteInputModel inputModel)
+    {
+        await songService.RemoveSongAsync(inputModel);
+        await distributedCache.RemoveAsync($"Album{inputModel.AlbumId}");
+        await distributedCache.RemoveAsync($"Song{inputModel.Id}");
     }
 }

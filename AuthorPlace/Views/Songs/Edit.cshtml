@@ -1,6 +1,7 @@
 ﻿@model SongUpdateInputModel
 <section>
     <form method="post">
+        <input type="hidden" asp-for="AlbumId" />
         <input type="hidden" asp-for="RowVersion" />
         <div class="row">
             <div class="col-md-9">
@@ -8,7 +9,7 @@
             </div>
             <div class="col-md-3 d-flex align-items-center justify-content-center">
                 <button type="submit" class="btn btn-outline-info mx-4"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-                <button type="button" class="btn btn-outline-danger mx-4"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                <button type="submit" class="btn btn-outline-danger mx-4" asp-action="Remove" asp-route-id="@Model.Id"><i class="fa-solid fa-trash-can"></i> Remove</button>
             </div>
         </div>
         <div class="row">

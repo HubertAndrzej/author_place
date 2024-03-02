@@ -71,4 +71,12 @@ public class SongsController : Controller
         ViewBag.Title = "Update song";
         return View(inputModel);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> Remove(SongDeleteInputModel inputModel)
+    {
+        await songService.RemoveSongAsync(inputModel);
+        TempData["ConfirmationMessage"] = "The song has been deleted successfully";
+        return RedirectToAction(nameof(AlbumsController.Detail), "Albums", new { id = inputModel.AlbumId });
+    }
 }

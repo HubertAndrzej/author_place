@@ -81,6 +81,7 @@ public static class EntityExtensions
         return new SongUpdateInputModel
         {
             Id = song.Id,
+            AlbumId = song.AlbumId,
             Title = song.Title,
             Description = song.Description,
             Duration = song.Duration,

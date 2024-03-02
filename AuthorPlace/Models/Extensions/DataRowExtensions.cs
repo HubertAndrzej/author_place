@@ -100,6 +100,7 @@ public static class DataRowExtensions
         return new SongUpdateInputModel
         {
             Id = Convert.ToInt32(dataRow["Id"]),
+            AlbumId = Convert.ToInt32(dataRow["AlbumId"]),
             Title = Convert.ToString(dataRow["Title"]),
             Description = Convert.ToString(dataRow["Description"]),
             Duration = TimeSpan.Parse(Convert.ToString(dataRow["Duration"])!),

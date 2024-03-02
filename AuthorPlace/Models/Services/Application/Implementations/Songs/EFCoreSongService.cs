@@ -82,4 +82,16 @@ public class EFCoreSongService : ISongService
         }
         return song.ToSongDetailViewModel();
     }
+
+    public async Task RemoveSongAsync(SongDeleteInputModel inputModel)
+    {
+        Song? song = await dbContext.Songs!.FindAsync(inputModel.Id);
+        if (song == null)
+        {
+            logger.LogWarning("Song {inputModel.Id} not found", inputModel.Id);
+            throw new SongNotFoundException(inputModel.Id);
+        }
+        dbContext.Remove(song);
+        await dbContext.SaveChangesAsync();
+    }
 }

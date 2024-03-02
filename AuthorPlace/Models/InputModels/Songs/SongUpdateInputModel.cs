@@ -6,6 +6,8 @@ public class SongUpdateInputModel
 {
     public int Id { get; set; }
 
+    public int AlbumId { get; set; }
+
     [Display(Name = "Title")]
     public string? Title { get; set; }
 
