@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AuthorPlace.Models.InputModels;
+namespace AuthorPlace.Models.InputModels.Albums;
 
 public class AlbumCreateInputModel
 {

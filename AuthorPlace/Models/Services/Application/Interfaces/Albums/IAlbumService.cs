@@ -1,7 +1,7 @@
-﻿using AuthorPlace.Models.InputModels;
-using AuthorPlace.Models.ViewModels;
+﻿using AuthorPlace.Models.InputModels.Albums;
+using AuthorPlace.Models.ViewModels.Albums;
 
-namespace AuthorPlace.Models.Services.Application.Interfaces;
+namespace AuthorPlace.Models.Services.Application.Interfaces.Albums;
 
 public interface IAlbumService
 {

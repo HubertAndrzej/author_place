@@ -1,6 +1,6 @@
 ﻿using AuthorPlace.Models.ValueObjects;
 
-namespace AuthorPlace.Models.Services.Application.Interfaces;
+namespace AuthorPlace.Models.Services.Application.Interfaces.Errors;
 
 public interface IErrorViewSelectorService
 {

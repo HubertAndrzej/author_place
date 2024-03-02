@@ -1,11 +1,11 @@
-﻿using AuthorPlace.Models.InputModels;
+﻿using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.Options;
-using AuthorPlace.Models.Services.Application.Interfaces;
-using AuthorPlace.Models.ViewModels;
+using AuthorPlace.Models.Services.Application.Interfaces.Albums;
+using AuthorPlace.Models.ViewModels.Albums;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
-namespace AuthorPlace.Models.Services.Application.Implementations;
+namespace AuthorPlace.Models.Services.Application.Implementations.Albums;
 
 public class MemoryCacheAlbumService : ICachedAlbumService
 {

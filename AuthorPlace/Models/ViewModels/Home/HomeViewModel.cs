@@ -1,4 +1,6 @@
-﻿namespace AuthorPlace.Models.ViewModels;
+﻿using AuthorPlace.Models.ViewModels.Albums;
+
+namespace AuthorPlace.Models.ViewModels.Home;
 
 public class HomeViewModel
 {

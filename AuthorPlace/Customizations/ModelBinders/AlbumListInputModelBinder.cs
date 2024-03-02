@@ -1,4 +1,4 @@
-﻿using AuthorPlace.Models.InputModels;
+﻿using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.Options;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;

@@ -1,8 +1,8 @@
 ﻿using AuthorPlace.Models.Extensions;
-using AuthorPlace.Models.InputModels;
+using AuthorPlace.Models.InputModels.Albums;
 using FluentValidation;
 
-namespace AuthorPlace.Models.Validators;
+namespace AuthorPlace.Models.Validators.Albums;
 
 public class AlbumCreateValidator : AbstractValidator<AlbumCreateInputModel>
 {

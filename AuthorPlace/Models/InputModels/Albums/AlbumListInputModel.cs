@@ -2,7 +2,7 @@
 using AuthorPlace.Models.Options;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AuthorPlace.Models.InputModels;
+namespace AuthorPlace.Models.InputModels.Albums;
 
 [ModelBinder(BinderType = typeof(AlbumListInputModelBinder))]
 public class AlbumListInputModel

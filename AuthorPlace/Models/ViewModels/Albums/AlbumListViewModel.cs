@@ -1,7 +1,7 @@
-﻿using AuthorPlace.Models.InputModels;
+﻿using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.ViewModels.Interfaces;
 
-namespace AuthorPlace.Models.ViewModels;
+namespace AuthorPlace.Models.ViewModels.Albums;
 
 public class AlbumListViewModel : IPaginationInfo
 {

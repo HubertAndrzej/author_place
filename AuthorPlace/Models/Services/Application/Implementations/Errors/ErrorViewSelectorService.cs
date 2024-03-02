@@ -1,10 +1,10 @@
 ﻿using AuthorPlace.Models.Exceptions.Application;
-using AuthorPlace.Models.Services.Application.Interfaces;
+using AuthorPlace.Models.Services.Application.Interfaces.Errors;
 using AuthorPlace.Models.ValueObjects;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Net;
 
-namespace AuthorPlace.Models.Services.Application.Implementations;
+namespace AuthorPlace.Models.Services.Application.Implementations.Errors;
 
 public class ErrorViewSelectorService : IErrorViewSelectorService
 {

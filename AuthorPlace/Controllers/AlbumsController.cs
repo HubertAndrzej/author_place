@@ -1,7 +1,7 @@
 ﻿using AuthorPlace.Models.Exceptions.Application;
-using AuthorPlace.Models.InputModels;
-using AuthorPlace.Models.Services.Application.Interfaces;
-using AuthorPlace.Models.ViewModels;
+using AuthorPlace.Models.InputModels.Albums;
+using AuthorPlace.Models.Services.Application.Interfaces.Albums;
+using AuthorPlace.Models.ViewModels.Albums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorPlace.Controllers;

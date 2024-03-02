@@ -1,6 +1,6 @@
 ﻿using AuthorPlace.Models.ValueObjects;
 
-namespace AuthorPlace.Models.ViewModels;
+namespace AuthorPlace.Models.ViewModels.Albums;
 
 public class AlbumViewModel
 {

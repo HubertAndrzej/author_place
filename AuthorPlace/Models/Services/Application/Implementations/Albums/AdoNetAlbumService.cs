@@ -1,16 +1,17 @@
 ﻿using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.Exceptions.Infrastructure;
 using AuthorPlace.Models.Extensions;
-using AuthorPlace.Models.InputModels;
+using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.Options;
-using AuthorPlace.Models.Services.Application.Interfaces;
+using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.ValueObjects;
-using AuthorPlace.Models.ViewModels;
+using AuthorPlace.Models.ViewModels.Albums;
+using AuthorPlace.Models.ViewModels.Songs;
 using Microsoft.Extensions.Options;
 using System.Data;
 
-namespace AuthorPlace.Models.Services.Application.Implementations;
+namespace AuthorPlace.Models.Services.Application.Implementations.Albums;
 
 public class AdoNetAlbumService : IAlbumService
 {
@@ -24,7 +25,7 @@ public class AdoNetAlbumService : IAlbumService
         this.databaseAccessor = databaseAccessor;
         this.imagePersister = imagePersister;
         this.albumsOptions = albumsOptions;
-        this.logger = loggerFactory.CreateLogger("Albums");
+        logger = loggerFactory.CreateLogger("Albums");
     }
 
     public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)

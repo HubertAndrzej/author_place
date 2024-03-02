@@ -1,6 +1,7 @@
 ﻿using AuthorPlace.Models.Entities;
-using AuthorPlace.Models.InputModels;
-using AuthorPlace.Models.ViewModels;
+using AuthorPlace.Models.InputModels.Albums;
+using AuthorPlace.Models.ViewModels.Albums;
+using AuthorPlace.Models.ViewModels.Songs;
 
 namespace AuthorPlace.Models.Extensions;
 

@@ -1,4 +1,4 @@
-﻿namespace AuthorPlace.Models.ViewModels;
+﻿namespace AuthorPlace.Models.ViewModels.Albums;
 
 public class ListViewModel<T>
 {

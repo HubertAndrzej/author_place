@@ -1,4 +1,4 @@
-﻿namespace AuthorPlace.Models.Validators;
+﻿namespace AuthorPlace.Models.Validators.Albums;
 
 public interface IRemotePropertyValidator
 {

@@ -1,7 +1,7 @@
 ﻿using AuthorPlace.Models.ValueObjects;
 using System.ComponentModel.DataAnnotations;
 
-namespace AuthorPlace.Models.InputModels;
+namespace AuthorPlace.Models.InputModels.Albums;
 
 public class AlbumUpdateInputModel : IValidatableObject
 {
@@ -10,7 +10,7 @@ public class AlbumUpdateInputModel : IValidatableObject
     [Display(Name = "Title")]
     public string? Title { get; set; }
 
-    [Display(Name ="Description")]
+    [Display(Name = "Description")]
     public string? Description { get; set; }
 
     [Display(Name = "Album Cover")]

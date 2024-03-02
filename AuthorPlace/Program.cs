@@ -1,11 +1,14 @@
 using AuthorPlace.Customizations.ModelBinders;
 using AuthorPlace.Models.Enums;
 using AuthorPlace.Models.Options;
-using AuthorPlace.Models.Services.Application.Implementations;
-using AuthorPlace.Models.Services.Application.Interfaces;
+using AuthorPlace.Models.Services.Application.Implementations.Albums;
+using AuthorPlace.Models.Services.Application.Implementations.Errors;
+using AuthorPlace.Models.Services.Application.Interfaces.Albums;
+using AuthorPlace.Models.Services.Application.Interfaces.Errors;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.Validators;
+using AuthorPlace.Models.Validators.Albums;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,4 @@
-﻿using AuthorPlace.Models.InputModels;
+﻿using AuthorPlace.Models.InputModels.Albums;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;

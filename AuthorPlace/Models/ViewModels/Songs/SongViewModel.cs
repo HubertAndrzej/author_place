@@ -1,4 +1,4 @@
-﻿namespace AuthorPlace.Models.ViewModels;
+﻿namespace AuthorPlace.Models.ViewModels.Songs;
 
 public class SongViewModel
 {

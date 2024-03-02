@@ -1,4 +1,6 @@
-﻿namespace AuthorPlace.Models.ViewModels;
+﻿using AuthorPlace.Models.ViewModels.Songs;
+
+namespace AuthorPlace.Models.ViewModels.Albums;
 
 public class AlbumDetailViewModel : AlbumViewModel
 {

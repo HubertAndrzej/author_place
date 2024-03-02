@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.Validators;
 
-namespace AuthorPlace.Models.Validators;
+namespace AuthorPlace.Models.Validators.Albums;
 
 public class RemotePropertyValidator<T, TProperty> : PropertyValidator<T, TProperty>, IRemotePropertyValidator
 {
@@ -13,7 +13,7 @@ public class RemotePropertyValidator<T, TProperty> : PropertyValidator<T, TPrope
     public RemotePropertyValidator(string url, string additionalFields, string errorText = "")
     {
         Url = url;
-        AdditionalFields = (additionalFields ?? "").Split(',',StringSplitOptions.RemoveEmptyEntries);
+        AdditionalFields = (additionalFields ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries);
         ErrorText = errorText;
     }
 

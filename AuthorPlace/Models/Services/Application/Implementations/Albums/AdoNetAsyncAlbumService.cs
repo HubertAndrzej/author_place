@@ -1,16 +1,17 @@
 ﻿using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.Exceptions.Infrastructure;
 using AuthorPlace.Models.Extensions;
-using AuthorPlace.Models.InputModels;
+using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.Options;
-using AuthorPlace.Models.Services.Application.Interfaces;
+using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.ValueObjects;
-using AuthorPlace.Models.ViewModels;
+using AuthorPlace.Models.ViewModels.Albums;
+using AuthorPlace.Models.ViewModels.Songs;
 using Microsoft.Extensions.Options;
 using System.Data;
 
-namespace AuthorPlace.Models.Services.Application.Implementations;
+namespace AuthorPlace.Models.Services.Application.Implementations.Albums;
 
 public class AdoNetAsyncAlbumService : IAlbumService
 {
@@ -24,14 +25,14 @@ public class AdoNetAsyncAlbumService : IAlbumService
         this.databaseAccessor = databaseAccessor;
         this.imagePersister = imagePersister;
         this.albumsOptions = albumsOptions;
-        this.logger = loggerFactory.CreateLogger("Albums");
+        logger = loggerFactory.CreateLogger("Albums");
     }
 
     public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
     {
         string orderby = model.OrderBy == "CurrentPrice" ? "CurrentPrice_Amount" : model.OrderBy;
         string direction = model.Ascending ? "ASC" : "DESC";
-        FormattableString albumsQuery = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE {"%" + model.Search + "%"} ORDER BY {(Sql) orderby} {(Sql) direction} LIMIT {model.Limit} OFFSET {model.Offset};";
+        FormattableString albumsQuery = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE {"%" + model.Search + "%"} ORDER BY {(Sql)orderby} {(Sql)direction} LIMIT {model.Limit} OFFSET {model.Offset};";
         IAsyncEnumerable<IDataRecord> albumsResults = databaseAccessor.ExecuteAsync(albumsQuery);
         List<AlbumViewModel> albumList = new();
         await foreach (IDataRecord dataRecord in albumsResults)

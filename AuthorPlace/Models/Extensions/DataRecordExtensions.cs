@@ -1,7 +1,8 @@
 ﻿using AuthorPlace.Models.Enums;
-using AuthorPlace.Models.InputModels;
+using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.ValueObjects;
-using AuthorPlace.Models.ViewModels;
+using AuthorPlace.Models.ViewModels.Albums;
+using AuthorPlace.Models.ViewModels.Songs;
 using System.Data;
 
 namespace AuthorPlace.Models.Extensions;
