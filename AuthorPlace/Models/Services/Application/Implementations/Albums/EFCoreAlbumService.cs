@@ -30,20 +30,20 @@ public class EFCoreAlbumService : IAlbumService
         logger = loggerFactory.CreateLogger("Albums");
     }
 
-    public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
+    public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel inputModel)
     {
-        string orderby = model.OrderBy == "CurrentPrice" ? "CurrentPrice.Amount" : model.OrderBy;
-        string direction = model.Ascending ? "ASC" : "DESC";
+        string orderby = inputModel.OrderBy == "CurrentPrice" ? "CurrentPrice.Amount" : inputModel.OrderBy;
+        string direction = inputModel.Ascending ? "ASC" : "DESC";
         IQueryable<Album> baseQuery = dbContext.Albums!
             .OrderBy($"{orderby} {direction}");
 
         IQueryable<AlbumViewModel> queryLinq = baseQuery
             .AsNoTracking()
-            .Where(album => album.Title.Contains(model.Search!))
+            .Where(album => album.Title!.Contains(inputModel.Search!))
             .Select(album => album.ToAlbumViewModel());
         List<AlbumViewModel> albums = await queryLinq
-            .Skip(model.Offset)
-            .Take(model.Limit)
+            .Skip(inputModel.Offset)
+            .Take(inputModel.Limit)
             .ToListAsync();
         int totalCount = await queryLinq.CountAsync();
         ListViewModel<AlbumViewModel> result = new()
@@ -61,14 +61,14 @@ public class EFCoreAlbumService : IAlbumService
             .Include(album => album.Songs)
             .Where(album => album.Id == id)
             .Select(album => album.ToAlbumDetailViewModel());
-        AlbumDetailViewModel? album = await queryLinq
+        AlbumDetailViewModel? viewModel = await queryLinq
             .FirstOrDefaultAsync();
-        if (album == null)
+        if (viewModel == null)
         {
             logger.LogWarning("Album {id} not found", id);
             throw new AlbumNotFoundException(id);
         }
-        return album;
+        return viewModel;
     }
 
     public async Task<List<AlbumViewModel>> GetBestRatingAlbumsAsync()
@@ -110,13 +110,13 @@ public class EFCoreAlbumService : IAlbumService
             .Where(album => album.Id == id)
             .Select(album => album.ToAlbumUpdateInputModel());
 
-        AlbumUpdateInputModel? viewModel = await queryLinq.FirstOrDefaultAsync();
-        if (viewModel == null)
+        AlbumUpdateInputModel? inputModel = await queryLinq.FirstOrDefaultAsync();
+        if (inputModel == null)
         {
             logger.LogWarning("Album {id} not found", id);
             throw new AlbumNotFoundException(id);
         }
-        return viewModel;
+        return inputModel;
     }
 
     public async Task<AlbumDetailViewModel> UpdateAlbumAsync(AlbumUpdateInputModel inputModel)
@@ -165,7 +165,7 @@ public class EFCoreAlbumService : IAlbumService
 
     public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
     {
-        bool isAlbumUnique = await dbContext.Albums!.AnyAsync(album => EF.Functions.Like(album.Title, title) && EF.Functions.Like(album.Author, author) && album.Id != id);
+        bool isAlbumUnique = await dbContext.Albums!.AnyAsync(album => EF.Functions.Like(album.Title!, title) && EF.Functions.Like(album.Author!, author) && album.Id != id);
         return !isAlbumUnique;
     }
 
@@ -174,7 +174,7 @@ public class EFCoreAlbumService : IAlbumService
         IQueryable<string> queryLinq = dbContext.Albums!
             .AsNoTracking()
             .Where(album => album.Id == id)
-            .Select(album => album.Author);
+            .Select(album => album.Author!);
         string? author = await queryLinq.FirstOrDefaultAsync();
         return author!;
     }

@@ -2,7 +2,6 @@
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.ViewModels.Albums;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -23,13 +22,13 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         this.cacheDurationOptions = cacheDurationOptions;
     }
 
-    public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
+    public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel inputModel)
     {
-        string key = $"Albums{model.Search}-{model.Page}-{model.OrderBy}-{model.Ascending}";
+        string key = $"Albums{inputModel.Search}-{inputModel.Page}-{inputModel.OrderBy}-{inputModel.Ascending}";
         string serializedObject = await distributedCache.GetStringAsync(key);
         if (serializedObject == null)
         {
-            ListViewModel<AlbumViewModel> albums = await albumService.GetAlbumsAsync(model);
+            ListViewModel<AlbumViewModel> albums = await albumService.GetAlbumsAsync(inputModel);
             serializedObject = JsonConvert.SerializeObject(albums);
             DistributedCacheEntryOptions cacheOptions = new();
             cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
@@ -48,12 +47,12 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         string serializedObject = await distributedCache.GetStringAsync(key);
         if (serializedObject == null)
         {
-            AlbumDetailViewModel album = await albumService.GetAlbumAsync(id);
-            serializedObject = JsonConvert.SerializeObject(album);
+            AlbumDetailViewModel viewModel = await albumService.GetAlbumAsync(id);
+            serializedObject = JsonConvert.SerializeObject(viewModel);
             DistributedCacheEntryOptions cacheOptions = new();
             cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
             await distributedCache.SetStringAsync(key, serializedObject, cacheOptions);
-            return album;
+            return viewModel;
         }
         else
         {

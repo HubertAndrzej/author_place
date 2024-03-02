@@ -26,10 +26,6 @@
 
   <ItemGroup>
     <Folder Include="Data\" />
-    <Folder Include="Models\InputModels\Songs\" />
-    <Folder Include="Models\Services\Application\Implementations\Songs\" />
-    <Folder Include="Models\Services\Application\Interfaces\Songs\" />
-    <Folder Include="Models\Validators\Songs\" />
   </ItemGroup>
 
 </Project>

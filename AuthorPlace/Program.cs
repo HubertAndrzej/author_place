@@ -3,11 +3,12 @@ using AuthorPlace.Models.Enums;
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Implementations.Albums;
 using AuthorPlace.Models.Services.Application.Implementations.Errors;
+using AuthorPlace.Models.Services.Application.Implementations.Songs;
 using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.Services.Application.Interfaces.Errors;
+using AuthorPlace.Models.Services.Application.Interfaces.Songs;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
-using AuthorPlace.Models.Validators;
 using AuthorPlace.Models.Validators.Albums;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -35,15 +36,21 @@ builder.Services.AddFluentValidationClientsideAdapters(clientSide => clientSide.
 IServiceCollection? albumService = persistence switch
 {
     Persistence.AdoNet => builder.Services.AddTransient<IAlbumService, AdoNetAlbumService>(),
-    Persistence.AdoNetAsync => builder.Services.AddTransient<IAlbumService, AdoNetAsyncAlbumService>(),
     Persistence.EFCore => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>(),
     _ => builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>()
+};
+IServiceCollection? songService = persistence switch
+{
+    Persistence.AdoNet => builder.Services.AddTransient<ISongService, AdoNetSongService>(),
+    Persistence.EFCore => builder.Services.AddTransient<ISongService, EFCoreSongService>(),
+    _ => builder.Services.AddScoped<ISongService, EFCoreSongService>()
 };
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
 builder.Services.AddSingleton<IImagePersister, MagickNetImagePersister>();
 builder.Services.AddTransient<ICachedAlbumService, MemoryCacheAlbumService>();
+builder.Services.AddTransient<ICachedSongService, MemoryCacheSongService>();
 builder.Services.AddResponseCaching();
 builder.Services.Configure<ConnectionStringsOptions>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<AlbumsOptions>(builder.Configuration.GetSection("Albums"));

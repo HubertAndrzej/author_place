@@ -28,11 +28,11 @@ public class AdoNetAlbumService : IAlbumService
         logger = loggerFactory.CreateLogger("Albums");
     }
 
-    public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel model)
+    public async Task<ListViewModel<AlbumViewModel>> GetAlbumsAsync(AlbumListInputModel inputModel)
     {
-        string orderby = model.OrderBy == "CurrentPrice" ? "CurrentPrice_Amount" : model.OrderBy;
-        string direction = model.Ascending ? "ASC" : "DESC";
-        FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE {"%" + model.Search + "%"} ORDER BY {(Sql)orderby} {(Sql)direction} LIMIT {model.Limit} OFFSET {model.Offset}; SELECT COUNT(*) FROM Albums WHERE Title LIKE {"%" + model.Search + "%"};";
+        string orderby = inputModel.OrderBy == "CurrentPrice" ? "CurrentPrice_Amount" : inputModel.OrderBy;
+        string direction = inputModel.Ascending ? "ASC" : "DESC";
+        FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE {"%" + inputModel.Search + "%"} ORDER BY {(Sql)orderby} {(Sql)direction} LIMIT {inputModel.Limit} OFFSET {inputModel.Offset}; SELECT COUNT(*) FROM Albums WHERE Title LIKE {"%" + inputModel.Search + "%"};";
         DataSet dataSet = await databaseAccessor.QueryAsync(query);
         DataTable dataTable = dataSet.Tables[0];
         List<AlbumViewModel> albumList = new();
@@ -51,8 +51,8 @@ public class AdoNetAlbumService : IAlbumService
 
     public async Task<AlbumDetailViewModel> GetAlbumAsync(int id)
     {
-        FormattableString query = $"SELECT Id, Title, Description, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id={id}; SELECT Id, Title, Description, Duration FROM Songs WHERE AlbumId={id};";
-        DataSet dataSet = await databaseAccessor.QueryAsync(query);
+        FormattableString albumQuery = $"SELECT Id, Title, Description, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id={id};";
+        DataSet dataSet = await databaseAccessor.QueryAsync(albumQuery);
         DataTable albumTable = dataSet.Tables[0];
         if (albumTable.Rows.Count != 1)
         {
@@ -60,14 +60,16 @@ public class AdoNetAlbumService : IAlbumService
             throw new AlbumNotFoundException(id);
         }
         DataRow albumRow = albumTable.Rows[0];
-        AlbumDetailViewModel albumDetailViewModel = albumRow.ToAlbumDetailViewModel();
-        DataTable songDataTable = dataSet.Tables[1];
-        foreach (DataRow songRow in songDataTable.Rows)
+        AlbumDetailViewModel viewModel = albumRow.ToAlbumDetailViewModel();
+        FormattableString songQuery = $"SELECT Id, Title, Description, Duration FROM Songs WHERE AlbumId={id};";
+        dataSet = await databaseAccessor.QueryAsync(songQuery);
+        DataTable songTable = dataSet.Tables[0];
+        foreach (DataRow songRow in songTable.Rows)
         {
             SongViewModel songViewModel = songRow.ToSongViewModel();
-            albumDetailViewModel.Songs!.Add(songViewModel);
+            viewModel.Songs!.Add(songViewModel);
         }
-        return albumDetailViewModel;
+        return viewModel;
     }
 
     public async Task<List<AlbumViewModel>> GetBestRatingAlbumsAsync()
@@ -90,12 +92,12 @@ public class AdoNetAlbumService : IAlbumService
         string author = "Hub Sobo";
         try
         {
-            FormattableString insertQuery = $"INSERT INTO Albums (Title, Author, ImagePath, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount) VALUES ({title}, {author}, '/placeholder.jpg', 'EUR', 0, 'EUR', 0);";
+            FormattableString insertQuery = $"INSERT INTO Albums (Title, Author, ImagePath, Rating, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount) VALUES ({title}, {author}, '/placeholder.jpg', 0, 'EUR', 0, 'EUR', 0);";
             await databaseAccessor.CommandAsync(insertQuery);
             FormattableString albumQuery = $"SELECT last_insert_rowid();";
             int albumId = await databaseAccessor.ScalarAsync<int>(albumQuery);
-            AlbumDetailViewModel? albumDetailViewModel = await GetAlbumAsync(albumId);
-            return albumDetailViewModel;
+            AlbumDetailViewModel? viewModel = await GetAlbumAsync(albumId);
+            return viewModel;
         }
         catch (ConstraintViolationException exception)
         {
@@ -115,8 +117,8 @@ public class AdoNetAlbumService : IAlbumService
             throw new AlbumNotFoundException(id);
         }
         DataRow albumRow = albumTable.Rows[0];
-        AlbumUpdateInputModel albumUpdateInputModel = albumRow.ToAlbumUpdateInputModel();
-        return albumUpdateInputModel;
+        AlbumUpdateInputModel inputModel = albumRow.ToAlbumUpdateInputModel();
+        return inputModel;
     }
 
     public async Task<AlbumDetailViewModel> UpdateAlbumAsync(AlbumUpdateInputModel inputModel)
@@ -157,8 +159,8 @@ public class AdoNetAlbumService : IAlbumService
             logger.LogWarning("The selected image could not be saved for album {inputModel.Id}", inputModel.Id);
             throw new AlbumImageInvalidException(inputModel.Id, exception);
         }
-        AlbumDetailViewModel? albumDetailViewModel = await GetAlbumAsync(inputModel.Id);
-        return albumDetailViewModel;
+        AlbumDetailViewModel? viewModel = await GetAlbumAsync(inputModel.Id);
+        return viewModel;
     }
 
     public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)

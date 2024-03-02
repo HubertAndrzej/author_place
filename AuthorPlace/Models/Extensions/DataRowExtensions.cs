@@ -1,5 +1,6 @@
 ﻿using AuthorPlace.Models.Enums;
 using AuthorPlace.Models.InputModels.Albums;
+using AuthorPlace.Models.InputModels.Songs;
 using AuthorPlace.Models.ValueObjects;
 using AuthorPlace.Models.ViewModels.Albums;
 using AuthorPlace.Models.ViewModels.Songs;
@@ -51,16 +52,6 @@ public static class DataRowExtensions
         };
     }
 
-    public static SongViewModel ToSongViewModel(this DataRow songRow)
-    {
-        return new SongViewModel
-        {
-            Id = Convert.ToInt32(songRow["Id"]),
-            Title = Convert.ToString(songRow["Title"]),
-            Duration = TimeSpan.Parse((string)songRow["Duration"]),
-        };
-    }
-
     public static AlbumUpdateInputModel ToAlbumUpdateInputModel(this DataRow dataRow)
     {
         return new AlbumUpdateInputModel
@@ -78,6 +69,40 @@ public static class DataRowExtensions
                 Enum.Parse<Currency>((string)dataRow["CurrentPrice_Currency"]),
                 Convert.ToDecimal(dataRow["CurrentPrice_Amount"])
             ),
+            RowVersion = Convert.ToString(dataRow["RowVersion"])
+        };
+    }
+
+    public static SongViewModel ToSongViewModel(this DataRow songRow)
+    {
+        return new SongViewModel
+        {
+            Id = Convert.ToInt32(songRow["Id"]),
+            Title = Convert.ToString(songRow["Title"]),
+            Duration = TimeSpan.Parse((string)songRow["Duration"])
+        };
+    }
+    
+    public static SongDetailViewModel ToSongDetailViewModel(this DataRow songRow)
+    {
+        return new SongDetailViewModel
+        {
+            Id = Convert.ToInt32(songRow["Id"]),
+            AlbumId = Convert.ToInt32(songRow["AlbumId"]),
+            Title = Convert.ToString(songRow["Title"]),
+            Duration = TimeSpan.Parse((string)songRow["Duration"]),
+            Description = Convert.ToString(songRow["Description"])
+        };
+    }
+
+    public static SongUpdateInputModel ToSongUpdateInputModel(this DataRow dataRow)
+    {
+        return new SongUpdateInputModel
+        {
+            Id = Convert.ToInt32(dataRow["Id"]),
+            Title = Convert.ToString(dataRow["Title"]),
+            Description = Convert.ToString(dataRow["Description"]),
+            Duration = TimeSpan.Parse(Convert.ToString(dataRow["Duration"])!),
             RowVersion = Convert.ToString(dataRow["RowVersion"])
         };
     }

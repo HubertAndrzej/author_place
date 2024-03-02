@@ -40,6 +40,7 @@ public partial class AuthorPlaceDbContext : DbContext
             entity.ToTable("Songs");
             entity.HasKey(song => song.Id);
             entity.HasOne(song => song.Album).WithMany(album => album.Songs).HasForeignKey(song => song.AlbumId);
+            entity.Property(song => song.RowVersion).IsRowVersion();
         });
 
         OnModelCreatingPartial(modelBuilder);

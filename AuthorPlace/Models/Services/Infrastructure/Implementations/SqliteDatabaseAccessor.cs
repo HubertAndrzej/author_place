@@ -34,35 +34,38 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
 
     public async Task<DataSet> QueryAsync(FormattableString formattableSQL)
     {
-        using SqliteConnection connection = await GetConnection();
-        using SqliteCommand command = GetCommand(formattableSQL, connection);
-        using SqliteDataReader reader = await command.ExecuteReaderAsync();
-        DataSet dataSet = new();
-        do
+        try
         {
-            DataTable dataTable = new();
-            dataSet.Tables.Add(dataTable);
-            dataTable.Load(reader);
-        } while (!reader.IsClosed);
-        return dataSet;
+            using SqliteConnection connection = await GetConnection();
+            using SqliteCommand command = GetCommand(formattableSQL, connection);
+            using SqliteDataReader reader = await command.ExecuteReaderAsync();
+            DataSet dataSet = new();
+            do
+            {
+                DataTable dataTable = new();
+                dataSet.Tables.Add(dataTable);
+                dataTable.Load(reader);
+            } while (!reader.IsClosed);
+            return dataSet;
+        }
+        catch (SqliteException exception) when (exception.SqliteErrorCode == 19)
+        {
+            throw new ConstraintViolationException(exception);
+        }
     }
 
     public async Task<T> ScalarAsync<T>(FormattableString formattableSQL)
     {
-        using SqliteConnection connection = await GetConnection();
-        using SqliteCommand command = GetCommand(formattableSQL, connection);
-        object? result = await command.ExecuteScalarAsync();
-        return (T)Convert.ChangeType(result!, typeof(T));
-    }
-
-    public async IAsyncEnumerable<IDataRecord> ExecuteAsync(FormattableString formattableSQL)
-    {
-        using SqliteConnection connection = await GetConnection();
-        using SqliteCommand command = GetCommand(formattableSQL, connection);
-        using SqliteDataReader reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        try
         {
-            yield return reader;
+            using SqliteConnection connection = await GetConnection();
+            using SqliteCommand command = GetCommand(formattableSQL, connection);
+            object? result = await command.ExecuteScalarAsync();
+            return (T)Convert.ChangeType(result!, typeof(T));
+        }
+        catch (SqliteException exception) when (exception.SqliteErrorCode == 19)
+        {
+            throw new ConstraintViolationException(exception);
         }
     }
 

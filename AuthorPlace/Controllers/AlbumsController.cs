@@ -15,23 +15,23 @@ public class AlbumsController : Controller
         this.albumService = albumService;
     }
 
-    public async Task<IActionResult> Index(AlbumListInputModel input)
+    public async Task<IActionResult> Index(AlbumListInputModel inputModel)
     {
-        ListViewModel<AlbumViewModel> albums = await albumService.GetAlbumsAsync(input);
+        ListViewModel<AlbumViewModel> albums = await albumService.GetAlbumsAsync(inputModel);
         ViewBag.Title = "Album Catalogue";
         AlbumListViewModel viewModel = new()
         {
             Albums = albums,
-            Input = input
+            Input = inputModel
         };
         return View(viewModel);
     }
 
     public async Task<IActionResult> Detail(int id)
     {
-        AlbumDetailViewModel album = await albumService.GetAlbumAsync(id);
-        ViewBag.Title = album.Title;
-        return View(album);
+        AlbumDetailViewModel viewModel = await albumService.GetAlbumAsync(id);
+        ViewBag.Title = viewModel.Title;
+        return View(viewModel);
     }
 
     public IActionResult New()
@@ -48,9 +48,9 @@ public class AlbumsController : Controller
         {
             try
             {
-                AlbumDetailViewModel album = await albumService.CreateAlbumAsync(inputModel);
+                AlbumDetailViewModel viewModel = await albumService.CreateAlbumAsync(inputModel);
                 TempData["ConfirmationMessage"] = "Your album has been created successfully";
-                return RedirectToAction(nameof(Edit), new { id = album.Id });
+                return RedirectToAction(nameof(Edit), new { id = viewModel.Id });
             }
             catch (AlbumUniqueException)
             {
@@ -75,7 +75,7 @@ public class AlbumsController : Controller
         {
             try
             {
-                AlbumDetailViewModel album = await albumService.UpdateAlbumAsync(inputModel);
+                AlbumDetailViewModel viewModel = await albumService.UpdateAlbumAsync(inputModel);
                 TempData["ConfirmationMessage"] = "Your album has been updated successfully";
                 return RedirectToAction(nameof(Detail), new { id = inputModel.Id });
             }

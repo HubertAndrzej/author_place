@@ -1,5 +1,6 @@
 ﻿using AuthorPlace.Models.Entities;
 using AuthorPlace.Models.InputModels.Albums;
+using AuthorPlace.Models.InputModels.Songs;
 using AuthorPlace.Models.ViewModels.Albums;
 using AuthorPlace.Models.ViewModels.Songs;
 
@@ -37,17 +38,6 @@ public static class EntityExtensions
         };
     }
 
-    public static SongViewModel ToSongViewModel(this Song song)
-    {
-        return new SongViewModel
-        {
-            Id = song.Id,
-            Title = song.Title,
-            Duration = song.Duration,
-            Description = song.Description
-        };
-    }
-
     public static AlbumUpdateInputModel ToAlbumUpdateInputModel(this Album album)
     {
         return new AlbumUpdateInputModel
@@ -60,6 +50,40 @@ public static class EntityExtensions
             CurrentPrice = album.CurrentPrice,
             FullPrice = album.FullPrice,
             RowVersion = album.RowVersion
+        };
+    }
+
+    public static SongViewModel ToSongViewModel(this Song song)
+    {
+        return new SongViewModel
+        {
+            Id = song.Id,
+            Title = song.Title,
+            Duration = song.Duration
+        };
+    }
+
+    public static SongDetailViewModel ToSongDetailViewModel(this Song song)
+    {
+        return new SongDetailViewModel
+        {
+            Id = song.Id,
+            AlbumId = song.AlbumId,
+            Title = song.Title,
+            Duration = song.Duration,
+            Description = song.Description
+        };
+    }
+
+    public static SongUpdateInputModel ToSongUpdateInputModel(this Song song)
+    {
+        return new SongUpdateInputModel
+        {
+            Id = song.Id,
+            Title = song.Title,
+            Description = song.Description,
+            Duration = song.Duration,
+            RowVersion = song.RowVersion
         };
     }
 }
