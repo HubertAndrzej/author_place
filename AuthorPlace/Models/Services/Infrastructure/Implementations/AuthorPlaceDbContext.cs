@@ -1,10 +1,11 @@
 ﻿using AuthorPlace.Models.Entities;
 using AuthorPlace.Models.Enums;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorPlace.Models.Services.Infrastructure.Implementations;
 
-public partial class AuthorPlaceDbContext : DbContext
+public partial class AuthorPlaceDbContext : IdentityDbContext
 {
     public AuthorPlaceDbContext(DbContextOptions<AuthorPlaceDbContext> options) : base(options)
     {
@@ -17,6 +18,8 @@ public partial class AuthorPlaceDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Album>(entity =>
         {
             entity.ToTable("Albums");
@@ -43,6 +46,7 @@ public partial class AuthorPlaceDbContext : DbContext
             entity.ToTable("Songs");
             entity.HasKey(song => song.Id);
             entity.Property(song => song.RowVersion).IsRowVersion();
+            entity.HasQueryFilter(song => song.Album!.Status != Status.Erased);
             entity.HasOne(song => song.Album).WithMany(album => album.Songs).HasForeignKey(song => song.AlbumId);
         });
 

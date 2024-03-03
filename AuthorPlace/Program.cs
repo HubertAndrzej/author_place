@@ -13,6 +13,7 @@ using AuthorPlace.Models.Validators.Albums;
 using AuthorPlace.Models.Validators.Songs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ Persistence persistence = Persistence.EFCore;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 builder.Host.UseSerilog((hostContext, loggerConfiguration) => loggerConfiguration.ReadFrom.Configuration(hostContext.Configuration));
+builder.Services.AddRazorPages();
 builder.Services.AddMvc(options =>
 {
     CacheProfile cacheProfile = new();
@@ -50,6 +52,11 @@ IServiceCollection? songService = persistence switch
     Persistence.EFCore => builder.Services.AddTransient<ISongService, EFCoreSongService>(),
     _ => builder.Services.AddScoped<ISongService, EFCoreSongService>()
 };
+IdentityBuilder? identity = persistence switch
+{
+    Persistence.EFCore => builder.Services.AddDefaultIdentity<IdentityUser>().AddEntityFrameworkStores<AuthorPlaceDbContext>(),
+    _ => builder.Services.AddDefaultIdentity<IdentityUser>().AddEntityFrameworkStores<AuthorPlaceDbContext>(),
+};
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
@@ -68,6 +75,13 @@ WebApplication app = builder.Build();
 app.UseExceptionHandler("/Error");
 app.UseStatusCodePagesWithReExecute("/Error");
 app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseResponseCaching();
-app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+app.UseEndpoints(routeBuilder =>
+{
+    routeBuilder.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+    routeBuilder.MapRazorPages();
+});
 app.Run();
