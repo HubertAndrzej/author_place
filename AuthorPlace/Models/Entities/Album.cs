@@ -7,16 +7,9 @@ public class Album
 {
     public Album(string title, string author)
     {
-        if (string.IsNullOrWhiteSpace(title))
-        {
-            throw new ArgumentException("The album must have a title");
-        }
-        if (string.IsNullOrWhiteSpace(author))
-        {
-            throw new ArgumentException("The album must have an author"); 
-        }
-        Title = title;
-        Author = author;
+        ChangeTitle(title);
+        ChangeAuthor(author);
+        ChangeStatus(Status.Drafted);
         ImagePath = "/placeholder.jpg";
         FullPrice = new Money(Currency.EUR, 0);
         CurrentPrice = new Money(Currency.EUR, 0);
@@ -24,14 +17,16 @@ public class Album
     }
 
     public int Id { get; private set; }
-    public string Title { get; private set; }
+    public string? Title { get; private set; }
     public string? Description { get; private set; }
     public string ImagePath { get; private set; }
-    public string Author { get; private set; }
+    public string? Author { get; private set; }
     public string? Email { get; private set; }
     public double Rating { get; private set; }
     public Money FullPrice { get; private set; }
     public Money CurrentPrice { get; private set; }
+    public string? RowVersion { get; private set; }
+    public Status Status { get; private set; }
     public virtual ICollection<Song> Songs { get; private set; } = new List<Song>();
 
     public void ChangeTitle(string title)
@@ -41,6 +36,15 @@ public class Album
             throw new ArgumentException("The album must have a title");
         }
         Title = title;
+    }
+
+    public void ChangeAuthor(string author)
+    {
+        if (string.IsNullOrWhiteSpace(author))
+        {
+            throw new ArgumentException("The album must have an author");
+        }
+        Author = author;
     }
 
     public void ChangePrices(Money fullPrice, Money currentPrice)
@@ -89,5 +93,10 @@ public class Album
     public void ChangeImagePath(string imagePath)
     {
         ImagePath = imagePath;
+    }
+
+    public void ChangeStatus(Status status)
+    {
+        Status = status;
     }
 }

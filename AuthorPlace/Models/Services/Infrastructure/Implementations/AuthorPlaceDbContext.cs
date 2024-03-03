@@ -1,4 +1,5 @@
 ﻿using AuthorPlace.Models.Entities;
+using AuthorPlace.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorPlace.Models.Services.Infrastructure.Implementations;
@@ -20,6 +21,10 @@ public partial class AuthorPlaceDbContext : DbContext
         {
             entity.ToTable("Albums");
             entity.HasKey(album => album.Id);
+            entity.HasIndex(entity => new { entity.Title, entity.Author }).IsUnique();
+            entity.Property(album => album.RowVersion).IsRowVersion();
+            entity.Property(album => album.Status).HasConversion<string>();
+            entity.HasQueryFilter(album => album.Status != Status.Erased);
             entity.OwnsOne(album => album.CurrentPrice, builder =>
             {
                 builder.Property(money => money.Amount).HasConversion<double>().HasColumnName("CurrentPrice_Amount");
@@ -37,6 +42,7 @@ public partial class AuthorPlaceDbContext : DbContext
         {
             entity.ToTable("Songs");
             entity.HasKey(song => song.Id);
+            entity.Property(song => song.RowVersion).IsRowVersion();
             entity.HasOne(song => song.Album).WithMany(album => album.Songs).HasForeignKey(song => song.AlbumId);
         });
 

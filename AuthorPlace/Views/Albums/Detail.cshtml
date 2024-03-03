@@ -28,26 +28,29 @@
     </div>
 </section>
 <section class="album-songs">
-    <h2>Songs (@Model.Songs!.Count)</h2>
+    <h2>Songs (@Model.Songs!.Count) <a class="btn btn-outline-info btn-sm" asp-controller="Songs" asp-action="New" asp-route-id="@Model.Id"><i class="fa-solid fa-plus"></i> Create new</a></h2>
     @foreach (SongViewModel song in Model.Songs)
     {
         <hr>
         <div class="row">
-            <div class="col-md-9">
-                <a href="#" class="link-info link-offset-2 link-underline-opacity-0 link-underline-opacity-25-hover">@song.Title</a>
+            <div class="col-md-10">
+                <a asp-controller="Songs" asp-action="Detail" asp-route-id="@song.Id" class="link-info link-offset-2 link-underline-opacity-0 link-underline-opacity-25-hover">@song.Title</a>
             </div>
-            <div class="col-md-3 song-duration">
+            <div class="col-md-1 song-duration justify-content-end">
                 <i class="far fa-clock"></i>
                 <time>@song.Duration.ToString("m'm 's's'")</time>
+            </div>
+            <div class="col-md-1">
+                <a class="btn btn-outline-info btn-sm" asp-controller="Songs" asp-action="Edit" asp-route-id="@song.Id"><i class="fa-solid fa-pencil"></i></a>
             </div>
         </div>
     }
     <hr>
     <div class="row album-duration pb-5">
-        <div class="col-md-9">
+        <div class="col-md-10">
             Total
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2 justify-content-end">
             <i class="far fa-clock"></i>
             <time>@Model.TotalAlbumDuration.ToString("h'h 'm'm 's's'")</time>
         </div>

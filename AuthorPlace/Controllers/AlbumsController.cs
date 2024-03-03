@@ -1,7 +1,7 @@
-﻿using AuthorPlace.Models.Exceptions;
-using AuthorPlace.Models.InputModels;
-using AuthorPlace.Models.Services.Application.Interfaces;
-using AuthorPlace.Models.ViewModels;
+﻿using AuthorPlace.Models.Exceptions.Application;
+using AuthorPlace.Models.InputModels.Albums;
+using AuthorPlace.Models.Services.Application.Interfaces.Albums;
+using AuthorPlace.Models.ViewModels.Albums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorPlace.Controllers;
@@ -15,23 +15,23 @@ public class AlbumsController : Controller
         this.albumService = albumService;
     }
 
-    public async Task<IActionResult> Index(AlbumListInputModel input)
+    public async Task<IActionResult> Index(AlbumListInputModel inputModel)
     {
-        ListViewModel<AlbumViewModel> albums = await albumService.GetAlbumsAsync(input);
+        ListViewModel<AlbumViewModel> albums = await albumService.GetAlbumsAsync(inputModel);
         ViewBag.Title = "Album Catalogue";
         AlbumListViewModel viewModel = new()
         {
             Albums = albums,
-            Input = input
+            Input = inputModel
         };
         return View(viewModel);
     }
 
     public async Task<IActionResult> Detail(int id)
     {
-        AlbumDetailViewModel album = await albumService.GetAlbumAsync(id);
-        ViewBag.Title = album.Title;
-        return View(album);
+        AlbumDetailViewModel viewModel = await albumService.GetAlbumAsync(id);
+        ViewBag.Title = viewModel.Title;
+        return View(viewModel);
     }
 
     public IActionResult New()
@@ -48,9 +48,9 @@ public class AlbumsController : Controller
         {
             try
             {
-                AlbumDetailViewModel album = await albumService.CreateAlbumAsync(inputModel);
+                AlbumDetailViewModel viewModel = await albumService.CreateAlbumAsync(inputModel);
                 TempData["ConfirmationMessage"] = "Your album has been created successfully";
-                return RedirectToAction(nameof(Edit), new { id = album.Id });
+                return RedirectToAction(nameof(Edit), new { id = viewModel.Id });
             }
             catch (AlbumUniqueException)
             {
@@ -75,7 +75,7 @@ public class AlbumsController : Controller
         {
             try
             {
-                AlbumDetailViewModel album = await albumService.UpdateAlbumAsync(inputModel);
+                AlbumDetailViewModel viewModel = await albumService.UpdateAlbumAsync(inputModel);
                 TempData["ConfirmationMessage"] = "Your album has been updated successfully";
                 return RedirectToAction(nameof(Detail), new { id = inputModel.Id });
             }
@@ -87,9 +87,21 @@ public class AlbumsController : Controller
             {
                 ModelState.AddModelError(nameof(AlbumUpdateInputModel.Title), "This title is already used by this author");
             }
+            catch (OptimisticConcurrencyException)
+            {
+                ModelState.AddModelError("", $"The update failed because another user updated the values ​​in the meantime. Please refresh the page to get the updated values");
+            }
         }
         ViewBag.Title = "Update album";
         return View(inputModel);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Remove(AlbumDeleteInputModel inputModel)
+    {
+        await albumService.RemoveAlbumAsync(inputModel);
+        TempData["ConfirmationMessage"] = "Your album has been deleted successfully";
+        return RedirectToAction(nameof(Index));
     }
 
     public async Task<IActionResult> IsAlbumUnique(string title, string author, int id = 0)

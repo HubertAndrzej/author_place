@@ -3,6 +3,5 @@
 public enum Persistence
 {
     AdoNet,
-    AdoNetAsync,
     EFCore
 }

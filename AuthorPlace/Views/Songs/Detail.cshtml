@@ -1,0 +1,15 @@
+﻿@model SongDetailViewModel
+<section>
+    <div class="row">
+        <div class="col-md-12">
+            <h1>@ViewBag.Title</h1>
+            <p>Extimated Duration: @Model.Duration</p>
+        </div>
+        <div class="col-md-12" html-sanitize>
+            @Model.Description
+        </div>
+        <div class="col-md-12 mt-3">
+            <a asp-controller="Albums" asp-action="Detail" asp-route-id="@Model.AlbumId" class="link-info link-offset-2 link-underline-opacity-0 link-underline-opacity-25-hover"><i class="fa-regular fa-hand-point-left"></i> Back to album</a>
+        </div>
+    </div>
+</section>

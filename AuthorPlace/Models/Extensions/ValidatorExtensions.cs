@@ -1,4 +1,4 @@
-﻿using AuthorPlace.Models.Validators;
+﻿using AuthorPlace.Models.Validators.Albums;
 using FluentValidation;
 
 namespace AuthorPlace.Models.Extensions;

@@ -1,4 +1,4 @@
-﻿using AuthorPlace.Models.Services.Application.Interfaces;
+﻿using AuthorPlace.Models.Services.Application.Interfaces.Errors;
 using AuthorPlace.Models.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
 

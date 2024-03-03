@@ -1,12 +1,16 @@
 using AuthorPlace.Customizations.ModelBinders;
 using AuthorPlace.Models.Enums;
-using AuthorPlace.Models.InputModels;
 using AuthorPlace.Models.Options;
-using AuthorPlace.Models.Services.Application.Implementations;
-using AuthorPlace.Models.Services.Application.Interfaces;
+using AuthorPlace.Models.Services.Application.Implementations.Albums;
+using AuthorPlace.Models.Services.Application.Implementations.Errors;
+using AuthorPlace.Models.Services.Application.Implementations.Songs;
+using AuthorPlace.Models.Services.Application.Interfaces.Albums;
+using AuthorPlace.Models.Services.Application.Interfaces.Errors;
+using AuthorPlace.Models.Services.Application.Interfaces.Songs;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
-using AuthorPlace.Models.Validators;
+using AuthorPlace.Models.Validators.Albums;
+using AuthorPlace.Models.Validators.Songs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +18,6 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
-using System;
 
 Persistence persistence = Persistence.EFCore;
 
@@ -30,19 +33,29 @@ builder.Services.AddMvc(options =>
 });
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumUpdateValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AlbumDeleteValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SongCreateValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SongUpdateValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SongDeleteValidator>();
 builder.Services.AddFluentValidationClientsideAdapters(clientSide => clientSide.Add(typeof(IRemotePropertyValidator), (context, description, validator) => new RemoteClientValidator(description, validator)));
 IServiceCollection? albumService = persistence switch
 {
     Persistence.AdoNet => builder.Services.AddTransient<IAlbumService, AdoNetAlbumService>(),
-    Persistence.AdoNetAsync => builder.Services.AddTransient<IAlbumService, AdoNetAsyncAlbumService>(),
     Persistence.EFCore => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>(),
     _ => builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>()
+};
+IServiceCollection? songService = persistence switch
+{
+    Persistence.AdoNet => builder.Services.AddTransient<ISongService, AdoNetSongService>(),
+    Persistence.EFCore => builder.Services.AddTransient<ISongService, EFCoreSongService>(),
+    _ => builder.Services.AddScoped<ISongService, EFCoreSongService>()
 };
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
 builder.Services.AddSingleton<IImagePersister, MagickNetImagePersister>();
 builder.Services.AddTransient<ICachedAlbumService, MemoryCacheAlbumService>();
+builder.Services.AddTransient<ICachedSongService, MemoryCacheSongService>();
 builder.Services.AddResponseCaching();
 builder.Services.Configure<ConnectionStringsOptions>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<AlbumsOptions>(builder.Configuration.GetSection("Albums"));

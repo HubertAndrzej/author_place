@@ -1,6 +1,8 @@
 ﻿using AuthorPlace.Models.Entities;
-using AuthorPlace.Models.InputModels;
-using AuthorPlace.Models.ViewModels;
+using AuthorPlace.Models.InputModels.Albums;
+using AuthorPlace.Models.InputModels.Songs;
+using AuthorPlace.Models.ViewModels.Albums;
+using AuthorPlace.Models.ViewModels.Songs;
 
 namespace AuthorPlace.Models.Extensions;
 
@@ -32,18 +34,7 @@ public static class EntityExtensions
             Rating = album.Rating,
             CurrentPrice = album.CurrentPrice,
             FullPrice = album.FullPrice,
-            Songs = album.Songs.Select(song => song.ToSongViewModel()).ToList()
-        };
-    }
-
-    public static SongViewModel ToSongViewModel(this Song song)
-    {
-        return new SongViewModel
-        {
-            Id = song.Id,
-            Title = song.Title,
-            Duration = song.Duration,
-            Description = song.Description
+            Songs = album.Songs.OrderBy(song => song.Id).Select(song => song.ToSongViewModel()).ToList()
         };
     }
 
@@ -58,6 +49,42 @@ public static class EntityExtensions
             ImagePath = album.ImagePath,
             CurrentPrice = album.CurrentPrice,
             FullPrice = album.FullPrice,
+            RowVersion = album.RowVersion
+        };
+    }
+
+    public static SongViewModel ToSongViewModel(this Song song)
+    {
+        return new SongViewModel
+        {
+            Id = song.Id,
+            Title = song.Title,
+            Duration = song.Duration
+        };
+    }
+
+    public static SongDetailViewModel ToSongDetailViewModel(this Song song)
+    {
+        return new SongDetailViewModel
+        {
+            Id = song.Id,
+            AlbumId = song.AlbumId,
+            Title = song.Title,
+            Duration = song.Duration,
+            Description = song.Description
+        };
+    }
+
+    public static SongUpdateInputModel ToSongUpdateInputModel(this Song song)
+    {
+        return new SongUpdateInputModel
+        {
+            Id = song.Id,
+            AlbumId = song.AlbumId,
+            Title = song.Title,
+            Description = song.Description,
+            Duration = song.Duration,
+            RowVersion = song.RowVersion
         };
     }
 }

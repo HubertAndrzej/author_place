@@ -1,5 +1,6 @@
-﻿using AuthorPlace.Models.Services.Application.Interfaces;
-using AuthorPlace.Models.ViewModels;
+﻿using AuthorPlace.Models.Services.Application.Interfaces.Albums;
+using AuthorPlace.Models.ViewModels.Albums;
+using AuthorPlace.Models.ViewModels.Home;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorPlace.Controllers;
