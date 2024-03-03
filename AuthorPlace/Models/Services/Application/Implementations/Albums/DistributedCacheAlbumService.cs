@@ -115,6 +115,12 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         return viewModel;
     }
 
+    public async Task RemoveAlbumAsync(AlbumDeleteInputModel inputModel)
+    {
+        await albumService.RemoveAlbumAsync(inputModel);
+        await distributedCache.RemoveAsync($"Album{inputModel.Id}");
+    }
+
     public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
     {
         return await albumService.IsAlbumUniqueAsync(title, author, id);

@@ -9,6 +9,7 @@ public class Album
     {
         ChangeTitle(title);
         ChangeAuthor(author);
+        ChangeStatus(Status.Drafted);
         ImagePath = "/placeholder.jpg";
         FullPrice = new Money(Currency.EUR, 0);
         CurrentPrice = new Money(Currency.EUR, 0);
@@ -25,6 +26,7 @@ public class Album
     public Money FullPrice { get; private set; }
     public Money CurrentPrice { get; private set; }
     public string? RowVersion { get; private set; }
+    public Status Status { get; private set; }
     public virtual ICollection<Song> Songs { get; private set; } = new List<Song>();
 
     public void ChangeTitle(string title)
@@ -91,5 +93,10 @@ public class Album
     public void ChangeImagePath(string imagePath)
     {
         ImagePath = imagePath;
+    }
+
+    public void ChangeStatus(Status status)
+    {
+        Status = status;
     }
 }

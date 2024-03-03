@@ -1,13 +1,10 @@
 ﻿using AuthorPlace.Models.InputModels.Songs;
 using AuthorPlace.Models.Options;
-using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.Services.Application.Interfaces.Songs;
-using AuthorPlace.Models.ViewModels.Albums;
 using AuthorPlace.Models.ViewModels.Songs;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace AuthorPlace.Models.Services.Application.Implementations.Songs;
 

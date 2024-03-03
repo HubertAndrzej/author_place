@@ -33,6 +33,7 @@ builder.Services.AddMvc(options =>
 });
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumUpdateValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AlbumDeleteValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongUpdateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongDeleteValidator>();

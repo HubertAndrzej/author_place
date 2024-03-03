@@ -1,4 +1,5 @@
 ﻿using AuthorPlace.Models.Entities;
+using AuthorPlace.Models.Enums;
 using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.Extensions;
 using AuthorPlace.Models.InputModels.Albums;
@@ -161,6 +162,18 @@ public class EFCoreAlbumService : IAlbumService
             throw new AlbumUniqueException(inputModel.Title!, author, exception);
         }
         return album.ToAlbumDetailViewModel();
+    }
+
+    public async Task RemoveAlbumAsync(AlbumDeleteInputModel inputModel)
+    {
+        Album? album = await dbContext.Albums!.FindAsync(inputModel.Id);
+        if (album == null)
+        {
+            logger.LogWarning("Album {inputModel.Id} not found", inputModel.Id);
+            throw new AlbumNotFoundException(inputModel.Id);
+        }
+        album.ChangeStatus(Status.Erased);
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)

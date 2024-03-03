@@ -12,6 +12,7 @@ public interface IAlbumService
     public Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel);
     public Task<AlbumUpdateInputModel> GetAlbumForEditingAsync(int id);
     public Task<AlbumDetailViewModel> UpdateAlbumAsync(AlbumUpdateInputModel inputModel);
+    public Task RemoveAlbumAsync(AlbumDeleteInputModel inputModel);
     public Task<bool> IsAlbumUniqueAsync(string title, string author, int id);
     public Task<string> GetAuthorAsync(int id);
 }

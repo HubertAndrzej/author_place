@@ -96,6 +96,14 @@ public class AlbumsController : Controller
         return View(inputModel);
     }
 
+    [HttpPost]
+    public async Task<IActionResult> Remove(AlbumDeleteInputModel inputModel)
+    {
+        await albumService.RemoveAlbumAsync(inputModel);
+        TempData["ConfirmationMessage"] = "Your album has been deleted successfully";
+        return RedirectToAction(nameof(Index));
+    }
+
     public async Task<IActionResult> IsAlbumUnique(string title, string author, int id = 0)
     {
         bool result = await albumService.IsAlbumUniqueAsync(title, author, id);
