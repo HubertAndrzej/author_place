@@ -10,6 +10,7 @@ using AuthorPlace.Models.Services.Application.Interfaces.Songs;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.Validators.Albums;
+using AuthorPlace.Models.Validators.Identity;
 using AuthorPlace.Models.Validators.Songs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -54,7 +55,17 @@ IServiceCollection? songService = persistence switch
 };
 IdentityBuilder? identity = persistence switch
 {
-    Persistence.EFCore => builder.Services.AddDefaultIdentity<IdentityUser>().AddEntityFrameworkStores<AuthorPlaceDbContext>(),
+    Persistence.EFCore => builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+    {
+        options.Password.RequireDigit = true;
+        options.Password.RequiredLength = 8;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequiredUniqueChars = 4;
+    })
+    .AddPasswordValidator<CommonPasswordValidator<IdentityUser>>()
+    .AddEntityFrameworkStores<AuthorPlaceDbContext>(),
     _ => builder.Services.AddDefaultIdentity<IdentityUser>().AddEntityFrameworkStores<AuthorPlaceDbContext>(),
 };
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
