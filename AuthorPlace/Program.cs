@@ -1,3 +1,4 @@
+using AuthorPlace.Customizations.Claims;
 using AuthorPlace.Customizations.ModelBinders;
 using AuthorPlace.Models.Entities;
 using AuthorPlace.Models.Enums;
@@ -65,6 +66,7 @@ IdentityBuilder? identity = persistence switch
         options.Password.RequireNonAlphanumeric = true;
         options.Password.RequiredUniqueChars = 4;
     })
+    .AddClaimsPrincipalFactory<CustomClaimsPrincipalFactory>()
     .AddPasswordValidator<CommonPasswordValidator<ApplicationUser>>()
     .AddEntityFrameworkStores<AuthorPlaceDbContext>(),
     _ => builder.Services.AddDefaultIdentity<ApplicationUser>().AddEntityFrameworkStores<AuthorPlaceDbContext>(),
