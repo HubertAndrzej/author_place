@@ -34,6 +34,10 @@ namespace AuthorPlace.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+
+            [Required]
+            [Display(Name = "Full Name")]
+            public string FullName { get; set; }
         }
 
         private async Task LoadAsync(ApplicationUser user)
@@ -45,7 +49,8 @@ namespace AuthorPlace.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                FullName = user.FullName
             };
         }
 
@@ -73,6 +78,14 @@ namespace AuthorPlace.Areas.Identity.Pages.Account.Manage
             {
                 await LoadAsync(user);
                 return Page();
+            }
+
+            user.FullName = Input.FullName;
+            var identityResult = await _userManager.UpdateAsync(user);
+            if (!identityResult.Succeeded)
+            {
+                StatusMessage = "Unexpected error when trying to set full name.";
+                return RedirectToPage();
             }
 
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
