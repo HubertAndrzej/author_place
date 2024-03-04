@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthorPlace.Models.Services.Infrastructure.Implementations;
 
-public partial class AuthorPlaceDbContext : IdentityDbContext
+public partial class AuthorPlaceDbContext : IdentityDbContext<ApplicationUser>
 {
     public AuthorPlaceDbContext(DbContextOptions<AuthorPlaceDbContext> options) : base(options)
     {

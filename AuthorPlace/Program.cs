@@ -1,4 +1,5 @@
 using AuthorPlace.Customizations.ModelBinders;
+using AuthorPlace.Models.Entities;
 using AuthorPlace.Models.Enums;
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Application.Implementations.Albums;
@@ -55,7 +56,7 @@ IServiceCollection? songService = persistence switch
 };
 IdentityBuilder? identity = persistence switch
 {
-    Persistence.EFCore => builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+    Persistence.EFCore => builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     {
         options.Password.RequireDigit = true;
         options.Password.RequiredLength = 8;
@@ -64,9 +65,9 @@ IdentityBuilder? identity = persistence switch
         options.Password.RequireNonAlphanumeric = true;
         options.Password.RequiredUniqueChars = 4;
     })
-    .AddPasswordValidator<CommonPasswordValidator<IdentityUser>>()
+    .AddPasswordValidator<CommonPasswordValidator<ApplicationUser>>()
     .AddEntityFrameworkStores<AuthorPlaceDbContext>(),
-    _ => builder.Services.AddDefaultIdentity<IdentityUser>().AddEntityFrameworkStores<AuthorPlaceDbContext>(),
+    _ => builder.Services.AddDefaultIdentity<ApplicationUser>().AddEntityFrameworkStores<AuthorPlaceDbContext>(),
 };
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
