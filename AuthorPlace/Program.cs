@@ -61,6 +61,9 @@ IdentityBuilder? identity = persistence switch
 {
     Persistence.EFCore => builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     {
+        options.Lockout.AllowedForNewUsers = true;
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
         options.Password.RequireDigit = true;
         options.Password.RequiredLength = 8;
         options.Password.RequireUppercase = true;
