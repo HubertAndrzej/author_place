@@ -9,7 +9,6 @@ public partial class AuthorPlaceDbContext : IdentityDbContext<ApplicationUser>
 {
     public AuthorPlaceDbContext(DbContextOptions<AuthorPlaceDbContext> options) : base(options)
     {
-
     }
 
     public virtual DbSet<Album>? Albums { get; set; }
@@ -38,6 +37,7 @@ public partial class AuthorPlaceDbContext : IdentityDbContext<ApplicationUser>
                 builder.Property(money => money.Amount).HasConversion<double>().HasColumnName("FullPrice_Amount");
                 builder.Property(money => money.Currency).HasConversion<string>().HasColumnName("FullPrice_Currency");
             });
+            entity.HasOne(album => album.User).WithMany(user => user.Albums).HasForeignKey(album => album.AuthorId);
             entity.HasMany(album => album.Songs).WithOne(song => song.Album).HasForeignKey(song => song.AlbumId);
         });
 

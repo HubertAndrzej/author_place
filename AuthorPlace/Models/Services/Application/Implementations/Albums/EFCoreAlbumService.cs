@@ -13,19 +13,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Data;
 using System.Linq.Dynamic.Core;
+using System.Security.Claims;
 
 namespace AuthorPlace.Models.Services.Application.Implementations.Albums;
 
 public class EFCoreAlbumService : IAlbumService
 {
     private readonly AuthorPlaceDbContext dbContext;
+    private readonly IHttpContextAccessor httpContextAccessor;
     private readonly IImagePersister imagePersister;
     private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
     private readonly ILogger logger;
 
-    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, IImagePersister imagePersister, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
+    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, IHttpContextAccessor httpContextAccessor, IImagePersister imagePersister, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
     {
         this.dbContext = dbContext;
+        this.httpContextAccessor = httpContextAccessor;
         this.imagePersister = imagePersister;
         this.albumsOptions = albumsOptions;
         logger = loggerFactory.CreateLogger("Albums");
@@ -89,8 +92,18 @@ public class EFCoreAlbumService : IAlbumService
     public async Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel)
     {
         string title = inputModel.Title!;
-        string author = "Hub Sobo";
-        Album album = new(title, author);
+        string author;
+        string authorId;
+        try
+        {
+            author = httpContextAccessor.HttpContext!.User.FindFirst("FullName")!.Value;
+            authorId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        }
+        catch (NullReferenceException)
+        {
+            throw new UserUnknownException();
+        }
+        Album album = new(title, author, authorId);
         dbContext.Add(album);
         try
         {

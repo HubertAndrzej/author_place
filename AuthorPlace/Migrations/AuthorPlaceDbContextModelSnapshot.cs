@@ -26,6 +26,9 @@ namespace AuthorPlace.Migrations
                     b.Property<string>("Author")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("AuthorId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
@@ -52,6 +55,8 @@ namespace AuthorPlace.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
 
                     b.HasIndex("Title", "Author")
                         .IsUnique();
@@ -205,7 +210,7 @@ namespace AuthorPlace.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.ApplicationUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -228,7 +233,7 @@ namespace AuthorPlace.Migrations
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.ApplicationUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasMaxLength(128)
@@ -252,7 +257,7 @@ namespace AuthorPlace.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.ApplicationUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("TEXT");
@@ -267,7 +272,7 @@ namespace AuthorPlace.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.ApplicationUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("TEXT");
@@ -290,6 +295,10 @@ namespace AuthorPlace.Migrations
 
             modelBuilder.Entity("AuthorPlace.Models.Entities.Album", b =>
                 {
+                    b.HasOne("AuthorPlace.Models.Entities.ApplicationUser", "User")
+                        .WithMany("Albums")
+                        .HasForeignKey("AuthorId");
+
                     b.OwnsOne("AuthorPlace.Models.ValueObjects.Money", "CurrentPrice", b1 =>
                         {
                             b1.Property<int>("AlbumId")
@@ -339,6 +348,8 @@ namespace AuthorPlace.Migrations
 
                     b.Navigation("FullPrice")
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AuthorPlace.Models.Entities.Song", b =>
@@ -361,7 +372,7 @@ namespace AuthorPlace.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.ApplicationUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.HasOne("AuthorPlace.Models.Entities.ApplicationUser", null)
                         .WithMany()
@@ -370,7 +381,7 @@ namespace AuthorPlace.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.ApplicationUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.HasOne("AuthorPlace.Models.Entities.ApplicationUser", null)
                         .WithMany()
@@ -379,7 +390,7 @@ namespace AuthorPlace.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.ApplicationUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
@@ -394,7 +405,7 @@ namespace AuthorPlace.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.ApplicationUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.HasOne("AuthorPlace.Models.Entities.ApplicationUser", null)
                         .WithMany()
@@ -406,6 +417,11 @@ namespace AuthorPlace.Migrations
             modelBuilder.Entity("AuthorPlace.Models.Entities.Album", b =>
                 {
                     b.Navigation("Songs");
+                });
+
+            modelBuilder.Entity("AuthorPlace.Models.Entities.ApplicationUser", b =>
+                {
+                    b.Navigation("Albums");
                 });
 #pragma warning restore 612, 618
         }
