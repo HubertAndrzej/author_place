@@ -17,6 +17,7 @@ using AuthorPlace.Models.Validators.Songs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
@@ -65,6 +66,7 @@ IdentityBuilder? identity = persistence switch
         options.Password.RequireLowercase = true;
         options.Password.RequireNonAlphanumeric = true;
         options.Password.RequiredUniqueChars = 4;
+        options.SignIn.RequireConfirmedAccount = true;
     })
     .AddClaimsPrincipalFactory<CustomClaimsPrincipalFactory>()
     .AddPasswordValidator<CommonPasswordValidator<ApplicationUser>>()
@@ -75,6 +77,7 @@ builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
 builder.Services.AddSingleton<IImagePersister, MagickNetImagePersister>();
+builder.Services.AddSingleton<IEmailSender, MailKitEmailSender>();
 builder.Services.AddTransient<ICachedAlbumService, MemoryCacheAlbumService>();
 builder.Services.AddTransient<ICachedSongService, MemoryCacheSongService>();
 builder.Services.AddResponseCaching();
@@ -84,6 +87,7 @@ builder.Services.Configure<MemoryCacheOptions>(builder.Configuration.GetSection(
 builder.Services.Configure<CacheDurationOptions>(builder.Configuration.GetSection("CacheDuration"));
 builder.Services.Configure<ImageSizeOptions>(builder.Configuration.GetSection("ImageSize"));
 builder.Services.Configure<KestrelServerOptions>(builder.Configuration.GetSection("Kestrel"));
+builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 
 WebApplication app = builder.Build();
 app.UseExceptionHandler("/Error");
