@@ -9,10 +9,12 @@ namespace AuthorPlace.Models.Services.Infrastructure.Implementations;
 public class MailKitEmailSender : IEmailSender
 {
     private readonly IOptionsMonitor<SmtpOptions> smtpOptionsMonitor;
+    private readonly IConfiguration configuration;
 
-    public MailKitEmailSender(IOptionsMonitor<SmtpOptions> smtpOptionsMonitor)
+    public MailKitEmailSender(IOptionsMonitor<SmtpOptions> smtpOptionsMonitor, IConfiguration configuration)
     {
         this.smtpOptionsMonitor = smtpOptionsMonitor;
+        this.configuration = configuration;
     }
 
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
@@ -20,9 +22,9 @@ public class MailKitEmailSender : IEmailSender
         SmtpOptions options = this.smtpOptionsMonitor.CurrentValue;
         using SmtpClient client = new();
         await client.ConnectAsync(options.Host, options.Port, options.Security);
-        if (!string.IsNullOrEmpty(options.Username))
+        if (!string.IsNullOrEmpty(configuration["Smtp:Username"]))
         {
-            await client.AuthenticateAsync(options.Username, options.Password);
+            await client.AuthenticateAsync(configuration["Smtp:Username"], configuration["Smtp:Password"]);
         }
         MimeMessage message = new();
         message.From.Add(MailboxAddress.Parse(options.Sender));

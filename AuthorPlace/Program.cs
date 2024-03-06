@@ -28,6 +28,7 @@ Persistence persistence = Persistence.EFCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddUserSecrets("secrets.json");
 builder.Host.UseSerilog((hostContext, loggerConfiguration) => loggerConfiguration.ReadFrom.Configuration(hostContext.Configuration));
 builder.Services.AddRazorPages();
 builder.Services.AddMvc(options =>
