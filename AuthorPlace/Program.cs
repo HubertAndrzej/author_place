@@ -57,25 +57,26 @@ IServiceCollection? songService = persistence switch
     Persistence.EFCore => builder.Services.AddTransient<ISongService, EFCoreSongService>(),
     _ => builder.Services.AddScoped<ISongService, EFCoreSongService>()
 };
-IdentityBuilder? identity = persistence switch
+IdentityBuilder? identityBuilder = builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
-    Persistence.EFCore => builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
-    {
-        options.Lockout.AllowedForNewUsers = true;
-        options.Lockout.MaxFailedAccessAttempts = 5;
-        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-        options.Password.RequireDigit = true;
-        options.Password.RequiredLength = 8;
-        options.Password.RequireUppercase = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireNonAlphanumeric = true;
-        options.Password.RequiredUniqueChars = 4;
-        options.SignIn.RequireConfirmedAccount = true;
-    })
+    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredUniqueChars = 4;
+    options.SignIn.RequireConfirmedAccount = true;
+})
     .AddClaimsPrincipalFactory<CustomClaimsPrincipalFactory>()
-    .AddPasswordValidator<CommonPasswordValidator<ApplicationUser>>()
-    .AddEntityFrameworkStores<AuthorPlaceDbContext>(),
-    _ => builder.Services.AddDefaultIdentity<ApplicationUser>().AddEntityFrameworkStores<AuthorPlaceDbContext>(),
+    .AddPasswordValidator<CommonPasswordValidator<ApplicationUser>>();
+IdentityBuilder? identityStore = persistence switch
+{
+    Persistence.AdoNet => identityBuilder.AddUserStore<AdoNetUserStore>(),
+    Persistence.EFCore => identityBuilder.AddEntityFrameworkStores<AuthorPlaceDbContext>(),
+    _ => identityBuilder.AddEntityFrameworkStores<AuthorPlaceDbContext>(),
 };
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
