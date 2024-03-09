@@ -93,6 +93,12 @@ builder.Services.Configure<CacheDurationOptions>(builder.Configuration.GetSectio
 builder.Services.Configure<ImageSizeOptions>(builder.Configuration.GetSection("ImageSize"));
 builder.Services.Configure<KestrelServerOptions>(builder.Configuration.GetSection("Kestrel"));
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
+builder.Services.AddAuthentication().AddFacebook(options =>
+{
+    options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
+    options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+});
 
 WebApplication app = builder.Build();
 app.UseExceptionHandler("/Error");
@@ -107,4 +113,5 @@ app.UseEndpoints(routeBuilder =>
     routeBuilder.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
     routeBuilder.MapRazorPages();
 });
+app.UseHttpsRedirection();
 app.Run();
