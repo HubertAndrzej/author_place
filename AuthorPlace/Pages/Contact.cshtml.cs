@@ -1,3 +1,4 @@
+using AspNetCore.ReCaptcha;
 using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.ViewModels.Albums;
 using Microsoft.AspNetCore.Mvc;
@@ -6,11 +7,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AuthorPlace.Pages
 {
+    [ValidateReCaptcha]
     public class ContactModel : PageModel
     {
         public AlbumDetailViewModel? Album { get; private set; }
 
-        [Required(ErrorMessage = "The question could not be empty")]
+        [Required(ErrorMessage = "The question could not be empty.")]
         [Display(Name = "Text of the question")]
         [BindProperty]
         public string? Question { get; set; }

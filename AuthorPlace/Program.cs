@@ -1,3 +1,4 @@
+using AspNetCore.ReCaptcha;
 using AuthorPlace.Customizations.Claims;
 using AuthorPlace.Customizations.ModelBinders;
 using AuthorPlace.Models.Entities;
@@ -110,6 +111,7 @@ builder.Services.AddAuthentication().AddFacebook(options =>
     options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
     options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
 });
+builder.Services.AddReCaptcha(builder.Configuration.GetSection("ReCaptcha"));
 
 WebApplication app = builder.Build();
 app.UseExceptionHandler("/Error");

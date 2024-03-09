@@ -11,7 +11,7 @@
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
             <h2>Create a new account.</h2>
             <hr />
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-floating my-3">
                 <input asp-for="Input.FullName" class="form-control" />
                 <label asp-for="Input.FullName"></label>
@@ -32,6 +32,7 @@
                 <label asp-for="Input.ConfirmPassword"></label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
+            <recaptcha />
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-outline-info my-3">Register</button>
         </form>
     </div>
