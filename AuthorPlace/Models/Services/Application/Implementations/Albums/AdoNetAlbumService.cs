@@ -9,8 +9,10 @@ using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.ValueObjects;
 using AuthorPlace.Models.ViewModels.Albums;
 using AuthorPlace.Models.ViewModels.Songs;
+using Ganss.Xss;
 using Microsoft.Extensions.Options;
 using System.Data;
+using System.Security.Claims;
 
 namespace AuthorPlace.Models.Services.Application.Implementations.Albums;
 
@@ -18,13 +20,17 @@ public class AdoNetAlbumService : IAlbumService
 {
     private readonly IDatabaseAccessor databaseAccessor;
     private readonly IImagePersister imagePersister;
+    private readonly IHttpContextAccessor httpContextAccessor;
+    private readonly IEmailClient emailClient;
     private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
     private readonly ILogger logger;
 
-    public AdoNetAlbumService(IDatabaseAccessor databaseAccessor, IImagePersister imagePersister, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
+    public AdoNetAlbumService(IDatabaseAccessor databaseAccessor, IImagePersister imagePersister, IHttpContextAccessor httpContextAccessor, IEmailClient emailClient, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
     {
         this.databaseAccessor = databaseAccessor;
         this.imagePersister = imagePersister;
+        this.httpContextAccessor = httpContextAccessor;
+        this.emailClient = emailClient;
         this.albumsOptions = albumsOptions;
         logger = loggerFactory.CreateLogger("Albums");
     }
@@ -92,10 +98,21 @@ public class AdoNetAlbumService : IAlbumService
     public async Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel)
     {
         string title = inputModel.Title!;
-        string author = "Hub Sobo";
+        string author;
+        string authorId;
+
         try
         {
-            FormattableString insertQuery = $"INSERT INTO Albums (Title, Author, ImagePath, Rating, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount, Status) VALUES ({title}, {author}, '/placeholder.jpg', 0, 'EUR', 0, 'EUR', 0, {nameof(Status.Drafted)});";
+            author = httpContextAccessor.HttpContext!.User.FindFirst("FullName")!.Value;
+            authorId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        }
+        catch (NullReferenceException)
+        {
+            throw new UserUnknownException();
+        }
+        try
+        {
+            FormattableString insertQuery = $"INSERT INTO Albums (Title, Author, AuthorId, ImagePath, Rating, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount, Status) VALUES ({title}, {author}, {authorId}, '/placeholder.jpg', 0, 'EUR', 0, 'EUR', 0, {nameof(Status.Drafted)});";
             await databaseAccessor.CommandAsync(insertQuery);
             FormattableString albumQuery = $"SELECT last_insert_rowid();";
             int albumId = await databaseAccessor.ScalarAsync<int>(albumQuery);
@@ -189,5 +206,43 @@ public class AdoNetAlbumService : IAlbumService
         FormattableString query = $"SELECT Author FROM Albums WHERE Id LIKE {id};";
         string author = await databaseAccessor.ScalarAsync<string>(query);
         return author;
+    }
+
+    public async Task SendQuestionToAlbumAuthorAsync(int id, string? question)
+    {
+        FormattableString query = $"SELECT Title, Email FROM Albums WHERE Id={id};";
+        DataSet dataSet = await databaseAccessor.QueryAsync(query);
+        DataTable dataTable = dataSet.Tables[0];
+        if (dataTable.Rows.Count == 0)
+        {
+            logger.LogWarning("Album {id} not found", id);
+            throw new AlbumNotFoundException(id);
+        }
+        string? albumTitle = Convert.ToString(dataTable.Rows[0]["Title"]);
+        string? albumEmail = Convert.ToString(dataTable.Rows[0]["Email"]);
+        string userFullName;
+        string userEmail;
+        try
+        {
+            userFullName = httpContextAccessor.HttpContext!.User.FindFirst("FullName")!.Value;
+            userEmail = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.Email)!.Value;
+        }
+        catch (NullReferenceException)
+        {
+            throw new UserUnknownException();
+        }
+        HtmlSanitizer htmlSanitizer = new();
+        htmlSanitizer.AllowedTags.Clear();
+        question = htmlSanitizer.Sanitize(question!);
+        string subject = $"Question for album '{albumTitle}'";
+        string message = $"<p>'{userFullName}' (<a href=\"{userEmail}\">{userEmail}</a>) sent the following question:</p>\n<p>{question}</p>";
+        try
+        {
+            await emailClient.SendEmailAsync(albumEmail!, userEmail, subject, message);
+        }
+        catch
+        {
+            throw new SendException();
+        }
     }
 }

@@ -23,6 +23,9 @@
                     <price current-price="@Model.CurrentPrice" full-price="@Model.FullPrice"></price>
                 </div>
                 <img src="@Model.ImagePath" class="img-fluid album-image" alt="@Model.Title" asp-append-version="true">
+                <div class="d-grid gap-2">
+                    <a class="btn btn-outline-info mt-3" asp-page="/Contact" asp-route-id="@Model.Id"><i class="fa-solid fa-envelope"></i> Ask the author a question</a>
+                </div>
             </aside>
         </div>
     </div>

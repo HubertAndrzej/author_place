@@ -23,7 +23,15 @@ public class ErrorViewSelectorService : IErrorViewSelectorService
                 statusCode: HttpStatusCode.NotFound,
                 viewName: "AlbumNotFound"),
 
-            _ => new ErrorViewData(title: "Error")
+            SendException => new ErrorViewData(
+                title: $"The message could not be sent",
+                statusCode: HttpStatusCode.InternalServerError,
+                viewName: "Index"),
+
+            _ => new ErrorViewData(
+                title: "Error",
+                statusCode: HttpStatusCode.BadRequest,
+                viewName: "Index")
         };
     }
 }

@@ -1,0 +1,15 @@
+﻿@page
+@model AuthorPlace.Pages.ContactModel
+<h1>Ask @Model.Album!.Author a question about @Model.Album!.Title</h1>
+<form method="post">
+    <div class="row">
+        <div class="col-md-12">
+            <div asp-validation-summary="All"></div>
+            <label class="display-label" asp-for="Question"></label>
+            <textarea asp-for="Question" class="form-control input" rows="10"></textarea>
+            <span asp-validation-for="Question"></span>
+            <button type="submit" class="btn btn-outline-info mt-3">Send question <i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+</form>
+<partial name="_Validation" /> 

@@ -15,4 +15,5 @@ public interface IAlbumService
     public Task RemoveAlbumAsync(AlbumDeleteInputModel inputModel);
     public Task<bool> IsAlbumUniqueAsync(string title, string author, int id);
     public Task<string> GetAuthorAsync(int id);
+    public Task SendQuestionToAlbumAuthorAsync(int id, string? question);
 }

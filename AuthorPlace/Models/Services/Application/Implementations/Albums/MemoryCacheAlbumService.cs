@@ -79,6 +79,11 @@ public class MemoryCacheAlbumService : ICachedAlbumService
         memoryCache.Remove($"Album{inputModel.Id}");
     }
 
+    public Task SendQuestionToAlbumAuthorAsync(int id, string? question)
+    {
+        return albumService.SendQuestionToAlbumAuthorAsync(id, question);
+    }
+
     public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
     {
         return await albumService.IsAlbumUniqueAsync(title, author, id);

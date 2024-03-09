@@ -93,6 +93,7 @@ builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => option
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
 builder.Services.AddSingleton<IImagePersister, MagickNetImagePersister>();
 builder.Services.AddSingleton<IEmailSender, MailKitEmailSender>();
+builder.Services.AddSingleton<IEmailClient, MailKitEmailSender>();
 builder.Services.AddTransient<ICachedAlbumService, MemoryCacheAlbumService>();
 builder.Services.AddTransient<ICachedSongService, MemoryCacheSongService>();
 builder.Services.AddResponseCaching();
