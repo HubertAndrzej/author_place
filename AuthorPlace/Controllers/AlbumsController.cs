@@ -2,6 +2,7 @@
 using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.ViewModels.Albums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorPlace.Controllers;
@@ -15,6 +16,7 @@ public class AlbumsController : Controller
         this.albumService = albumService;
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Index(AlbumListInputModel inputModel)
     {
         ListViewModel<AlbumViewModel> albums = await albumService.GetAlbumsAsync(inputModel);
@@ -27,6 +29,7 @@ public class AlbumsController : Controller
         return View(viewModel);
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Detail(int id)
     {
         AlbumDetailViewModel viewModel = await albumService.GetAlbumAsync(id);

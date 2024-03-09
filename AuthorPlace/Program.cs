@@ -16,9 +16,11 @@ using AuthorPlace.Models.Validators.Identity;
 using AuthorPlace.Models.Validators.Songs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -30,13 +32,21 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 builder.Configuration.AddUserSecrets("secrets.json");
 builder.Host.UseSerilog((hostContext, loggerConfiguration) => loggerConfiguration.ReadFrom.Configuration(hostContext.Configuration));
-builder.Services.AddRazorPages();
 builder.Services.AddMvc(options =>
 {
     CacheProfile cacheProfile = new();
     builder.Configuration.Bind("ResponseCache:Home", cacheProfile);
     options.CacheProfiles.Add("Home", cacheProfile);
     options.ModelBinderProviders.Insert(0, new DecimalModelBinderProvider());
+    AuthorizationPolicyBuilder policyBuilder = new();
+    AuthorizationPolicy policy = policyBuilder.RequireAuthenticatedUser().Build();
+    AuthorizeFilter filter = new(policy);
+    options.Filters.Add(filter);
+});
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AllowAnonymousToAreaFolder("Identity", "/Account");
+    options.Conventions.AllowAnonymousToPage("/Privacy");
 });
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumUpdateValidator>();

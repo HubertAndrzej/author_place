@@ -1,12 +1,14 @@
 ﻿using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.ViewModels.Albums;
 using AuthorPlace.Models.ViewModels.Home;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorPlace.Controllers;
 
 public class HomeController : Controller
 {
+    [AllowAnonymous]
     [ResponseCache(CacheProfileName = "Home")]
     public async Task<IActionResult> Index([FromServices] ICachedAlbumService albumService)
     {
