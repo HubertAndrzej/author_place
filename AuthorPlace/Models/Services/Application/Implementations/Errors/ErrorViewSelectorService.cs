@@ -14,7 +14,7 @@ public class ErrorViewSelectorService : IErrorViewSelectorService
         return exception switch
         {
             null => new ErrorViewData(
-                title: $"Page '{context.Request.Path}' not found",
+                title: $"Page not found",
                 statusCode: HttpStatusCode.NotFound,
                 viewName: "NotFound"),
 

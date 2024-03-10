@@ -245,4 +245,10 @@ public class AdoNetAlbumService : IAlbumService
             throw new SendException();
         }
     }
+
+    public Task<string> GetAlbumAuthorIdAsync(int albumId)
+    {
+        FormattableString query = $"SELECT AuthorId FROM Albums WHERE Id={albumId};";
+        return databaseAccessor.ScalarAsync<string>(query);
+    }
 }

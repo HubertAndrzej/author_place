@@ -228,6 +228,14 @@ public class EFCoreAlbumService : IAlbumService
         }
     }
 
+    public Task<string> GetAlbumAuthorIdAsync(int albumId)
+    {
+        return dbContext.Albums!
+            .Where(album => album.Id == albumId)
+            .Select(album => album.AuthorId)
+            .FirstOrDefaultAsync()!;
+    }
+
     public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
     {
         bool isAlbumUnique = await dbContext.Albums!.AnyAsync(album => EF.Functions.Like(album.Title!, title) && EF.Functions.Like(album.Author!, author) && album.Id != id);

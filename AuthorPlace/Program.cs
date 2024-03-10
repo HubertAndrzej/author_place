@@ -1,4 +1,5 @@
 using AspNetCore.ReCaptcha;
+using AuthorPlace.Customizations.Authorizations;
 using AuthorPlace.Customizations.Claims;
 using AuthorPlace.Customizations.ModelBinders;
 using AuthorPlace.Models.Entities;
@@ -91,6 +92,7 @@ IdentityBuilder? identityStore = persistence switch
     _ => identityBuilder.AddEntityFrameworkStores<AuthorPlaceDbContext>(),
 };
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
+builder.Services.AddScoped<IAuthorizationHandler, AlbumAuthorRequirementHandler>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
 builder.Services.AddSingleton<IImagePersister, MagickNetImagePersister>();
@@ -112,6 +114,13 @@ builder.Services.AddAuthentication().AddFacebook(options =>
 {
     options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
     options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+});
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AlbumAuthor", builder =>
+    {
+        builder.Requirements.Add(new AlbumAuthorRequirement());
+    });
 });
 builder.Services.AddReCaptcha(builder.Configuration.GetSection("ReCaptcha"));
 

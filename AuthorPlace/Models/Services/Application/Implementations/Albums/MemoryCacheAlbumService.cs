@@ -84,6 +84,15 @@ public class MemoryCacheAlbumService : ICachedAlbumService
         return albumService.SendQuestionToAlbumAuthorAsync(id, question);
     }
 
+    public Task<string> GetAlbumAuthorIdAsync(int albumId)
+    {
+        return memoryCache.GetOrCreateAsync($"AlbumAuthorId{albumId}", cacheEntry =>
+        {
+            cacheEntry.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
+            return albumService.GetAlbumAuthorIdAsync(albumId);
+        });
+    }
+
     public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
     {
         return await albumService.IsAlbumUniqueAsync(title, author, id);

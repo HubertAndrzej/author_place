@@ -126,6 +126,25 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         return albumService.SendQuestionToAlbumAuthorAsync(id, question);
     }
 
+    public async Task<string> GetAlbumAuthorIdAsync(int albumId)
+    {
+        string key = $"AlbumAuthorId{albumId}";
+        string serializedObject = await distributedCache.GetStringAsync(key);
+        if (serializedObject == null)
+        {
+            string authorId = await albumService.GetAlbumAuthorIdAsync(albumId);
+            serializedObject = JsonConvert.SerializeObject(authorId);
+            DistributedCacheEntryOptions cacheOptions = new();
+            cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
+            await distributedCache.SetStringAsync(key, serializedObject, cacheOptions);
+            return authorId;
+        }
+        else
+        {
+            return JsonConvert.DeserializeObject<string>(serializedObject)!;
+        }
+    }
+
     public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
     {
         return await albumService.IsAlbumUniqueAsync(title, author, id);
