@@ -2,11 +2,13 @@
 
 using System.ComponentModel.DataAnnotations;
 using AuthorPlace.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace AuthorPlace.Areas.Identity.Pages.Account
 {
+    [AllowAnonymous]
     public class LoginWithRecoveryCodeModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;

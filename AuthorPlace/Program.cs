@@ -46,7 +46,6 @@ builder.Services.AddMvc(options =>
 });
 builder.Services.AddRazorPages(options =>
 {
-    options.Conventions.AllowAnonymousToAreaFolder("Identity", "/Account");
     options.Conventions.AllowAnonymousToPage("/Privacy");
 });
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumCreateValidator>();

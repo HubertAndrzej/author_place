@@ -6,6 +6,7 @@ using System.Text.Encodings.Web;
 using AspNetCore.ReCaptcha;
 using AuthorPlace.Models.Entities;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace AuthorPlace.Areas.Identity.Pages.Account
 {
+    [AllowAnonymous]
     [ValidateReCaptcha]
     public class RegisterModel : PageModel
     {
