@@ -1,4 +1,5 @@
-﻿using AuthorPlace.Models.Exceptions.Application;
+﻿using AuthorPlace.Models.Enums;
+using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.ViewModels.Albums;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorPlace.Controllers;
 
+[Authorize(Roles = nameof(Role.Author))]
 public class AlbumsController : Controller
 {
     private readonly IAlbumService albumService;

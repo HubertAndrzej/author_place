@@ -9,7 +9,7 @@ using System.Security.Claims;
 
 namespace AuthorPlace.Pages.Admin
 {
-    [AllowAnonymous]
+    [Authorize(Roles = nameof(Role.Administrator))]
     public class UsersModel : PageModel
     {
         private readonly UserManager<ApplicationUser> userManager;

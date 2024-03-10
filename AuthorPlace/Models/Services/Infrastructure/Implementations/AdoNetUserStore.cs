@@ -148,7 +148,7 @@ public class AdoNetUserStore : IUserStore<ApplicationUser>, IUserClaimStore<Appl
 
     public async Task<IList<ApplicationUser>> GetUsersForClaimAsync(Claim claim, CancellationToken token)
     {
-        DataSet dataSet = await databaseAccessor.QueryAsync($"SELECT * FROM AspNetUserClaims WHERE ClaimType={claim.Type} AND ClaimValue={claim.Value}", token);
+        DataSet dataSet = await databaseAccessor.QueryAsync($"SELECT AspNetUsers.* FROM AspNetUserClaims INNER JOIN AspNetUsers ON AspNetUserClaims.UserId = AspNetUsers.Id WHERE AspNetUserClaims.ClaimType={claim.Type} AND AspNetUserClaims.ClaimValue={claim.Value}", token);
         List<ApplicationUser> users = dataSet.Tables[0].AsEnumerable().Select(dataRow => dataRow.ToApplicationUser()).ToList();
         return users;
     }
