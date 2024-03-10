@@ -104,6 +104,7 @@ builder.Services.Configure<CacheDurationOptions>(builder.Configuration.GetSectio
 builder.Services.Configure<ImageSizeOptions>(builder.Configuration.GetSection("ImageSize"));
 builder.Services.Configure<KestrelServerOptions>(builder.Configuration.GetSection("Kestrel"));
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.Configure<UsersOptions>(builder.Configuration.GetSection("Users"));
 builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
 builder.Services.AddAuthentication().AddFacebook(options =>
 {
