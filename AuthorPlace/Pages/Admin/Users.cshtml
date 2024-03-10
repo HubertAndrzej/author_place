@@ -17,10 +17,37 @@
         <div class="col-md-4">
             <label class="display-label my-3">Action</label>
             <div>
-                <button type="submit" class="btn btn-outline-success" asp-page-handler="Assign">Assign role</button>
-                <button type="submit" class="btn btn-outline-danger" asp-page-handler="Revoke">Revoke role</button>
+                <button type="submit" class="btn btn-outline-success" asp-page-handler="Assign" asp-route-inrole="@((int)Model.InRole)">Assign role</button>
+                <button type="submit" class="btn btn-outline-danger" asp-page-handler="Revoke" asp-route-inrole="@((int)Model.InRole)">Revoke role</button>
             </div>
         </div>
     </div>
 </form>
+<ul class="nav nav-tabs input my-3">
+    @foreach (SelectListItem item in Html.GetEnumSelectList<Role>())
+    {
+        string activeClass = item.Value == ((int)Model.InRole).ToString() ? "active" : string.Empty;
+        <li class="nav-item">
+            <a class="nav-link link-info link-offset-2 link-underline-opacity-0 link-underline-opacity-25-hover @activeClass" asp-route-inrole="@item.Value">@item.Text</a>
+        </li>
+    }
+</ul>
+@foreach (ApplicationUser user in Model.Users!)
+{
+    <hr />
+    <div class="row my-3">
+        <div class="col-md-6">@user.FullName</div>
+        <div class="col-md-6">@user.Email</div>
+    </div>
+}
+@if (Model.Users!.Count != 0)
+{
+    <hr />
+}
+else
+{
+    <br />
+    <p class="text-center text-muted">This role is not assigned to any user</p>
+    <br />
+}
 <partial name="_Validation" />

@@ -26,5 +26,14 @@
 {
     <partial name="Albums/_AlbumLine" model="@album" />
 }
-<hr>
+@if (Model.Albums!.Results!.Count != 0)
+{
+    <hr>
+}
+else
+{
+    <br>
+    <p class="text-center text-muted">No albums existing</p>
+    <br>
+}
 <vc:pagination-bar model="@Model"></vc:pagination-bar>

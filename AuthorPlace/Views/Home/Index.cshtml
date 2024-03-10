@@ -18,7 +18,16 @@
     {
         <partial name="Albums/_AlbumLine" model="@album" />
     }
-    <hr>
+    @if (Model.BestRatingAlbums!.Count != 0)
+    {
+        <hr>
+    }
+    else
+    {
+        <br>
+        <p class="text-center text-muted">No albums existing</p>
+        <br>
+    }
 </section>
 <br>
 <br>
@@ -28,6 +37,15 @@
     {
         <partial name="Albums/_AlbumLine" model="@album" />
     }
-    <hr>
+    @if (Model.MostRecentAlbums!.Count != 0)
+    {
+        <hr>
+    }
+    else
+    {
+        <br>
+        <p class="text-center text-muted">No albums existing</p>
+        <br>
+    }
 </section>
 <br>
