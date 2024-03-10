@@ -15,6 +15,7 @@ using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.Validators.Albums;
 using AuthorPlace.Models.Validators.Identity;
 using AuthorPlace.Models.Validators.Songs;
+using AuthorPlace.Models.Validators.Users;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
@@ -54,6 +55,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<AlbumDeleteValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongUpdateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongDeleteValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UserRoleValidator>();
 builder.Services.AddFluentValidationClientsideAdapters(clientSide => clientSide.Add(typeof(IRemotePropertyValidator), (context, description, validator) => new RemoteClientValidator(description, validator)));
 IServiceCollection? albumService = persistence switch
 {

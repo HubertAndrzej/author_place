@@ -1,0 +1,26 @@
+﻿@page
+@model AuthorPlace.Pages.Admin.UsersModel
+<h1>@ViewData["Title"]</h1>
+<form method="post">
+    <div class="row">
+        <div class="col-md-12" asp-validation-summary="All"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <label class="display-label my-3" asp-for="Input!.Email"></label>
+            <input type="text" class="form-control input" asp-for="Input!.Email" placeholder="Email">
+        </div>
+        <div class="col-md-4">
+            <label class="display-label my-3" asp-for="Input!.Role"></label>
+            <select class="form-select input" asp-items="@Html.GetEnumSelectList<Role>()" asp-for="Input!.Role"></select>
+        </div>
+        <div class="col-md-4">
+            <label class="display-label my-3">Action</label>
+            <div>
+                <button type="submit" class="btn btn-outline-success" asp-page-handler="Assign">Assign role</button>
+                <button type="submit" class="btn btn-outline-danger" asp-page-handler="Revoke">Revoke role</button>
+            </div>
+        </div>
+    </div>
+</form>
+<partial name="_Validation" />
