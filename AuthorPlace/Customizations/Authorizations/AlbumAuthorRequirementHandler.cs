@@ -19,6 +19,11 @@ namespace AuthorPlace.Customizations.Authorizations
         {
             string userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
             int albumId = Convert.ToInt32(httpContextAccessor.HttpContext!.Request.RouteValues["id"]);
+            if (albumId == 0)
+            {
+                context.Fail();
+                return;
+            }
             string authorId = await albumService.GetAlbumAuthorIdAsync(albumId);
             if (userId == authorId)
             {

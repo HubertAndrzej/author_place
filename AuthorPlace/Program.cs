@@ -23,7 +23,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -41,10 +40,6 @@ builder.Services.AddMvc(options =>
     builder.Configuration.Bind("ResponseCache:Home", cacheProfile);
     options.CacheProfiles.Add("Home", cacheProfile);
     options.ModelBinderProviders.Insert(0, new DecimalModelBinderProvider());
-    AuthorizationPolicyBuilder policyBuilder = new();
-    AuthorizationPolicy policy = policyBuilder.RequireAuthenticatedUser().Build();
-    AuthorizeFilter filter = new(policy);
-    options.Filters.Add(filter);
 });
 builder.Services.AddRazorPages(options =>
 {
@@ -117,7 +112,7 @@ builder.Services.AddAuthentication().AddFacebook(options =>
 });
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AlbumAuthor", builder =>
+    options.AddPolicy(nameof(Policy.AlbumAuthor), builder =>
     {
         builder.Requirements.Add(new AlbumAuthorRequirement());
     });
@@ -134,8 +129,8 @@ app.UseAuthorization();
 app.UseResponseCaching();
 app.UseEndpoints(routeBuilder =>
 {
-    routeBuilder.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
-    routeBuilder.MapRazorPages();
+    routeBuilder.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}").RequireAuthorization();
+    routeBuilder.MapRazorPages().RequireAuthorization();
 });
 app.UseHttpsRedirection();
 app.Run();

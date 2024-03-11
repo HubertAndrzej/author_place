@@ -66,6 +66,7 @@ public class AlbumsController : Controller
         return View(inputModel);
     }
 
+    [Authorize(Policy = nameof(Policy.AlbumAuthor))]
     public async Task<IActionResult> Edit(int id)
     {
         ViewBag.Title = "Update album";
@@ -73,6 +74,7 @@ public class AlbumsController : Controller
         return View(inputModel);
     }
 
+    [Authorize(Policy = nameof(Policy.AlbumAuthor))]
     [HttpPost]
     public async Task<IActionResult> Edit(AlbumUpdateInputModel inputModel)
     {
@@ -101,6 +103,7 @@ public class AlbumsController : Controller
         return View(inputModel);
     }
 
+    [Authorize(Policy = nameof(Policy.AlbumAuthor))]
     [HttpPost]
     public async Task<IActionResult> Remove(AlbumDeleteInputModel inputModel)
     {
