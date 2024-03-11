@@ -39,7 +39,7 @@ namespace AuthorPlace.Customizations.Authorizations
                     case "songs":
                         albumId = (await songService.GetSongAsync(id)).AlbumId;
                         break;
-                    case "courses":
+                    case "albums":
                         albumId = id;
                         break;
                     default:
