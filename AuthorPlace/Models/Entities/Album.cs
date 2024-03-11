@@ -31,6 +31,7 @@ public class Album
     public Status Status { get; private set; }
     public virtual ICollection<Song> Songs { get; private set; } = new List<Song>();
     public virtual ApplicationUser? User { get; private set; }
+    public virtual ICollection<ApplicationUser>? SubscribedUsers { get; private set; }
 
     public void ChangeTitle(string title)
     {

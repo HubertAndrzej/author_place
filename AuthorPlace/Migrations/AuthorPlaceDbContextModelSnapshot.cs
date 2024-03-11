@@ -161,6 +161,33 @@ namespace AuthorPlace.Migrations
                     b.ToTable("Songs", (string)null);
                 });
 
+            modelBuilder.Entity("AuthorPlace.Models.Entities.Subscription", b =>
+                {
+                    b.Property<int>("AlbumId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("PaymentDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PaymentType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Vote")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("AlbumId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Subscriptions", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -296,7 +323,7 @@ namespace AuthorPlace.Migrations
             modelBuilder.Entity("AuthorPlace.Models.Entities.Album", b =>
                 {
                     b.HasOne("AuthorPlace.Models.Entities.ApplicationUser", "User")
-                        .WithMany("Albums")
+                        .WithMany("AuthoredAlbums")
                         .HasForeignKey("AuthorId");
 
                     b.OwnsOne("AuthorPlace.Models.ValueObjects.Money", "CurrentPrice", b1 =>
@@ -363,6 +390,50 @@ namespace AuthorPlace.Migrations
                     b.Navigation("Album");
                 });
 
+            modelBuilder.Entity("AuthorPlace.Models.Entities.Subscription", b =>
+                {
+                    b.HasOne("AuthorPlace.Models.Entities.Album", "Album")
+                        .WithMany()
+                        .HasForeignKey("AlbumId");
+
+                    b.HasOne("AuthorPlace.Models.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("AuthorPlace.Models.ValueObjects.Money", "Paid", b1 =>
+                        {
+                            b1.Property<int>("SubscriptionAlbumId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("SubscriptionUserId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<double>("Amount")
+                                .HasColumnType("REAL")
+                                .HasColumnName("Paid_Amount");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("Paid_Currency");
+
+                            b1.HasKey("SubscriptionAlbumId", "SubscriptionUserId");
+
+                            b1.ToTable("Subscriptions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SubscriptionAlbumId", "SubscriptionUserId");
+                        });
+
+                    b.Navigation("Album");
+
+                    b.Navigation("Paid");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -421,7 +492,7 @@ namespace AuthorPlace.Migrations
 
             modelBuilder.Entity("AuthorPlace.Models.Entities.ApplicationUser", b =>
                 {
-                    b.Navigation("Albums");
+                    b.Navigation("AuthoredAlbums");
                 });
 #pragma warning restore 612, 618
         }
