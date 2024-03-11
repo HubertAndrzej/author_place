@@ -8,25 +8,31 @@ using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
 using AuthorPlace.Models.ViewModels.Albums;
+using Ganss.Xss;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Data;
 using System.Linq.Dynamic.Core;
+using System.Security.Claims;
 
 namespace AuthorPlace.Models.Services.Application.Implementations.Albums;
 
 public class EFCoreAlbumService : IAlbumService
 {
     private readonly AuthorPlaceDbContext dbContext;
+    private readonly IHttpContextAccessor httpContextAccessor;
     private readonly IImagePersister imagePersister;
+    private readonly IEmailClient emailClient;
     private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
     private readonly ILogger logger;
 
-    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, IImagePersister imagePersister, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
+    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, IHttpContextAccessor httpContextAccessor, IImagePersister imagePersister, IEmailClient emailClient, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
     {
         this.dbContext = dbContext;
+        this.httpContextAccessor = httpContextAccessor;
         this.imagePersister = imagePersister;
+        this.emailClient = emailClient;
         this.albumsOptions = albumsOptions;
         logger = loggerFactory.CreateLogger("Albums");
     }
@@ -89,8 +95,20 @@ public class EFCoreAlbumService : IAlbumService
     public async Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel)
     {
         string title = inputModel.Title!;
-        string author = "Hub Sobo";
-        Album album = new(title, author);
+        string author;
+        string authorId;
+        string email;
+        try
+        {
+            author = httpContextAccessor.HttpContext!.User.FindFirst("FullName")!.Value;
+            authorId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            email = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.Email)!.Value;
+        }
+        catch (NullReferenceException)
+        {
+            throw new UserUnknownException();
+        }
+        Album album = new(title, author, authorId, email);
         dbContext.Add(album);
         try
         {
@@ -176,9 +194,53 @@ public class EFCoreAlbumService : IAlbumService
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
+    public async Task SendQuestionToAlbumAuthorAsync(int id, string? question)
     {
-        bool isAlbumUnique = await dbContext.Albums!.AnyAsync(album => EF.Functions.Like(album.Title!, title) && EF.Functions.Like(album.Author!, author) && album.Id != id);
+        Album? album = await dbContext.Albums!.FindAsync(id);
+        if (album == null)
+        {
+            logger.LogWarning("Album {id} not found", id);
+            throw new AlbumNotFoundException(id);
+        }
+        string albumTitle = album.Title!;
+        string albumEmail = album.Email!;
+        string userFullName;
+        string userEmail;
+        try
+        {
+            userFullName = httpContextAccessor.HttpContext!.User.FindFirst("FullName")!.Value;
+            userEmail = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.Email)!.Value;
+        }
+        catch (NullReferenceException)
+        {
+            throw new UserUnknownException();
+        }
+        HtmlSanitizer htmlSanitizer = new();
+        htmlSanitizer.AllowedTags.Clear();
+        question = htmlSanitizer.Sanitize(question!);
+        string subject = $"Question for album '{albumTitle}'";
+        string message = $"<p>'{userFullName}' (<a href=\"{userEmail}\">{userEmail}</a>) sent the following question:</p>\n<p>{question}</p>";
+        try
+        {
+            await emailClient.SendEmailAsync(albumEmail, userEmail, subject, message);
+        }
+        catch
+        {
+            throw new SendException();
+        }
+    }
+
+    public Task<string> GetAlbumAuthorIdAsync(int albumId)
+    {
+        return dbContext.Albums!
+            .Where(album => album.Id == albumId)
+            .Select(album => album.AuthorId)
+            .FirstOrDefaultAsync()!;
+    }
+
+    public async Task<bool> IsAlbumUniqueAsync(string title, string authorId, int id)
+    {
+        bool isAlbumUnique = await dbContext.Albums!.AnyAsync(album => EF.Functions.Like(album.Title!, title) && EF.Functions.Like(album.AuthorId!, authorId) && album.Id != id);
         return !isAlbumUnique;
     }
 

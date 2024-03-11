@@ -1,11 +1,14 @@
-﻿using AuthorPlace.Models.Exceptions.Application;
+﻿using AuthorPlace.Models.Enums;
+using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.InputModels.Songs;
 using AuthorPlace.Models.Services.Application.Interfaces.Songs;
 using AuthorPlace.Models.ViewModels.Songs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorPlace.Controllers;
 
+[Authorize(Roles = nameof(Role.Author))]
 public class SongsController : Controller
 {
     private readonly ICachedSongService songService;

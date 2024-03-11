@@ -121,9 +121,33 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         await distributedCache.RemoveAsync($"Album{inputModel.Id}");
     }
 
-    public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
+    public Task SendQuestionToAlbumAuthorAsync(int id, string? question)
     {
-        return await albumService.IsAlbumUniqueAsync(title, author, id);
+        return albumService.SendQuestionToAlbumAuthorAsync(id, question);
+    }
+
+    public async Task<string> GetAlbumAuthorIdAsync(int albumId)
+    {
+        string key = $"AlbumAuthorId{albumId}";
+        string serializedObject = await distributedCache.GetStringAsync(key);
+        if (serializedObject == null)
+        {
+            string authorId = await albumService.GetAlbumAuthorIdAsync(albumId);
+            serializedObject = JsonConvert.SerializeObject(authorId);
+            DistributedCacheEntryOptions cacheOptions = new();
+            cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(cacheDurationOptions.CurrentValue.Duration));
+            await distributedCache.SetStringAsync(key, serializedObject, cacheOptions);
+            return authorId;
+        }
+        else
+        {
+            return JsonConvert.DeserializeObject<string>(serializedObject)!;
+        }
+    }
+
+    public async Task<bool> IsAlbumUniqueAsync(string title, string authorId, int id)
+    {
+        return await albumService.IsAlbumUniqueAsync(title, authorId, id);
     }
 
     public async Task<string> GetAuthorAsync(int id)

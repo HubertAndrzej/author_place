@@ -1,0 +1,25 @@
+﻿@inject SignInManager<ApplicationUser> signInManager
+@if (signInManager.IsSignedIn(User))
+{
+    <ul class="navbar-nav ml-auto mb-lg-0">
+        <li class="nav-item">
+            <a class="nav-link active" asp-area="Identity" asp-page="/Account/Manage/Index">Welcome @User.FindFirst("FullName")!.Value</a>
+        </li>
+        <li class="nav-item">
+            <form method="post" asp-area="Identity" asp-page="/Account/Logout">
+                <button class="nav-link active" type="submit">Logout</button>
+            </form>
+        </li>
+    </ul>
+}
+else
+{
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+            <a class="nav-link active" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </li>
+    </ul>
+}

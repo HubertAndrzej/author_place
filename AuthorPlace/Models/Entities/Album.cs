@@ -5,11 +5,12 @@ namespace AuthorPlace.Models.Entities;
 
 public class Album
 {
-    public Album(string title, string author)
+    public Album(string title, string author, string authorId, string email)
     {
         ChangeTitle(title);
-        ChangeAuthor(author);
+        ChangeAuthor(author, authorId);
         ChangeStatus(Status.Drafted);
+        Email = email;
         ImagePath = "/placeholder.jpg";
         FullPrice = new Money(Currency.EUR, 0);
         CurrentPrice = new Money(Currency.EUR, 0);
@@ -20,6 +21,7 @@ public class Album
     public string? Title { get; private set; }
     public string? Description { get; private set; }
     public string ImagePath { get; private set; }
+    public string? AuthorId { get; private set; }
     public string? Author { get; private set; }
     public string? Email { get; private set; }
     public double Rating { get; private set; }
@@ -28,6 +30,7 @@ public class Album
     public string? RowVersion { get; private set; }
     public Status Status { get; private set; }
     public virtual ICollection<Song> Songs { get; private set; } = new List<Song>();
+    public virtual ApplicationUser? User { get; private set; }
 
     public void ChangeTitle(string title)
     {
@@ -38,13 +41,18 @@ public class Album
         Title = title;
     }
 
-    public void ChangeAuthor(string author)
+    public void ChangeAuthor(string author, string authorId)
     {
         if (string.IsNullOrWhiteSpace(author))
         {
             throw new ArgumentException("The album must have an author");
         }
+        if (string.IsNullOrWhiteSpace(authorId))
+        {
+            throw new ArgumentException("The author must have an id");
+        }
         Author = author;
+        AuthorId = authorId;
     }
 
     public void ChangePrices(Money fullPrice, Money currentPrice)

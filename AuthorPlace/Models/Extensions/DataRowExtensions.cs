@@ -1,4 +1,5 @@
-﻿using AuthorPlace.Models.Enums;
+﻿using AuthorPlace.Models.Entities;
+using AuthorPlace.Models.Enums;
 using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.InputModels.Songs;
 using AuthorPlace.Models.ValueObjects;
@@ -105,6 +106,29 @@ public static class DataRowExtensions
             Description = Convert.ToString(dataRow["Description"]),
             Duration = TimeSpan.Parse(Convert.ToString(dataRow["Duration"])!),
             RowVersion = Convert.ToString(dataRow["RowVersion"])
+        };
+    }
+
+    public static ApplicationUser ToApplicationUser(this DataRow dataRow)
+    {
+        return new ApplicationUser
+        {
+            Id = Convert.ToString(dataRow["Id"]),
+            UserName = Convert.ToString(dataRow["UserName"]),
+            NormalizedUserName = Convert.ToString(dataRow["NormalizedUserName"]),
+            Email = Convert.ToString(dataRow["Email"]),
+            NormalizedEmail = Convert.ToString(dataRow["NormalizedEmail"]),
+            EmailConfirmed = Convert.ToBoolean(dataRow["EmailConfirmed"]),
+            PasswordHash = Convert.ToString(dataRow["PasswordHash"]),
+            SecurityStamp = Convert.ToString(dataRow["SecurityStamp"]),
+            ConcurrencyStamp = Convert.ToString(dataRow["ConcurrencyStamp"]),
+            PhoneNumber = Convert.ToString(dataRow["PhoneNumber"]),
+            PhoneNumberConfirmed = Convert.ToBoolean(dataRow["PhoneNumberConfirmed"]),
+            TwoFactorEnabled = Convert.ToBoolean(dataRow["TwoFactorEnabled"]),
+            LockoutEnd = (dataRow["LockoutEnd"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dataRow["LockoutEnd"])),
+            LockoutEnabled = Convert.ToBoolean(dataRow["LockoutEnabled"]),
+            AccessFailedCount = Convert.ToInt32(dataRow["AccessFailedCount"]),
+            FullName = Convert.ToString(dataRow["FullName"])
         };
     }
 }

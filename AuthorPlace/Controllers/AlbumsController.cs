@@ -1,11 +1,14 @@
-﻿using AuthorPlace.Models.Exceptions.Application;
+﻿using AuthorPlace.Models.Enums;
+using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.ViewModels.Albums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorPlace.Controllers;
 
+[Authorize(Roles = nameof(Role.Author))]
 public class AlbumsController : Controller
 {
     private readonly IAlbumService albumService;
@@ -15,6 +18,7 @@ public class AlbumsController : Controller
         this.albumService = albumService;
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Index(AlbumListInputModel inputModel)
     {
         ListViewModel<AlbumViewModel> albums = await albumService.GetAlbumsAsync(inputModel);
@@ -27,6 +31,7 @@ public class AlbumsController : Controller
         return View(viewModel);
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Detail(int id)
     {
         AlbumDetailViewModel viewModel = await albumService.GetAlbumAsync(id);
@@ -61,6 +66,7 @@ public class AlbumsController : Controller
         return View(inputModel);
     }
 
+    [Authorize(Policy = nameof(Policy.AlbumAuthor))]
     public async Task<IActionResult> Edit(int id)
     {
         ViewBag.Title = "Update album";
@@ -68,6 +74,7 @@ public class AlbumsController : Controller
         return View(inputModel);
     }
 
+    [Authorize(Policy = nameof(Policy.AlbumAuthor))]
     [HttpPost]
     public async Task<IActionResult> Edit(AlbumUpdateInputModel inputModel)
     {
@@ -96,6 +103,7 @@ public class AlbumsController : Controller
         return View(inputModel);
     }
 
+    [Authorize(Policy = nameof(Policy.AlbumAuthor))]
     [HttpPost]
     public async Task<IActionResult> Remove(AlbumDeleteInputModel inputModel)
     {
@@ -104,9 +112,9 @@ public class AlbumsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    public async Task<IActionResult> IsAlbumUnique(string title, string author, int id = 0)
+    public async Task<IActionResult> IsAlbumUnique(string title, string authorId, int id = 0)
     {
-        bool result = await albumService.IsAlbumUniqueAsync(title, author, id);
+        bool result = await albumService.IsAlbumUniqueAsync(title, authorId, id);
         return Json(result);
     }
 }

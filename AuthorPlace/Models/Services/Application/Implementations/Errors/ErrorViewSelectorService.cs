@@ -14,7 +14,7 @@ public class ErrorViewSelectorService : IErrorViewSelectorService
         return exception switch
         {
             null => new ErrorViewData(
-                title: $"Page '{context.Request.Path}' not found",
+                title: $"Page not found",
                 statusCode: HttpStatusCode.NotFound,
                 viewName: "NotFound"),
 
@@ -23,7 +23,15 @@ public class ErrorViewSelectorService : IErrorViewSelectorService
                 statusCode: HttpStatusCode.NotFound,
                 viewName: "AlbumNotFound"),
 
-            _ => new ErrorViewData(title: "Error")
+            SendException => new ErrorViewData(
+                title: $"The message could not be sent",
+                statusCode: HttpStatusCode.InternalServerError,
+                viewName: "Index"),
+
+            _ => new ErrorViewData(
+                title: "Error",
+                statusCode: HttpStatusCode.BadRequest,
+                viewName: "Index")
         };
     }
 }

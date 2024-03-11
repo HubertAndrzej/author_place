@@ -57,7 +57,7 @@ hr {
 
 .album-info .subscribe-album {
     margin-bottom: 1em;
-    }
+}
 
 .album-songs .album-duration {
     font-weight: bold;
@@ -86,6 +86,19 @@ hr {
 
 .field-validation-error {
     color: red;
+}
+
+.form-check-input {
+    border-color: #0dcaf0;
+}
+
+.form-check-input:checked {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
+.form-floating > input {
+    border-color: #0dcaf0;
 }
 
 .input {
@@ -119,7 +132,7 @@ hr {
 
 .pagination .page-link:hover {
     color: black;
-    background-color: #0dcaf0;
+    background-color: lightcyan;
     border-color: black;
 }
 
@@ -150,6 +163,26 @@ hr {
 .rating {
     color: #0dcaf0;
     white-space: nowrap;
+}
+
+.tab-selector .nav-link {
+    border-color: #0dcaf0 !important;
+    color: #0dcaf0 !important;
+    margin-bottom: 0;
+}
+
+.tab-selector .nav-item .nav-link.active {
+    background-color: #0dcaf0 !important;
+    border-color: black !important;
+    color: white !important;
+    margin-bottom: 0;
+}
+
+.tab-selector .nav-link:hover {
+    color: black !important;
+    background-color: lightcyan !important;
+    border-color: black !important;
+    margin-bottom: 0;
 }
 
 .validation-summary-errors ul {

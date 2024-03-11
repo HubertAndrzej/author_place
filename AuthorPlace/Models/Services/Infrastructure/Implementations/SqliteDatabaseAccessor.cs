@@ -17,13 +17,13 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
         this.connectionStringsOptions = connectionStringsOptions;
     }
 
-    public async Task<int> CommandAsync(FormattableString formattableSQL)
+    public async Task<int> CommandAsync(FormattableString formattableSQL, CancellationToken token)
     {
         try
         {
-            using SqliteConnection connection = await GetConnection();
+            using SqliteConnection connection = await GetConnection(token);
             using SqliteCommand command = GetCommand(formattableSQL, connection);
-            int affectedRows = await command.ExecuteNonQueryAsync();
+            int affectedRows = await command.ExecuteNonQueryAsync(token);
             return affectedRows;
         }
         catch (SqliteException exception) when (exception.SqliteErrorCode == 19)
@@ -32,13 +32,13 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
         }
     }
 
-    public async Task<DataSet> QueryAsync(FormattableString formattableSQL)
+    public async Task<DataSet> QueryAsync(FormattableString formattableSQL, CancellationToken token)
     {
         try
         {
-            using SqliteConnection connection = await GetConnection();
+            using SqliteConnection connection = await GetConnection(token);
             using SqliteCommand command = GetCommand(formattableSQL, connection);
-            using SqliteDataReader reader = await command.ExecuteReaderAsync();
+            using SqliteDataReader reader = await command.ExecuteReaderAsync(token);
             DataSet dataSet = new();
             do
             {
@@ -54,13 +54,13 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
         }
     }
 
-    public async Task<T> ScalarAsync<T>(FormattableString formattableSQL)
+    public async Task<T> ScalarAsync<T>(FormattableString formattableSQL, CancellationToken token)
     {
         try
         {
-            using SqliteConnection connection = await GetConnection();
+            using SqliteConnection connection = await GetConnection(token);
             using SqliteCommand command = GetCommand(formattableSQL, connection);
-            object? result = await command.ExecuteScalarAsync();
+            object? result = await command.ExecuteScalarAsync(token);
             return (T)Convert.ChangeType(result!, typeof(T));
         }
         catch (SqliteException exception) when (exception.SqliteErrorCode == 19)
@@ -69,11 +69,11 @@ public class SqliteDatabaseAccessor : IDatabaseAccessor
         }
     }
 
-private async Task<SqliteConnection> GetConnection()
+private async Task<SqliteConnection> GetConnection(CancellationToken token)
     {
         string? connectionString = connectionStringsOptions.CurrentValue.Default;
         SqliteConnection connection = new(connectionString);
-        await connection.OpenAsync();
+        await connection.OpenAsync(token);
         return connection;
     }
 

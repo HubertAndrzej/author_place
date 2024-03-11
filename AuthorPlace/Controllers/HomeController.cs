@@ -1,13 +1,15 @@
 ﻿using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.ViewModels.Albums;
 using AuthorPlace.Models.ViewModels.Home;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorPlace.Controllers;
 
 public class HomeController : Controller
 {
-    [ResponseCache(CacheProfileName = "Home")]
+    [AllowAnonymous]
+    [ResponseCache(CacheProfileName = "Home", Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task<IActionResult> Index([FromServices] ICachedAlbumService albumService)
     {
         ViewBag.Title = "Welcome on AuthorPlace!";
