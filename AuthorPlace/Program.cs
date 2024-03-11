@@ -52,6 +52,7 @@ builder.Services.AddAntiforgery(options =>
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumUpdateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumDeleteValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AlbumSubscribeValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongUpdateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongDeleteValidator>();
@@ -92,11 +93,13 @@ IdentityBuilder? identityStore = persistence switch
 };
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddScoped<IAuthorizationHandler, AlbumAuthorRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, AlbumSubscriberRequirementHandler>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
 builder.Services.AddSingleton<IImagePersister, MagickNetImagePersister>();
 builder.Services.AddSingleton<IEmailSender, MailKitEmailSender>();
 builder.Services.AddSingleton<IEmailClient, MailKitEmailSender>();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, MultiAuthorizationPolicyProvider>();
 builder.Services.AddTransient<ICachedAlbumService, MemoryCacheAlbumService>();
 builder.Services.AddTransient<ICachedSongService, MemoryCacheSongService>();
 builder.Services.AddResponseCaching();
@@ -119,6 +122,10 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(nameof(Policy.AlbumAuthor), builder =>
     {
         builder.Requirements.Add(new AlbumAuthorRequirement());
+    });
+    options.AddPolicy(nameof(Policy.AlbumSubscriber), builder =>
+    {
+        builder.Requirements.Add(new AlbumSubscriberRequirement());
     });
 });
 builder.Services.AddReCaptcha(builder.Configuration.GetSection("ReCaptcha"));

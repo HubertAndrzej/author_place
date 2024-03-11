@@ -251,4 +251,23 @@ public class AdoNetAlbumService : IAlbumService
         FormattableString query = $"SELECT AuthorId FROM Albums WHERE Id={albumId};";
         return databaseAccessor.ScalarAsync<string>(query);
     }
+
+    public async Task SubscribeAlbumAsync(AlbumSubscribeInputModel inputModel)
+    {
+        try
+        {
+            FormattableString query = $"INSERT INTO Subscriptions (UserId, AlbumId, PaymentDate, PaymentType, Paid_Currency, Paid_Amount, TransactionId) VALUES ({inputModel.UserId}, {inputModel.AlbumId}, {inputModel.PaymentDate}, {inputModel.PaymentType}, {inputModel.Paid!.Currency}, {inputModel.Paid.Amount}, {inputModel.TransactionId});";
+            await databaseAccessor.CommandAsync(query);
+        }
+        catch (ConstraintViolationException)
+        {
+            throw new AlbumSubscriptionException(inputModel.AlbumId);
+        }
+    }
+
+    public Task<bool> IsAlbumSubscribedAsync(int albumId, string userId)
+    {
+        FormattableString query = $"SELECT COUNT(*) FROM Subscriptions WHERE AlbumId={albumId} AND UserId={userId};";
+        return databaseAccessor.ScalarAsync<bool>(query);
+    }
 }

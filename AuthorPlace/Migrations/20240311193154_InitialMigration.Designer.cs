@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorPlace.Migrations
 {
     [DbContext(typeof(AuthorPlaceDbContext))]
-    [Migration("20240311175709_InitialMigration")]
+    [Migration("20240311193154_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

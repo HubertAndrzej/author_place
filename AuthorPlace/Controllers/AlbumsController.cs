@@ -2,13 +2,14 @@
 using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.Services.Application.Interfaces.Albums;
+using AuthorPlace.Models.ValueObjects;
 using AuthorPlace.Models.ViewModels.Albums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AuthorPlace.Controllers;
 
-[Authorize(Roles = nameof(Role.Author))]
 public class AlbumsController : Controller
 {
     private readonly IAlbumService albumService;
@@ -39,6 +40,23 @@ public class AlbumsController : Controller
         return View(viewModel);
     }
 
+    public async Task<IActionResult> Subscribe(int id)
+    {
+        AlbumSubscribeInputModel inputModel = new()
+        {
+            AlbumId = id,
+            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+            TransactionId = string.Empty,
+            PaymentType = string.Empty,
+            Paid = new Money(Currency.EUR, 0m),
+            PaymentDate = DateTime.UtcNow
+        };
+        await albumService.SubscribeAlbumAsync(inputModel);
+        TempData["ConfirmationMessage"] = "You have been subscribed successfully to this album";
+        return RedirectToAction(nameof(Detail), new { id });
+    }
+
+    [Authorize(Roles = nameof(Role.Author))]
     public IActionResult New()
     {
         AlbumCreateInputModel inputModel = new();
@@ -46,6 +64,7 @@ public class AlbumsController : Controller
         return View(inputModel);
     }
 
+    [Authorize(Roles = nameof(Role.Author))]
     [HttpPost]
     public async Task<IActionResult> New(AlbumCreateInputModel inputModel)
     {
@@ -67,6 +86,7 @@ public class AlbumsController : Controller
     }
 
     [Authorize(Policy = nameof(Policy.AlbumAuthor))]
+    [Authorize(Roles = nameof(Role.Author))]
     public async Task<IActionResult> Edit(int id)
     {
         ViewBag.Title = "Update album";
@@ -75,6 +95,7 @@ public class AlbumsController : Controller
     }
 
     [Authorize(Policy = nameof(Policy.AlbumAuthor))]
+    [Authorize(Roles = nameof(Role.Author))]
     [HttpPost]
     public async Task<IActionResult> Edit(AlbumUpdateInputModel inputModel)
     {
@@ -104,6 +125,7 @@ public class AlbumsController : Controller
     }
 
     [Authorize(Policy = nameof(Policy.AlbumAuthor))]
+    [Authorize(Roles = nameof(Role.Author))]
     [HttpPost]
     public async Task<IActionResult> Remove(AlbumDeleteInputModel inputModel)
     {
@@ -112,6 +134,7 @@ public class AlbumsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = nameof(Role.Author))]
     public async Task<IActionResult> IsAlbumUnique(string title, string authorId, int id = 0)
     {
         bool result = await albumService.IsAlbumUniqueAsync(title, authorId, id);

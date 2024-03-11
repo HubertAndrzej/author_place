@@ -23,6 +23,16 @@ public class ErrorViewSelectorService : IErrorViewSelectorService
                 statusCode: HttpStatusCode.NotFound,
                 viewName: "AlbumNotFound"),
 
+            UserUnknownException => new ErrorViewData(
+                title: "User not found",
+                statusCode: HttpStatusCode.BadRequest,
+                viewName: "Index"),
+
+            AlbumSubscriptionException => new ErrorViewData(
+                title: "The subscription to the album failed",
+                statusCode: HttpStatusCode.BadRequest,
+                viewName: "Index"),
+
             SendException => new ErrorViewData(
                 title: $"The message could not be sent",
                 statusCode: HttpStatusCode.InternalServerError,

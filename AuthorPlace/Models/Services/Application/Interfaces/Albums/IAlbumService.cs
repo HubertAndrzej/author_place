@@ -17,4 +17,6 @@ public interface IAlbumService
     public Task<string> GetAuthorAsync(int id);
     public Task SendQuestionToAlbumAuthorAsync(int id, string? question);
     public Task<string> GetAlbumAuthorIdAsync(int albumId);
+    public Task SubscribeAlbumAsync(AlbumSubscribeInputModel inputModel);
+    public Task<bool> IsAlbumSubscribedAsync(int albumId, string userId);
 }

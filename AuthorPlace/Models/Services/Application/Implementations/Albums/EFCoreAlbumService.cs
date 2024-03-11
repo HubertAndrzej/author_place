@@ -253,4 +253,30 @@ public class EFCoreAlbumService : IAlbumService
         string? author = await queryLinq.FirstOrDefaultAsync();
         return author!;
     }
+
+    public async Task SubscribeAlbumAsync(AlbumSubscribeInputModel inputModel)
+    {
+        Subscription subscription = new(inputModel.UserId!, inputModel.AlbumId)
+        {
+            PaymentDate = inputModel.PaymentDate,
+            PaymentType = inputModel.PaymentType,
+            Paid = inputModel.Paid,
+            TransactionId = inputModel.TransactionId
+        };
+
+        dbContext.Subscriptions!.Add(subscription);
+        try
+        {
+            await dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            throw new AlbumSubscriptionException(inputModel.AlbumId);
+        }
+    }
+
+    public Task<bool> IsAlbumSubscribedAsync(int albumId, string userId)
+    {
+        return dbContext.Subscriptions!.Where(subscription => subscription.AlbumId == albumId && subscription.UserId == userId).AnyAsync();
+    }
 }

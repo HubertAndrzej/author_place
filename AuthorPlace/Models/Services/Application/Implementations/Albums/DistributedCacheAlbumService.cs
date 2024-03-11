@@ -154,4 +154,14 @@ public class DistributedCacheAlbumService : ICachedAlbumService
     {
         return await albumService.GetAuthorAsync(id);
     }
+
+    public Task SubscribeAlbumAsync(AlbumSubscribeInputModel inputModel)
+    {
+        return albumService.SubscribeAlbumAsync(inputModel);
+    }
+
+    public Task<bool> IsAlbumSubscribedAsync(int albumId, string userId)
+    {
+        return albumService.IsAlbumSubscribedAsync(albumId, userId);
+    }
 }

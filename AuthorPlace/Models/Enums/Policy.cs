@@ -2,5 +2,6 @@
 
 public enum Policy
 {
-    AlbumAuthor
+    AlbumAuthor,
+    AlbumSubscriber
 }

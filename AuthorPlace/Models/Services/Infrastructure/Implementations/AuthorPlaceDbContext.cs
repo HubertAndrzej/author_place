@@ -12,8 +12,8 @@ public partial class AuthorPlaceDbContext : IdentityDbContext<ApplicationUser>
     }
 
     public virtual DbSet<Album>? Albums { get; set; }
-
     public virtual DbSet<Song>? Songs { get; set; }
+    public virtual DbSet<Subscription>? Subscriptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
