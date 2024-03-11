@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorPlace.Migrations
 {
     [DbContext(typeof(AuthorPlaceDbContext))]
-    [Migration("20240306222512_InitialMigration")]
+    [Migration("20240311144428_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,7 +60,7 @@ namespace AuthorPlace.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("Title", "Author")
+                    b.HasIndex("Title", "AuthorId")
                         .IsUnique();
 
                     b.ToTable("Albums", (string)null);

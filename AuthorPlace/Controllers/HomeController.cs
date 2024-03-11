@@ -9,7 +9,7 @@ namespace AuthorPlace.Controllers;
 public class HomeController : Controller
 {
     [AllowAnonymous]
-    [ResponseCache(CacheProfileName = "Home")]
+    [ResponseCache(CacheProfileName = "Home", Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task<IActionResult> Index([FromServices] ICachedAlbumService albumService)
     {
         ViewBag.Title = "Welcome on AuthorPlace!";

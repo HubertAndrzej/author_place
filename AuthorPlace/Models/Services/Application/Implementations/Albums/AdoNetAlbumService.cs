@@ -194,9 +194,9 @@ public class AdoNetAlbumService : IAlbumService
         }
     }
 
-    public async Task<bool> IsAlbumUniqueAsync(string title, string author, int id)
+    public async Task<bool> IsAlbumUniqueAsync(string title, string authorId, int id)
     {
-        FormattableString query = $"SELECT COUNT(*) FROM Albums WHERE Title LIKE {title} AND Author LIKE {author} AND Id<>{id};";
+        FormattableString query = $"SELECT COUNT(*) FROM Albums WHERE Title LIKE {title} AND AuthorId LIKE {authorId} AND Id<>{id};";
         bool isTitleAvailable = await databaseAccessor.ScalarAsync<bool>(query);
         return !isTitleAvailable;
     }

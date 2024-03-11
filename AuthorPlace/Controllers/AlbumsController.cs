@@ -112,9 +112,9 @@ public class AlbumsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    public async Task<IActionResult> IsAlbumUnique(string title, string author, int id = 0)
+    public async Task<IActionResult> IsAlbumUnique(string title, string authorId, int id = 0)
     {
-        bool result = await albumService.IsAlbumUniqueAsync(title, author, id);
+        bool result = await albumService.IsAlbumUniqueAsync(title, authorId, id);
         return Json(result);
     }
 }

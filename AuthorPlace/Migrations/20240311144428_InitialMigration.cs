@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -212,9 +213,9 @@ namespace AuthorPlace.Migrations
                 column: "AuthorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Albums_Title_Author",
+                name: "IX_Albums_Title_AuthorId",
                 table: "Albums",
-                columns: new[] { "Title", "Author" },
+                columns: new[] { "Title", "AuthorId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -266,6 +267,11 @@ namespace AuthorPlace.Migrations
             migrationBuilder.Sql("CREATE TRIGGER SongsSetRowVersionOnInsert AFTER INSERT ON Songs BEGIN UPDATE Songs SET RowVersion = CURRENT_TIMESTAMP WHERE Id=NEW.Id; END;");
 
             migrationBuilder.Sql("CREATE TRIGGER SongsSetRowVersionOnUpdate AFTER UPDATE ON Songs WHEN NEW.RowVersion <= OLD.RowVersion BEGIN UPDATE Songs SET RowVersion = CURRENT_TIMESTAMP WHERE Id=NEW.Id; END;");
+
+            migrationBuilder.Sql("CREATE TRIGGER AlbumsSetAuthorOnUpdate AFTER UPDATE OF FullName ON AspNetUsers FOR EACH ROW BEGIN UPDATE Albums SET Author = NEW.FullName WHERE AuthorId = NEW.Id; END;");
+
+            migrationBuilder.Sql("CREATE TRIGGER AlbumsSetEmailOnUpdate AFTER UPDATE OF Email ON AspNetUsers FOR EACH ROW BEGIN UPDATE Albums SET Email = NEW.Email WHERE AuthorId = NEW.Id; END;");
+
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -304,6 +310,10 @@ namespace AuthorPlace.Migrations
             migrationBuilder.Sql("DROP TRIGGER SongsSetRowVersionOnInsert");
 
             migrationBuilder.Sql("DROP TRIGGER SongsSetRowVersionOnUpdate");
+
+            migrationBuilder.Sql("DROP TRIGGER AlbumsSetAuthorOnUpdate");
+
+            migrationBuilder.Sql("DROP TRIGGER AlbumsSetEmailOnUpdate");
         }
     }
 }

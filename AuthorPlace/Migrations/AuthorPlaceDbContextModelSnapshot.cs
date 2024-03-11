@@ -58,7 +58,7 @@ namespace AuthorPlace.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("Title", "Author")
+                    b.HasIndex("Title", "AuthorId")
                         .IsUnique();
 
                     b.ToTable("Albums", (string)null);

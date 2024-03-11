@@ -23,7 +23,7 @@ public partial class AuthorPlaceDbContext : IdentityDbContext<ApplicationUser>
         {
             entity.ToTable("Albums");
             entity.HasKey(album => album.Id);
-            entity.HasIndex(entity => new { entity.Title, entity.Author }).IsUnique();
+            entity.HasIndex(entity => new { entity.Title, entity.AuthorId }).IsUnique();
             entity.Property(album => album.RowVersion).IsRowVersion();
             entity.Property(album => album.Status).HasConversion<string>();
             entity.HasQueryFilter(album => album.Status != Status.Erased);
