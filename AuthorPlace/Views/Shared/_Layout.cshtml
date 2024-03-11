@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@inject IAuthorizationService authorizationService
+@{
+    AuthorizationPolicy authorizationPolicy = new AuthorizationPolicyBuilder().RequireRole(nameof(Role.Administrator)).Build();
+    AuthorizationResult roleResult = await authorizationService.AuthorizeAsync(User, authorizationPolicy);
+    bool isAdmin = roleResult.Succeeded;
+}
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -28,6 +34,12 @@
                         <li class="nav-item">
                             <a class="nav-link active" asp-controller="Albums" asp-action="Index">Albums</a>
                         </li>
+                        @if (isAdmin)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link active" asp-page="/Admin/Users">Manage users</a>
+                            </li>
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>

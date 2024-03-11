@@ -1,8 +1,19 @@
 ﻿@model AlbumDetailViewModel
+@inject IAuthorizationService authorizationService
+@{
+    AuthorizationResult albumAuthorResult = await authorizationService.AuthorizeAsync(User, nameof(Policy.AlbumAuthor));
+    bool canEdit = albumAuthorResult.Succeeded;
+}
 <section class="album-info">
     <div class="row">
         <div class="col-md-9">
-            <h1>@Model.Title <a class="btn btn-outline-info btn-sm" asp-action="Edit" asp-route-id="@Model.Id"><i class="fa-solid fa-pen-to-square"></i> Edit</a></h1>
+            <h1>
+                @Model.Title
+                @if (canEdit)
+                {
+                    <a class="btn btn-outline-info btn-sm" asp-action="Edit" asp-route-id="@Model.Id"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
+                }
+            </h1>
         </div>
         <div class="col-md-3 d-grid align-items-end">
             <a href="#" class="btn btn-info btn-lg subscribe-album">Subscribe</a>
@@ -31,7 +42,13 @@
     </div>
 </section>
 <section class="album-songs">
-    <h2>Songs (@Model.Songs!.Count) <a class="btn btn-outline-info btn-sm" asp-controller="Songs" asp-action="New" asp-route-id="@Model.Id"><i class="fa-solid fa-plus"></i> Create new</a></h2>
+    <h2>
+        Songs (@Model.Songs!.Count)
+        @if (canEdit)
+        {
+            <a class="btn btn-outline-info btn-sm" asp-controller="Songs" asp-action="New" asp-route-id="@Model.Id"><i class="fa-solid fa-plus"></i> Create new</a>
+        }
+        </h2>
     @foreach (SongViewModel song in Model.Songs)
     {
         <hr>
@@ -44,7 +61,10 @@
                 <time>@song.Duration.ToString("m'm 's's'")</time>
             </div>
             <div class="col-md-1">
-                <a class="btn btn-outline-info btn-sm" asp-controller="Songs" asp-action="Edit" asp-route-id="@song.Id"><i class="fa-solid fa-pencil"></i></a>
+                @if (canEdit)
+                {
+                    <a class="btn btn-outline-info btn-sm" asp-controller="Songs" asp-action="Edit" asp-route-id="@song.Id"><i class="fa-solid fa-pencil"></i></a>
+                }
             </div>
         </div>
     }

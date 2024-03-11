@@ -18,7 +18,7 @@ namespace AuthorPlace.Customizations.Authorizations
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, AlbumAuthorRequirement requirement)
         {
             string userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            int albumId = Convert.ToInt32(httpContextAccessor.HttpContext!.Request.RouteValues["id"]);
+            int albumId = context.Resource is int i ? i : Convert.ToInt32(httpContextAccessor.HttpContext!.Request.RouteValues["id"]);
             if (albumId == 0)
             {
                 context.Fail();

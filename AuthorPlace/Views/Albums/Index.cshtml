@@ -1,9 +1,18 @@
 ﻿@model AlbumListViewModel
+@inject IAuthorizationService authorizationService
+@{
+    AuthorizationPolicy authorizationPolicy = new AuthorizationPolicyBuilder().RequireRole(nameof(Role.Author)).Build();
+    AuthorizationResult roleResult = await authorizationService.AuthorizeAsync(User, authorizationPolicy);
+    bool canCreate = roleResult.Succeeded;
+}
 <div class="row">
     <div class="col-md-9">
         <h1>
             @ViewBag.Title
-            <a class="btn btn-outline-info btn-sm" asp-action="New"><i class="fa-solid fa-plus"></i> Create new</a>
+            @if (canCreate)
+            {
+                <a class="btn btn-outline-info btn-sm" asp-action="New"><i class="fa-solid fa-plus"></i> Create new</a>
+            }
         </h1>
     </div>
     <div class="col-md-3 d-flex align-items-center">
