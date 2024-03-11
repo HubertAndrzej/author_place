@@ -270,4 +270,14 @@ public class AdoNetAlbumService : IAlbumService
         FormattableString query = $"SELECT COUNT(*) FROM Subscriptions WHERE AlbumId={albumId} AND UserId={userId};";
         return databaseAccessor.ScalarAsync<bool>(query);
     }
+
+    public Task<string> GetPaymentUrlAsync(int albumId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<AlbumSubscribeInputModel> CapturePaymentAsync(int albumId, string token)
+    {
+        throw new NotImplementedException();
+    }
 }

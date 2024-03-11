@@ -111,6 +111,7 @@ builder.Services.Configure<ImageSizeOptions>(builder.Configuration.GetSection("I
 builder.Services.Configure<KestrelServerOptions>(builder.Configuration.GetSection("Kestrel"));
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 builder.Services.Configure<UsersOptions>(builder.Configuration.GetSection("Users"));
+builder.Services.Configure<PayPalOptions>(builder.Configuration.GetSection("PayPal"));
 builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
 builder.Services.AddAuthentication().AddFacebook(options =>
 {

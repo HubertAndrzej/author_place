@@ -80,6 +80,16 @@ public class MemoryCacheAlbumService : ICachedAlbumService
         memoryCache.Remove($"Album{inputModel.Id}");
     }
 
+    public async Task<bool> IsAlbumUniqueAsync(string title, string authorId, int id)
+    {
+        return await albumService.IsAlbumUniqueAsync(title, authorId, id);
+    }
+
+    public async Task<string> GetAuthorAsync(int id)
+    {
+        return await albumService.GetAuthorAsync(id);
+    }
+
     public Task SendQuestionToAlbumAuthorAsync(int id, string? question)
     {
         return albumService.SendQuestionToAlbumAuthorAsync(id, question);
@@ -93,17 +103,6 @@ public class MemoryCacheAlbumService : ICachedAlbumService
             return albumService.GetAlbumAuthorIdAsync(albumId);
         });
     }
-
-    public async Task<bool> IsAlbumUniqueAsync(string title, string authorId, int id)
-    {
-        return await albumService.IsAlbumUniqueAsync(title, authorId, id);
-    }
-
-    public async Task<string> GetAuthorAsync(int id)
-    {
-        return await albumService.GetAuthorAsync(id);
-    }
-
     public Task SubscribeAlbumAsync(AlbumSubscribeInputModel inputModel)
     {
         return albumService.SubscribeAlbumAsync(inputModel);
@@ -112,5 +111,15 @@ public class MemoryCacheAlbumService : ICachedAlbumService
     public Task<bool> IsAlbumSubscribedAsync(int albumId, string userId)
     {
         return albumService.IsAlbumSubscribedAsync(albumId, userId);
+    }
+
+    public Task<string> GetPaymentUrlAsync(int albumId)
+    {
+        return albumService.GetPaymentUrlAsync(albumId);
+    }
+
+    public Task<AlbumSubscribeInputModel> CapturePaymentAsync(int albumId, string token)
+    {
+        return albumService.CapturePaymentAsync(albumId, token);
     }
 }

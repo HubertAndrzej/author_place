@@ -194,6 +194,22 @@ public class EFCoreAlbumService : IAlbumService
         await dbContext.SaveChangesAsync();
     }
 
+    public async Task<bool> IsAlbumUniqueAsync(string title, string authorId, int id)
+    {
+        bool isAlbumUnique = await dbContext.Albums!.AnyAsync(album => EF.Functions.Like(album.Title!, title) && EF.Functions.Like(album.AuthorId!, authorId) && album.Id != id);
+        return !isAlbumUnique;
+    }
+
+    public async Task<string> GetAuthorAsync(int id)
+    {
+        IQueryable<string> queryLinq = dbContext.Albums!
+            .AsNoTracking()
+            .Where(album => album.Id == id)
+            .Select(album => album.Author!);
+        string? author = await queryLinq.FirstOrDefaultAsync();
+        return author!;
+    }
+
     public async Task SendQuestionToAlbumAuthorAsync(int id, string? question)
     {
         Album? album = await dbContext.Albums!.FindAsync(id);
@@ -238,22 +254,6 @@ public class EFCoreAlbumService : IAlbumService
             .FirstOrDefaultAsync()!;
     }
 
-    public async Task<bool> IsAlbumUniqueAsync(string title, string authorId, int id)
-    {
-        bool isAlbumUnique = await dbContext.Albums!.AnyAsync(album => EF.Functions.Like(album.Title!, title) && EF.Functions.Like(album.AuthorId!, authorId) && album.Id != id);
-        return !isAlbumUnique;
-    }
-
-    public async Task<string> GetAuthorAsync(int id)
-    {
-        IQueryable<string> queryLinq = dbContext.Albums!
-            .AsNoTracking()
-            .Where(album => album.Id == id)
-            .Select(album => album.Author!);
-        string? author = await queryLinq.FirstOrDefaultAsync();
-        return author!;
-    }
-
     public async Task SubscribeAlbumAsync(AlbumSubscribeInputModel inputModel)
     {
         Subscription subscription = new(inputModel.UserId!, inputModel.AlbumId)
@@ -278,5 +278,15 @@ public class EFCoreAlbumService : IAlbumService
     public Task<bool> IsAlbumSubscribedAsync(int albumId, string userId)
     {
         return dbContext.Subscriptions!.Where(subscription => subscription.AlbumId == albumId && subscription.UserId == userId).AnyAsync();
+    }
+
+    public Task<string> GetPaymentUrlAsync(int albumId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<AlbumSubscribeInputModel> CapturePaymentAsync(int albumId, string token)
+    {
+        throw new NotImplementedException();
     }
 }

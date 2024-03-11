@@ -40,17 +40,24 @@ public class AlbumsController : Controller
         return View(viewModel);
     }
 
-    public async Task<IActionResult> Subscribe(int id)
+    public async Task<IActionResult> Pay(int id)
     {
-        AlbumSubscribeInputModel inputModel = new()
-        {
-            AlbumId = id,
-            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
-            TransactionId = string.Empty,
-            PaymentType = string.Empty,
-            Paid = new Money(Currency.EUR, 0m),
-            PaymentDate = DateTime.UtcNow
-        };
+        string paymentUrl = await albumService.GetPaymentUrlAsync(id);
+        return Redirect(paymentUrl);
+    }
+
+    public async Task<IActionResult> Subscribe(int id, string token)
+    {
+        AlbumSubscribeInputModel inputModel = await albumService.CapturePaymentAsync(id, token);
+        //AlbumSubscribeInputModel inputModel = new()
+        //{
+        //    AlbumId = id,
+        //    UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+        //    TransactionId = string.Empty,
+        //    PaymentType = string.Empty,
+        //    Paid = new Money(Currency.EUR, 0m),
+        //    PaymentDate = DateTime.UtcNow
+        //};
         await albumService.SubscribeAlbumAsync(inputModel);
         TempData["ConfirmationMessage"] = "You have been subscribed successfully to this album";
         return RedirectToAction(nameof(Detail), new { id });
