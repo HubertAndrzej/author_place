@@ -5,11 +5,12 @@ namespace AuthorPlace.Models.Entities;
 
 public class Album
 {
-    public Album(string title, string author, string authorId)
+    public Album(string title, string author, string authorId, string email)
     {
         ChangeTitle(title);
         ChangeAuthor(author, authorId);
         ChangeStatus(Status.Drafted);
+        Email = email;
         ImagePath = "/placeholder.jpg";
         FullPrice = new Money(Currency.EUR, 0);
         CurrentPrice = new Money(Currency.EUR, 0);
@@ -29,7 +30,7 @@ public class Album
     public string? RowVersion { get; private set; }
     public Status Status { get; private set; }
     public virtual ICollection<Song> Songs { get; private set; } = new List<Song>();
-    public virtual ApplicationUser User { get; private set; } = new ApplicationUser();
+    public virtual ApplicationUser? User { get; private set; }
 
     public void ChangeTitle(string title)
     {

@@ -97,16 +97,18 @@ public class EFCoreAlbumService : IAlbumService
         string title = inputModel.Title!;
         string author;
         string authorId;
+        string email;
         try
         {
             author = httpContextAccessor.HttpContext!.User.FindFirst("FullName")!.Value;
             authorId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            email = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.Email)!.Value;
         }
         catch (NullReferenceException)
         {
             throw new UserUnknownException();
         }
-        Album album = new(title, author, authorId);
+        Album album = new(title, author, authorId, email);
         dbContext.Add(album);
         try
         {
