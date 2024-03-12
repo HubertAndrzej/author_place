@@ -1,8 +1,8 @@
 ﻿using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.Options;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
-using Microsoft.Extensions.Options;
 using AuthorPlaceMoney = AuthorPlace.Models.ValueObjects.Money;
+using Microsoft.Extensions.Options;
 using PayPalCheckoutSdk.Core;
 using PayPalCheckoutSdk.Orders;
 using PayPalResponse = PayPalHttp.HttpResponse;
@@ -76,14 +76,14 @@ public class PayPalPaymentGateway : IPaymentGateway
             string userId = customId[1];
             AuthorPlaceMoney paid = new(Enum.Parse<Currency>(capture.Amount.CurrencyCode), decimal.Parse(capture.Amount.Value, CultureInfo.InvariantCulture));
             DateTime paymentDate = DateTime.Parse(capture.CreateTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
-            AlbumSubscribeInputModel inputModel = new AlbumSubscribeInputModel
+            AlbumSubscribeInputModel inputModel = new()
             {
                 AlbumId = albumId,
                 UserId = userId,
                 Paid = paid,
                 TransactionId = capture.Id,
                 PaymentDate = paymentDate,
-                PaymentType = "PayPal"
+                PaymentType = PaymentType.PayPal.ToString()
             };
             return inputModel;
         }

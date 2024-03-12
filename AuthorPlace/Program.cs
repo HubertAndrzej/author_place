@@ -29,6 +29,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 
 Persistence persistence = Persistence.EFCore;
+PaymentType paymentType = PaymentType.Stripe;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
@@ -58,18 +59,6 @@ builder.Services.AddValidatorsFromAssemblyContaining<SongUpdateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongDeleteValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<UserRoleValidator>();
 builder.Services.AddFluentValidationClientsideAdapters(clientSide => clientSide.Add(typeof(IRemotePropertyValidator), (context, description, validator) => new RemoteClientValidator(description, validator)));
-IServiceCollection? albumService = persistence switch
-{
-    Persistence.AdoNet => builder.Services.AddTransient<IAlbumService, AdoNetAlbumService>(),
-    Persistence.EFCore => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>(),
-    _ => builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>()
-};
-IServiceCollection? songService = persistence switch
-{
-    Persistence.AdoNet => builder.Services.AddTransient<ISongService, AdoNetSongService>(),
-    Persistence.EFCore => builder.Services.AddTransient<ISongService, EFCoreSongService>(),
-    _ => builder.Services.AddScoped<ISongService, EFCoreSongService>()
-};
 IdentityBuilder? identityBuilder = builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.Lockout.AllowedForNewUsers = true;
@@ -91,10 +80,27 @@ IdentityBuilder? identityStore = persistence switch
     Persistence.EFCore => identityBuilder.AddEntityFrameworkStores<AuthorPlaceDbContext>(),
     _ => identityBuilder.AddEntityFrameworkStores<AuthorPlaceDbContext>(),
 };
+IServiceCollection? albumService = persistence switch
+{
+    Persistence.AdoNet => builder.Services.AddTransient<IAlbumService, AdoNetAlbumService>(),
+    Persistence.EFCore => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>(),
+    _ => builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>()
+};
+IServiceCollection? songService = persistence switch
+{
+    Persistence.AdoNet => builder.Services.AddTransient<ISongService, AdoNetSongService>(),
+    Persistence.EFCore => builder.Services.AddTransient<ISongService, EFCoreSongService>(),
+    _ => builder.Services.AddScoped<ISongService, EFCoreSongService>()
+};
+IServiceCollection? paymentGateway = paymentType switch
+{
+    PaymentType.PayPal => builder.Services.AddScoped<IPaymentGateway, PayPalPaymentGateway>(),
+    PaymentType.Stripe => builder.Services.AddScoped<IPaymentGateway, StripePaymentGateway>(),
+    _ => builder.Services.AddTransient<IPaymentGateway, StripePaymentGateway>()
+};
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddScoped<IAuthorizationHandler, AlbumAuthorRequirementHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, AlbumSubscriberRequirementHandler>();
-builder.Services.AddScoped<IPaymentGateway, PayPalPaymentGateway>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
 builder.Services.AddSingleton<IImagePersister, MagickNetImagePersister>();
@@ -113,6 +119,7 @@ builder.Services.Configure<KestrelServerOptions>(builder.Configuration.GetSectio
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 builder.Services.Configure<UsersOptions>(builder.Configuration.GetSection("Users"));
 builder.Services.Configure<PayPalOptions>(builder.Configuration.GetSection("PayPal"));
+builder.Services.Configure<StripeOptions>(builder.Configuration.GetSection("Stripe"));
 builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
 builder.Services.AddAuthentication().AddFacebook(options =>
 {
