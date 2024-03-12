@@ -50,6 +50,7 @@
                 <div class="d-grid gap-2">
                     <a class="btn btn-outline-info mt-3" asp-page="/Contact" asp-route-id="@Model.Id"><i class="fa-solid fa-envelope"></i> Ask the author a question</a>
                 </div>
+                <a asp-action="Vote" asp-route-id="@Model.Id" class="btn btn-outline-danger mx-4" data-bs-toggle="modal" data-bs-target="#voteModal"><i class="fa-solid fa-trash-can"></i> Remove</a>
             </aside>
         </div>
     </div>
@@ -99,3 +100,21 @@
         </div>
     </div>
 </section>
+<div class="modal fade" id="voteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="voteModalLabel">Your vote</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <iframe class="size" frameBorder="0"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#voteModal').on('shown.bs.modal', function (event) {
+        $(this).find('iframe').attr('src', event.relatedTarget.href);
+    });
+</script>

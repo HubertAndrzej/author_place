@@ -21,4 +21,6 @@ public interface IAlbumService
     public Task<bool> IsAlbumSubscribedAsync(int albumId, string userId);
     public Task<string> GetPaymentUrlAsync(int albumId);
     public Task<AlbumSubscribeInputModel> CapturePaymentAsync(int albumId, string token);
+    public Task<int?> GetAlbumVoteAsync(int albumId);
+    public Task VoteAlbumAsync(AlbumVoteInputModel inputModel);
 }

@@ -117,7 +117,7 @@ public class AdoNetAlbumService : IAlbumService
         }
         try
         {
-            FormattableString insertQuery = $"INSERT INTO Albums (Title, Author, AuthorId, ImagePath, Rating, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount, Status) VALUES ({title}, {author}, {authorId}, '/placeholder.jpg', 0, 'EUR', 0, 'EUR', 0, {nameof(Status.Drafted)});";
+            FormattableString insertQuery = $"INSERT INTO Albums (Title, Author, AuthorId, ImagePath, Rating, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount, Status) VALUES ({title}, {author}, {authorId}, '/placeholder.jpg', 0, 'EUR', 0, 'EUR', 0, {nameof(Status.Published)});";
             await databaseAccessor.CommandAsync(insertQuery);
             FormattableString albumQuery = $"SELECT last_insert_rowid();";
             int albumId = await databaseAccessor.ScalarAsync<int>(albumQuery);
@@ -296,5 +296,27 @@ public class AdoNetAlbumService : IAlbumService
     public Task<AlbumSubscribeInputModel> CapturePaymentAsync(int albumId, string token)
     {
         return paymentGateway.CapturePaymentAsync(token);
+    }
+
+    public async Task<int?> GetAlbumVoteAsync(int albumId)
+    {
+        string userId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        string vote = await databaseAccessor.ScalarAsync<string>($"SELECT Vote FROM Subscriptions WHERE AlbumId={albumId} AND UserId={userId};");
+        return string.IsNullOrEmpty(vote) ? null : Convert.ToInt32(vote);
+    }
+
+    public async Task VoteAlbumAsync(AlbumVoteInputModel inputModel)
+    {
+        if (inputModel.Vote < 1 || inputModel.Vote > 5)
+        {
+            throw new InvalidVoteException(inputModel.Vote);
+        }
+        string userId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        FormattableString query = $"UPDATE Subscriptions SET Vote={inputModel.Vote} WHERE AlbumId={inputModel.Id} AND UserId={userId};";
+        int updatedRows = await databaseAccessor.CommandAsync(query);
+        if (updatedRows == 0)
+        {
+            throw new AlbumSubscriptionNotFoundException(inputModel.Id);
+        }
     }
 }

@@ -165,6 +165,11 @@ hr {
     white-space: nowrap;
 }
 
+.size {
+    width: 100%;
+    height: 100%;
+}
+
 .tab-selector .nav-link {
     border-color: #0dcaf0 !important;
     color: #0dcaf0 !important;

@@ -304,6 +304,8 @@ namespace AuthorPlace.Migrations
             migrationBuilder.Sql("CREATE TRIGGER AlbumsSetAuthorOnUpdate AFTER UPDATE OF FullName ON AspNetUsers FOR EACH ROW BEGIN UPDATE Albums SET Author = NEW.FullName WHERE AuthorId = NEW.Id; END;");
 
             migrationBuilder.Sql("CREATE TRIGGER AlbumsSetEmailOnUpdate AFTER UPDATE OF Email ON AspNetUsers FOR EACH ROW BEGIN UPDATE Albums SET Email = NEW.Email WHERE AuthorId = NEW.Id; END;");
+
+            migrationBuilder.Sql("CREATE TRIGGER SubscriptionsSetAlbumRatingOnUpdate AFTER UPDATE ON Subscriptions FOR EACH ROW WHEN NEW.Vote <> OLD.Vote BEGIN UPDATE Albums SET Rating = (SELECT AVG(Vote) FROM Subscriptions WHERE AlbumId = NEW.AlbumId) WHERE Id = NEW.AlbumId; END;");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -349,6 +351,8 @@ namespace AuthorPlace.Migrations
             migrationBuilder.Sql("DROP TRIGGER AlbumsSetAuthorOnUpdate");
 
             migrationBuilder.Sql("DROP TRIGGER AlbumsSetEmailOnUpdate");
+
+            migrationBuilder.Sql("DROP TRIGGER SubscriptionsSetAlbumRatingOnUpdate");
         }
     }
 }

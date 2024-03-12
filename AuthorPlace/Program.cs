@@ -54,6 +54,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<AlbumCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumUpdateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumDeleteValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumSubscribeValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AlbumVoteValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongUpdateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongDeleteValidator>();

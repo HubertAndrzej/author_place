@@ -174,4 +174,14 @@ public class DistributedCacheAlbumService : ICachedAlbumService
     {
         return albumService.CapturePaymentAsync(albumId, token);
     }
+
+    public Task<int?> GetAlbumVoteAsync(int albumId)
+    {
+        return albumService.GetAlbumVoteAsync(albumId);
+    }
+
+    public Task VoteAlbumAsync(AlbumVoteInputModel inputModel)
+    {
+        return albumService.VoteAlbumAsync(inputModel);
+    }
 }

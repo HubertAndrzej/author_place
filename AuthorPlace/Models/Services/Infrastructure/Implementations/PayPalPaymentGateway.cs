@@ -93,7 +93,7 @@ public class PayPalPaymentGateway : IPaymentGateway
         }
     }
 
-    private PayPalEnvironment GetPayPalEnvironment(PayPalOptions options)
+    private static PayPalEnvironment GetPayPalEnvironment(PayPalOptions options)
     {
         string clientId = options.ClientId!;
         string secret = options.Secret!;

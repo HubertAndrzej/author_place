@@ -33,7 +33,12 @@ public class ErrorViewSelectorService : IErrorViewSelectorService
                 title: "The subscription to the album failed",
                 statusCode: HttpStatusCode.BadRequest,
                 viewName: "Index"),
-            
+
+            AlbumSubscriptionNotFoundException => new ErrorViewData(
+                title: "Subscription not found",
+                statusCode: HttpStatusCode.BadRequest,
+                viewName: "Index"),
+
             PaymentGatewayException => new ErrorViewData(
                 title: $"Something went wrong with the payment",
                 statusCode: HttpStatusCode.InternalServerError,

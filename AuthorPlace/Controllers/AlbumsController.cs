@@ -52,6 +52,26 @@ public class AlbumsController : Controller
         return RedirectToAction(nameof(Detail), new { id });
     }
 
+    [Authorize(Policy = nameof(Policy.AlbumSubscriber))]
+    public async Task<IActionResult> Vote(int albumId)
+    {
+        AlbumVoteInputModel inputModel = new()
+        {
+            Id = albumId,
+            Vote = await albumService.GetAlbumVoteAsync(albumId) ?? 0
+        };
+        return View(inputModel);
+    }
+
+    [Authorize(Policy = nameof(Policy.AlbumSubscriber))]
+    [HttpPost]
+    public async Task<IActionResult> Vote(AlbumVoteInputModel inputModel)
+    {
+        await albumService.VoteAlbumAsync(inputModel);
+        TempData["ConfirmationMessage"] = "Your vote have been submitted successfully";
+        return RedirectToAction(nameof(Detail), new { id = inputModel.Id });
+    }
+
     [Authorize(Roles = nameof(Role.Author))]
     public IActionResult New()
     {

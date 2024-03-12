@@ -9,7 +9,7 @@ public class Album
     {
         ChangeTitle(title);
         ChangeAuthor(author, authorId);
-        ChangeStatus(Status.Drafted);
+        ChangeStatus(Status.Published);
         Email = email;
         ImagePath = "/placeholder.jpg";
         FullPrice = new Money(Currency.EUR, 0);
@@ -107,5 +107,14 @@ public class Album
     public void ChangeStatus(Status status)
     {
         Status = status;
+    }
+
+    public void ChangeRating(double? rating)
+    {
+        if (rating == null)
+        {
+            return;
+        }
+        Rating = rating ?? 0;
     }
 }
