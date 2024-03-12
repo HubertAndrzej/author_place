@@ -94,6 +94,7 @@ IdentityBuilder? identityStore = persistence switch
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddScoped<IAuthorizationHandler, AlbumAuthorRequirementHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, AlbumSubscriberRequirementHandler>();
+builder.Services.AddScoped<IPaymentGateway, PayPalPaymentGateway>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
 builder.Services.AddSingleton<IImagePersister, MagickNetImagePersister>();

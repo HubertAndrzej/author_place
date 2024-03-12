@@ -1,4 +1,5 @@
-﻿using AuthorPlace.Models.Enums;
+﻿using AuthorPlace.Controllers;
+using AuthorPlace.Models.Enums;
 using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.Exceptions.Infrastructure;
 using AuthorPlace.Models.Extensions;
@@ -22,15 +23,19 @@ public class AdoNetAlbumService : IAlbumService
     private readonly IImagePersister imagePersister;
     private readonly IHttpContextAccessor httpContextAccessor;
     private readonly IEmailClient emailClient;
+    private readonly IPaymentGateway paymentGateway;
+    private readonly LinkGenerator linkGenerator;
     private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
     private readonly ILogger logger;
 
-    public AdoNetAlbumService(IDatabaseAccessor databaseAccessor, IImagePersister imagePersister, IHttpContextAccessor httpContextAccessor, IEmailClient emailClient, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
+    public AdoNetAlbumService(IDatabaseAccessor databaseAccessor, IImagePersister imagePersister, IHttpContextAccessor httpContextAccessor, IEmailClient emailClient, IPaymentGateway paymentGateway, LinkGenerator linkGenerator, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
     {
         this.databaseAccessor = databaseAccessor;
         this.imagePersister = imagePersister;
         this.httpContextAccessor = httpContextAccessor;
         this.emailClient = emailClient;
+        this.paymentGateway = paymentGateway;
+        this.linkGenerator = linkGenerator;
         this.albumsOptions = albumsOptions;
         logger = loggerFactory.CreateLogger("Albums");
     }
@@ -271,13 +276,25 @@ public class AdoNetAlbumService : IAlbumService
         return databaseAccessor.ScalarAsync<bool>(query);
     }
 
-    public Task<string> GetPaymentUrlAsync(int albumId)
+    public async Task<string> GetPaymentUrlAsync(int albumId)
     {
-        throw new NotImplementedException();
+        AlbumDetailViewModel viewModel = await GetAlbumAsync(albumId);
+        string? returnUrl = linkGenerator.GetUriByAction(httpContextAccessor.HttpContext!, action: nameof(AlbumsController.Subscribe), controller: "Albums", values: new { id = albumId });
+        string? cancelUrl = linkGenerator.GetUriByAction(httpContextAccessor.HttpContext!, action: nameof(AlbumsController.Detail), controller: "Albums", values: new { id = albumId });
+        AlbumPayInputModel inputModel = new()
+        {
+            AlbumId = albumId,
+            UserId = httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier),
+            Description = viewModel.Title,
+            Price = viewModel.CurrentPrice,
+            ReturnUrl = returnUrl,
+            CancelUrl = cancelUrl
+        };
+        return await paymentGateway.GetPaymentUrlAsync(inputModel);
     }
 
     public Task<AlbumSubscribeInputModel> CapturePaymentAsync(int albumId, string token)
     {
-        throw new NotImplementedException();
+        return paymentGateway.CapturePaymentAsync(token);
     }
 }

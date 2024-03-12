@@ -2,11 +2,9 @@
 using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.Services.Application.Interfaces.Albums;
-using AuthorPlace.Models.ValueObjects;
 using AuthorPlace.Models.ViewModels.Albums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace AuthorPlace.Controllers;
 
@@ -49,15 +47,6 @@ public class AlbumsController : Controller
     public async Task<IActionResult> Subscribe(int id, string token)
     {
         AlbumSubscribeInputModel inputModel = await albumService.CapturePaymentAsync(id, token);
-        //AlbumSubscribeInputModel inputModel = new()
-        //{
-        //    AlbumId = id,
-        //    UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
-        //    TransactionId = string.Empty,
-        //    PaymentType = string.Empty,
-        //    Paid = new Money(Currency.EUR, 0m),
-        //    PaymentDate = DateTime.UtcNow
-        //};
         await albumService.SubscribeAlbumAsync(inputModel);
         TempData["ConfirmationMessage"] = "You have been subscribed successfully to this album";
         return RedirectToAction(nameof(Detail), new { id });

@@ -1,4 +1,5 @@
 ﻿using AuthorPlace.Models.Exceptions.Application;
+using AuthorPlace.Models.Exceptions.Infrastructure;
 using AuthorPlace.Models.Services.Application.Interfaces.Errors;
 using AuthorPlace.Models.ValueObjects;
 using Microsoft.AspNetCore.Diagnostics;
@@ -31,6 +32,11 @@ public class ErrorViewSelectorService : IErrorViewSelectorService
             AlbumSubscriptionException => new ErrorViewData(
                 title: "The subscription to the album failed",
                 statusCode: HttpStatusCode.BadRequest,
+                viewName: "Index"),
+            
+            PaymentGatewayException => new ErrorViewData(
+                title: $"Something went wrong with the payment",
+                statusCode: HttpStatusCode.InternalServerError,
                 viewName: "Index"),
 
             SendException => new ErrorViewData(
