@@ -11,7 +11,11 @@
         <div class="col-md-9">
             <h1>
                 @Model.Title
-                @if (canEdit)
+                @if (isSubscribed)
+                {
+                    <a class="btn btn-outline-info btn-sm" asp-action="Receipt" asp-route-id="@Model.Id" download><i class="fa-solid fa-file-invoice"></i> Download receipt</a>
+                }
+                else if (canEdit)
                 {
                     <a class="btn btn-outline-info btn-sm" asp-action="Edit" asp-route-id="@Model.Id"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
                 }

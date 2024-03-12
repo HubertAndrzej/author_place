@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Rotativa.AspNetCore;
 using Serilog;
 
 Persistence persistence = Persistence.EFCore;
@@ -141,6 +142,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddReCaptcha(builder.Configuration.GetSection("ReCaptcha"));
 
 WebApplication app = builder.Build();
+app.UseRotativa();
 app.UseExceptionHandler("/Error");
 app.UseStatusCodePagesWithReExecute("/Error");
 app.UseStaticFiles();
@@ -148,10 +150,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseResponseCaching();
-app.UseEndpoints(routeBuilder =>
-{
-    routeBuilder.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}").RequireAuthorization();
-    routeBuilder.MapRazorPages().RequireAuthorization();
-});
+app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}").RequireAuthorization();
+app.MapRazorPages().RequireAuthorization();
 app.UseHttpsRedirection();
 app.Run();

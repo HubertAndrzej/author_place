@@ -5,6 +5,8 @@ using AuthorPlace.Models.Services.Application.Interfaces.Albums;
 using AuthorPlace.Models.ViewModels.Albums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Rotativa.AspNetCore;
+using Rotativa.AspNetCore.Options;
 
 namespace AuthorPlace.Controllers;
 
@@ -70,6 +72,21 @@ public class AlbumsController : Controller
         await albumService.VoteAlbumAsync(inputModel);
         TempData["ConfirmationMessage"] = "Your vote have been submitted successfully";
         return RedirectToAction(nameof(Detail), new { id = inputModel.Id });
+    }
+
+    [Authorize(Policy = nameof(Policy.AlbumSubscriber))]
+    public async Task<IActionResult> Receipt(int albumId)
+    {
+        AlbumSubscriptionViewModel viewModel = await albumService.GetAlbumSubscriptionAsync(albumId);
+        return new ViewAsPdf
+        {
+            Model = viewModel,
+            ViewName = nameof(Receipt),
+            PageMargins = new Margins { Top = 10, Left = 10, Bottom = 10, Right = 10 },
+            PageSize = Size.A4,
+            PageOrientation = Orientation.Portrait,
+            FileName = $"{viewModel.Title} - purchase receipt.pdf"
+        };
     }
 
     [Authorize(Roles = nameof(Role.Author))]

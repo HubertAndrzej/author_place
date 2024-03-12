@@ -307,6 +307,14 @@ public class EFCoreAlbumService : IAlbumService
         return paymentGateway.CapturePaymentAsync(token);
     }
 
+    public async Task<AlbumSubscriptionViewModel> GetAlbumSubscriptionAsync(int albumId)
+    {
+        string userId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        Subscription? subscription = await dbContext.Subscriptions!.Include(subscription => subscription.Album).SingleOrDefaultAsync(subscription => subscription.AlbumId == albumId && subscription.UserId == userId) ?? throw new AlbumSubscriptionNotFoundException(albumId);
+        AlbumSubscriptionViewModel viewModel = subscription.ToAlbumSubscriptionViewModel();
+        return viewModel;
+    }
+
     public async Task<int?> GetAlbumVoteAsync(int albumId)
     {
         string userId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;

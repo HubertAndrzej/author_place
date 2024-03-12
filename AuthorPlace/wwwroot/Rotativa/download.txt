@@ -1,0 +1,1 @@
+Put in this folder binary files from wkhtmltopdf. You can get them from https://wkhtmltopdf.org/downloads.html

@@ -74,6 +74,21 @@ public static class DataRowExtensions
         };
     }
 
+    public static AlbumSubscriptionViewModel ToAlbumSubscriptionViewModel(this DataRow dataRow)
+    {
+        return new AlbumSubscriptionViewModel
+        {
+            Title = Convert.ToString(dataRow["Title"]),
+            PaymentDate = Convert.ToDateTime(dataRow["PaymentDate"]),
+            PaymentType = Convert.ToString(dataRow["PaymentType"]),
+            Paid = new Money(
+                Enum.Parse<Currency>((string)dataRow["Paid_Currency"]),
+                Convert.ToDecimal(dataRow["Paid_Amount"])
+            ),
+            TransactionId = Convert.ToString(dataRow["TransactionId"])
+        };
+    }
+
     public static SongViewModel ToSongViewModel(this DataRow songRow)
     {
         return new SongViewModel
@@ -83,7 +98,7 @@ public static class DataRowExtensions
             Duration = TimeSpan.Parse((string)songRow["Duration"])
         };
     }
-    
+
     public static SongDetailViewModel ToSongDetailViewModel(this DataRow songRow)
     {
         return new SongDetailViewModel

@@ -122,6 +122,11 @@ public class MemoryCacheAlbumService : ICachedAlbumService
         return albumService.CapturePaymentAsync(albumId, token);
     }
 
+    public Task<AlbumSubscriptionViewModel> GetAlbumSubscriptionAsync(int albumId)
+    {
+        return albumService.GetAlbumSubscriptionAsync(albumId);
+    }
+
     public Task<int?> GetAlbumVoteAsync(int albumId)
     {
         return albumService.GetAlbumVoteAsync(albumId);

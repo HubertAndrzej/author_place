@@ -53,6 +53,18 @@ public static class EntityExtensions
         };
     }
 
+    public static AlbumSubscriptionViewModel ToAlbumSubscriptionViewModel(this Subscription subscription)
+    {
+        return new AlbumSubscriptionViewModel
+        {
+            Title = subscription.Album!.Title,
+            Paid = subscription.Paid,
+            PaymentDate = subscription.PaymentDate,
+            PaymentType = subscription.PaymentType,
+            TransactionId = subscription.TransactionId
+        };
+    }
+
     public static SongViewModel ToSongViewModel(this Song song)
     {
         return new SongViewModel

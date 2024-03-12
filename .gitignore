@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/AuthorPlace/wwwroot/Rotativa/libwkhtmltox.a
+/AuthorPlace/wwwroot/Rotativa/wkhtmltoimage.exe
+/AuthorPlace/wwwroot/Rotativa/wkhtmltopdf.exe
+/AuthorPlace/wwwroot/Rotativa/wkhtmltox.dll

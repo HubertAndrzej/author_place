@@ -298,6 +298,21 @@ public class AdoNetAlbumService : IAlbumService
         return paymentGateway.CapturePaymentAsync(token);
     }
 
+    public async Task<AlbumSubscriptionViewModel> GetAlbumSubscriptionAsync(int albumId)
+    {
+        string userId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        FormattableString query = $"SELECT Title, PaymentDate, PaymentType, Paid_Amount, Paid_Currency, TransactionId FROM Subscriptions INNER JOIN Albums ON Subscriptions.AlbumId = Albums.Id WHERE Subscriptions.AlbumId={albumId} AND Subscriptions.UserId={userId}";
+        DataSet dataSet = await databaseAccessor.QueryAsync(query);
+        DataTable dataTable = dataSet.Tables[0];
+        if (dataTable.Rows.Count == 0)
+        {
+            throw new AlbumSubscriptionNotFoundException(albumId);
+        }
+        DataRow datarow = dataTable.Rows[0];
+        AlbumSubscriptionViewModel viewModel = datarow.ToAlbumSubscriptionViewModel();
+        return viewModel;
+    }
+
     public async Task<int?> GetAlbumVoteAsync(int albumId)
     {
         string userId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
