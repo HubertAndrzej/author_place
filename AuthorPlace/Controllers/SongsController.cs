@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorPlace.Controllers;
 
-[Authorize(Roles = nameof(Role.Author))]
 public class SongsController : Controller
 {
     private readonly ICachedSongService songService;
@@ -18,6 +17,7 @@ public class SongsController : Controller
         this.songService = songService;
     }
 
+    [Authorize(Policy = nameof(Policy.AlbumAuthor) + "," + nameof(Policy.AlbumSubscriber))]
     public async Task<IActionResult> Detail(int id)
     {
         SongDetailViewModel viewModel = await songService.GetSongAsync(id);
@@ -25,6 +25,8 @@ public class SongsController : Controller
         return View(viewModel);
     }
 
+    [Authorize(Roles = nameof(Role.Author))]
+    [Authorize(Policy = nameof(Policy.AlbumAuthor))]
     public IActionResult New(int id)
     {
         SongCreateInputModel inputModel = new()
@@ -35,6 +37,8 @@ public class SongsController : Controller
         return View(inputModel);
     }
 
+    [Authorize(Roles = nameof(Role.Author))]
+    [Authorize(Policy = nameof(Policy.AlbumAuthor))]
     [HttpPost]
     public async Task<IActionResult> New(SongCreateInputModel inputModel)
     {
@@ -48,6 +52,8 @@ public class SongsController : Controller
         return View(inputModel);
     }
 
+    [Authorize(Roles = nameof(Role.Author))]
+    [Authorize(Policy = nameof(Policy.AlbumAuthor))]
     public async Task<IActionResult> Edit(int id)
     {
         ViewBag.Title = "Update song";
@@ -55,6 +61,8 @@ public class SongsController : Controller
         return View(inputModel);
     }
 
+    [Authorize(Roles = nameof(Role.Author))]
+    [Authorize(Policy = nameof(Policy.AlbumAuthor))]
     [HttpPost]
     public async Task<IActionResult> Edit(SongUpdateInputModel inputModel)
     {
@@ -75,6 +83,8 @@ public class SongsController : Controller
         return View(inputModel);
     }
 
+    [Authorize(Roles = nameof(Role.Author))]
+    [Authorize(Policy = nameof(Policy.AlbumAuthor))]
     [HttpPost]
     public async Task<IActionResult> Remove(SongDeleteInputModel inputModel)
     {

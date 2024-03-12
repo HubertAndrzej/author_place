@@ -3,20 +3,37 @@
 @{
     AuthorizationResult albumAuthorResult = await authorizationService.AuthorizeAsync(User, nameof(Policy.AlbumAuthor));
     bool canEdit = albumAuthorResult.Succeeded;
+    AuthorizationResult albumSubscriberResult = await authorizationService.AuthorizeAsync(User, nameof(Policy.AlbumSubscriber));
+    bool isSubscribed = albumSubscriberResult.Succeeded;
 }
 <section class="album-info">
     <div class="row">
         <div class="col-md-9">
             <h1>
                 @Model.Title
-                @if (canEdit)
+                @if (isSubscribed)
+                {
+                    <a class="btn btn-outline-info btn-sm" asp-action="Receipt" asp-route-id="@Model.Id" download><i class="fa-solid fa-file-invoice"></i> Download receipt</a>
+                }
+                else if (canEdit)
                 {
                     <a class="btn btn-outline-info btn-sm" asp-action="Edit" asp-route-id="@Model.Id"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
                 }
             </h1>
         </div>
         <div class="col-md-3 d-grid align-items-end">
-            <a href="#" class="btn btn-info btn-lg subscribe-album">Subscribe</a>
+            @if (isSubscribed)
+            {
+                <button type="button" class="btn btn-info btn-lg subscribe-album" disabled>You are subscribed</button>
+            }
+            else if (canEdit)
+            {
+                <button type="button" class="btn btn-info btn-lg subscribe-album" disabled>You are the author</button>
+            }
+            else
+            {
+                <a class="btn btn-info btn-lg subscribe-album" asp-action="Pay" asp-route-id="@Model.Id">Subscribe</a>
+            }
         </div>
     </div>
     <div class="row">
@@ -37,6 +54,7 @@
                 <div class="d-grid gap-2">
                     <a class="btn btn-outline-info mt-3" asp-page="/Contact" asp-route-id="@Model.Id"><i class="fa-solid fa-envelope"></i> Ask the author a question</a>
                 </div>
+                <a asp-action="Vote" asp-route-id="@Model.Id" class="btn btn-outline-danger mx-4" data-bs-toggle="modal" data-bs-target="#voteModal"><i class="fa-solid fa-trash-can"></i> Remove</a>
             </aside>
         </div>
     </div>
@@ -48,13 +66,20 @@
         {
             <a class="btn btn-outline-info btn-sm" asp-controller="Songs" asp-action="New" asp-route-id="@Model.Id"><i class="fa-solid fa-plus"></i> Create new</a>
         }
-        </h2>
+    </h2>
     @foreach (SongViewModel song in Model.Songs)
     {
         <hr>
         <div class="row">
             <div class="col-md-10">
-                <a asp-controller="Songs" asp-action="Detail" asp-route-id="@song.Id" class="link-info link-offset-2 link-underline-opacity-0 link-underline-opacity-25-hover">@song.Title</a>
+                @if (isSubscribed || canEdit)
+                {
+                    <a asp-controller="Songs" asp-action="Detail" asp-route-id="@song.Id" class="link-info link-offset-2 link-underline-opacity-0 link-underline-opacity-25-hover">@song.Title</a>
+                }
+                else
+                {
+                    <span>@song.Title</span>
+                }
             </div>
             <div class="col-md-1 song-duration justify-content-end">
                 <i class="far fa-clock"></i>
@@ -79,3 +104,21 @@
         </div>
     </div>
 </section>
+<div class="modal fade" id="voteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="voteModalLabel">Your vote</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <iframe class="size" frameBorder="0"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#voteModal').on('shown.bs.modal', function (event) {
+        $(this).find('iframe').attr('src', event.relatedTarget.href);
+    });
+</script>

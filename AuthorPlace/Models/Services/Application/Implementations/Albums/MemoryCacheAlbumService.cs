@@ -79,6 +79,16 @@ public class MemoryCacheAlbumService : ICachedAlbumService
         memoryCache.Remove($"Album{inputModel.Id}");
     }
 
+    public async Task<bool> IsAlbumUniqueAsync(string title, string authorId, int id)
+    {
+        return await albumService.IsAlbumUniqueAsync(title, authorId, id);
+    }
+
+    public async Task<string> GetAuthorAsync(int id)
+    {
+        return await albumService.GetAuthorAsync(id);
+    }
+
     public Task SendQuestionToAlbumAuthorAsync(int id, string? question)
     {
         return albumService.SendQuestionToAlbumAuthorAsync(id, question);
@@ -92,14 +102,38 @@ public class MemoryCacheAlbumService : ICachedAlbumService
             return albumService.GetAlbumAuthorIdAsync(albumId);
         });
     }
-
-    public async Task<bool> IsAlbumUniqueAsync(string title, string authorId, int id)
+    public Task SubscribeAlbumAsync(AlbumSubscribeInputModel inputModel)
     {
-        return await albumService.IsAlbumUniqueAsync(title, authorId, id);
+        return albumService.SubscribeAlbumAsync(inputModel);
     }
 
-    public async Task<string> GetAuthorAsync(int id)
+    public Task<bool> IsAlbumSubscribedAsync(int albumId, string userId)
     {
-        return await albumService.GetAuthorAsync(id);
+        return albumService.IsAlbumSubscribedAsync(albumId, userId);
+    }
+
+    public Task<string> GetPaymentUrlAsync(int albumId)
+    {
+        return albumService.GetPaymentUrlAsync(albumId);
+    }
+
+    public Task<AlbumSubscribeInputModel> CapturePaymentAsync(int albumId, string token)
+    {
+        return albumService.CapturePaymentAsync(albumId, token);
+    }
+
+    public Task<AlbumSubscriptionViewModel> GetAlbumSubscriptionAsync(int albumId)
+    {
+        return albumService.GetAlbumSubscriptionAsync(albumId);
+    }
+
+    public Task<int?> GetAlbumVoteAsync(int albumId)
+    {
+        return albumService.GetAlbumVoteAsync(albumId);
+    }
+
+    public Task VoteAlbumAsync(AlbumVoteInputModel inputModel)
+    {
+        return albumService.VoteAlbumAsync(inputModel);
     }
 }

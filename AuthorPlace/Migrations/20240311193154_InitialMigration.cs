@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -207,6 +206,35 @@ namespace AuthorPlace.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Subscriptions",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "TEXT", nullable: false),
+                    AlbumId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    PaymentType = table.Column<string>(type: "TEXT", nullable: true),
+                    Paid_Amount = table.Column<double>(type: "REAL", nullable: true),
+                    Paid_Currency = table.Column<string>(type: "TEXT", nullable: true),
+                    TransactionId = table.Column<string>(type: "TEXT", nullable: true),
+                    Vote = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subscriptions", x => new { x.AlbumId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_Subscriptions_Albums_AlbumId",
+                        column: x => x.AlbumId,
+                        principalTable: "Albums",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Subscriptions_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Albums_AuthorId",
                 table: "Albums",
@@ -260,6 +288,11 @@ namespace AuthorPlace.Migrations
                 table: "Songs",
                 column: "AlbumId");
 
+            migrationBuilder.CreateIndex(
+                name: "IX_Subscriptions_UserId",
+                table: "Subscriptions",
+                column: "UserId");
+
             migrationBuilder.Sql("CREATE TRIGGER AlbumsSetRowVersionOnInsert AFTER INSERT ON Albums BEGIN UPDATE Albums SET RowVersion = CURRENT_TIMESTAMP WHERE Id=NEW.Id; END;");
 
             migrationBuilder.Sql("CREATE TRIGGER AlbumsSetRowVersionOnUpdate AFTER UPDATE ON Albums WHEN NEW.RowVersion <= OLD.RowVersion BEGIN UPDATE Albums SET RowVersion = CURRENT_TIMESTAMP WHERE Id=NEW.Id; END;");
@@ -272,6 +305,7 @@ namespace AuthorPlace.Migrations
 
             migrationBuilder.Sql("CREATE TRIGGER AlbumsSetEmailOnUpdate AFTER UPDATE OF Email ON AspNetUsers FOR EACH ROW BEGIN UPDATE Albums SET Email = NEW.Email WHERE AuthorId = NEW.Id; END;");
 
+            migrationBuilder.Sql("CREATE TRIGGER SubscriptionsSetAlbumRatingOnUpdate AFTER UPDATE ON Subscriptions FOR EACH ROW WHEN NEW.Vote <> OLD.Vote BEGIN UPDATE Albums SET Rating = (SELECT AVG(Vote) FROM Subscriptions WHERE AlbumId = NEW.AlbumId) WHERE Id = NEW.AlbumId; END;");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -295,6 +329,9 @@ namespace AuthorPlace.Migrations
                 name: "Songs");
 
             migrationBuilder.DropTable(
+                name: "Subscriptions");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
@@ -314,6 +351,8 @@ namespace AuthorPlace.Migrations
             migrationBuilder.Sql("DROP TRIGGER AlbumsSetAuthorOnUpdate");
 
             migrationBuilder.Sql("DROP TRIGGER AlbumsSetEmailOnUpdate");
+
+            migrationBuilder.Sql("DROP TRIGGER SubscriptionsSetAlbumRatingOnUpdate");
         }
     }
 }

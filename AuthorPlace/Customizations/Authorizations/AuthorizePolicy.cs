@@ -6,8 +6,9 @@ namespace AuthorPlace.Customizations.Authorizations;
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
 public class AuthorizePolicyAttribute : AuthorizeAttribute
 {
-    public AuthorizePolicyAttribute(Policy policy)
+    public AuthorizePolicyAttribute(params Policy[] policies)
+
     {
-        Policy = policy.ToString();
+        Policy = string.Join(",", policies);
     }
 }

@@ -12,8 +12,8 @@ public partial class AuthorPlaceDbContext : IdentityDbContext<ApplicationUser>
     }
 
     public virtual DbSet<Album>? Albums { get; set; }
-
     public virtual DbSet<Song>? Songs { get; set; }
+    public virtual DbSet<Subscription>? Subscriptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -37,8 +37,21 @@ public partial class AuthorPlaceDbContext : IdentityDbContext<ApplicationUser>
                 builder.Property(money => money.Amount).HasConversion<double>().HasColumnName("FullPrice_Amount");
                 builder.Property(money => money.Currency).HasConversion<string>().HasColumnName("FullPrice_Currency");
             });
-            entity.HasOne(album => album.User).WithMany(user => user.Albums).HasForeignKey(album => album.AuthorId);
+            entity.HasOne(album => album.User).WithMany(user => user.AuthoredAlbums).HasForeignKey(album => album.AuthorId);
             entity.HasMany(album => album.Songs).WithOne(song => song.Album).HasForeignKey(song => song.AlbumId);
+            entity.HasMany(album => album.SubscribedUsers).WithMany(user => user.SubscribedAlbums).UsingEntity<Subscription>(
+                entity => entity.HasOne(subscription => subscription.User).WithMany().HasForeignKey(subscription => subscription.UserId),
+                entity => entity.HasOne(subscription => subscription.Album).WithMany().HasForeignKey(subscription => subscription.AlbumId).IsRequired(false),
+                entity =>
+                {
+                    entity.ToTable("Subscriptions");
+                    entity.OwnsOne(subscription => subscription.Paid, builder =>
+                    {
+                        builder.Property(money => money.Amount).HasConversion<double>().HasColumnName("Paid_Amount");
+                        builder.Property(money => money.Currency).HasConversion<string>().HasColumnName("Paid_Currency");
+                    });
+                }
+            );
         });
 
         modelBuilder.Entity<Song>(entity =>

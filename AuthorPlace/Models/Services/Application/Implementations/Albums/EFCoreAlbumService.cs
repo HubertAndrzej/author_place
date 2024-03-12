@@ -1,4 +1,5 @@
-﻿using AuthorPlace.Models.Entities;
+﻿using AuthorPlace.Controllers;
+using AuthorPlace.Models.Entities;
 using AuthorPlace.Models.Enums;
 using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.Extensions;
@@ -24,15 +25,19 @@ public class EFCoreAlbumService : IAlbumService
     private readonly IHttpContextAccessor httpContextAccessor;
     private readonly IImagePersister imagePersister;
     private readonly IEmailClient emailClient;
+    private readonly IPaymentGateway paymentGateway;
+    private readonly LinkGenerator linkGenerator;
     private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
     private readonly ILogger logger;
 
-    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, IHttpContextAccessor httpContextAccessor, IImagePersister imagePersister, IEmailClient emailClient, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
+    public EFCoreAlbumService(AuthorPlaceDbContext dbContext, IHttpContextAccessor httpContextAccessor, IImagePersister imagePersister, IEmailClient emailClient, IPaymentGateway paymentGateway, LinkGenerator linkGenerator, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
     {
         this.dbContext = dbContext;
         this.httpContextAccessor = httpContextAccessor;
         this.imagePersister = imagePersister;
         this.emailClient = emailClient;
+        this.paymentGateway = paymentGateway;
+        this.linkGenerator = linkGenerator;
         this.albumsOptions = albumsOptions;
         logger = loggerFactory.CreateLogger("Albums");
     }
@@ -194,6 +199,22 @@ public class EFCoreAlbumService : IAlbumService
         await dbContext.SaveChangesAsync();
     }
 
+    public async Task<bool> IsAlbumUniqueAsync(string title, string authorId, int id)
+    {
+        bool isAlbumUnique = await dbContext.Albums!.AnyAsync(album => EF.Functions.Like(album.Title!, title) && EF.Functions.Like(album.AuthorId!, authorId) && album.Id != id);
+        return !isAlbumUnique;
+    }
+
+    public async Task<string> GetAuthorAsync(int id)
+    {
+        IQueryable<string> queryLinq = dbContext.Albums!
+            .AsNoTracking()
+            .Where(album => album.Id == id)
+            .Select(album => album.Author!);
+        string? author = await queryLinq.FirstOrDefaultAsync();
+        return author!;
+    }
+
     public async Task SendQuestionToAlbumAuthorAsync(int id, string? question)
     {
         Album? album = await dbContext.Albums!.FindAsync(id);
@@ -238,19 +259,78 @@ public class EFCoreAlbumService : IAlbumService
             .FirstOrDefaultAsync()!;
     }
 
-    public async Task<bool> IsAlbumUniqueAsync(string title, string authorId, int id)
+    public async Task SubscribeAlbumAsync(AlbumSubscribeInputModel inputModel)
     {
-        bool isAlbumUnique = await dbContext.Albums!.AnyAsync(album => EF.Functions.Like(album.Title!, title) && EF.Functions.Like(album.AuthorId!, authorId) && album.Id != id);
-        return !isAlbumUnique;
+        Subscription subscription = new(inputModel.UserId!, inputModel.AlbumId)
+        {
+            PaymentDate = inputModel.PaymentDate,
+            PaymentType = inputModel.PaymentType,
+            Paid = inputModel.Paid,
+            TransactionId = inputModel.TransactionId
+        };
+
+        dbContext.Subscriptions!.Add(subscription);
+        try
+        {
+            await dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            throw new AlbumSubscriptionException(inputModel.AlbumId);
+        }
     }
 
-    public async Task<string> GetAuthorAsync(int id)
+    public Task<bool> IsAlbumSubscribedAsync(int albumId, string userId)
     {
-        IQueryable<string> queryLinq = dbContext.Albums!
-            .AsNoTracking()
-            .Where(album => album.Id == id)
-            .Select(album => album.Author!);
-        string? author = await queryLinq.FirstOrDefaultAsync();
-        return author!;
+        return dbContext.Subscriptions!.Where(subscription => subscription.AlbumId == albumId && subscription.UserId == userId).AnyAsync();
+    }
+
+    public async Task<string> GetPaymentUrlAsync(int albumId)
+    {
+        AlbumDetailViewModel viewModel = await GetAlbumAsync(albumId);
+        string? returnUrl = linkGenerator.GetUriByAction(httpContextAccessor.HttpContext!, action: nameof(AlbumsController.Subscribe), controller: "Albums", values: new { id = albumId });
+        string? cancelUrl = linkGenerator.GetUriByAction(httpContextAccessor.HttpContext!, action: nameof(AlbumsController.Detail), controller: "Albums", values: new { id = albumId });
+        AlbumPayInputModel inputModel = new()
+        {
+            AlbumId = albumId,
+            UserId = httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier),
+            Description = viewModel.Title,
+            Price = viewModel.CurrentPrice,
+            ReturnUrl = returnUrl,
+            CancelUrl = cancelUrl
+        };
+        return await paymentGateway.GetPaymentUrlAsync(inputModel);
+    }
+
+    public Task<AlbumSubscribeInputModel> CapturePaymentAsync(int albumId, string token)
+    {
+        return paymentGateway.CapturePaymentAsync(token);
+    }
+
+    public async Task<AlbumSubscriptionViewModel> GetAlbumSubscriptionAsync(int albumId)
+    {
+        string userId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        Subscription? subscription = await dbContext.Subscriptions!.Include(subscription => subscription.Album).SingleOrDefaultAsync(subscription => subscription.AlbumId == albumId && subscription.UserId == userId) ?? throw new AlbumSubscriptionNotFoundException(albumId);
+        AlbumSubscriptionViewModel viewModel = subscription.ToAlbumSubscriptionViewModel();
+        return viewModel;
+    }
+
+    public async Task<int?> GetAlbumVoteAsync(int albumId)
+    {
+        string userId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        Subscription? subscription = await dbContext.Subscriptions!.SingleOrDefaultAsync(subscription => subscription.AlbumId == albumId && subscription.UserId == userId);
+        return subscription == null ? throw new AlbumSubscriptionNotFoundException(albumId) : subscription.Vote;
+    }
+
+    public async Task VoteAlbumAsync(AlbumVoteInputModel inputModel)
+    {
+        if (inputModel.Vote < 1 || inputModel.Vote > 5)
+        {
+            throw new InvalidVoteException(inputModel.Vote);
+        }
+        string userId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        Subscription? subscription = await dbContext.Subscriptions!.SingleOrDefaultAsync(subscription => subscription.AlbumId == inputModel.Id && subscription.UserId == userId) ?? throw new AlbumSubscriptionNotFoundException(inputModel.Id);
+        subscription.Vote = inputModel.Vote;
+        await dbContext.SaveChangesAsync();
     }
 }

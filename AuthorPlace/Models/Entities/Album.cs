@@ -9,7 +9,7 @@ public class Album
     {
         ChangeTitle(title);
         ChangeAuthor(author, authorId);
-        ChangeStatus(Status.Drafted);
+        ChangeStatus(Status.Published);
         Email = email;
         ImagePath = "/placeholder.jpg";
         FullPrice = new Money(Currency.EUR, 0);
@@ -31,6 +31,7 @@ public class Album
     public Status Status { get; private set; }
     public virtual ICollection<Song> Songs { get; private set; } = new List<Song>();
     public virtual ApplicationUser? User { get; private set; }
+    public virtual ICollection<ApplicationUser>? SubscribedUsers { get; private set; }
 
     public void ChangeTitle(string title)
     {
@@ -106,5 +107,14 @@ public class Album
     public void ChangeStatus(Status status)
     {
         Status = status;
+    }
+
+    public void ChangeRating(double? rating)
+    {
+        if (rating == null)
+        {
+            return;
+        }
+        Rating = rating ?? 0;
     }
 }

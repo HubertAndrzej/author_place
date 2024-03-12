@@ -5,20 +5,20 @@ using System.Security.Claims;
 
 namespace AuthorPlace.Customizations.Authorizations;
 
-public class AlbumAuthorRequirementHandler : AuthorizationHandler<AlbumAuthorRequirement>
+public class AlbumSubscriberRequirementHandler : AuthorizationHandler<AlbumSubscriberRequirement>
 {
     private readonly IHttpContextAccessor httpContextAccessor;
     private readonly ICachedAlbumService albumService;
     private readonly ISongService songService;
 
-    public AlbumAuthorRequirementHandler(IHttpContextAccessor httpContextAccessor, ICachedAlbumService albumService, ISongService songService)
+    public AlbumSubscriberRequirementHandler(IHttpContextAccessor httpContextAccessor, ICachedAlbumService albumService, ISongService songService)
     {
         this.httpContextAccessor = httpContextAccessor;
         this.albumService = albumService;
         this.songService = songService;
     }
 
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, AlbumAuthorRequirement requirement)
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, AlbumSubscriberRequirement requirement)
     {
         string userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
         int albumId;
@@ -47,8 +47,8 @@ public class AlbumAuthorRequirementHandler : AuthorizationHandler<AlbumAuthorReq
                     return;
             }
         }
-        string authorId = await albumService.GetAlbumAuthorIdAsync(albumId);
-        if (userId == authorId)
+        bool isSubscribed = await albumService.IsAlbumSubscribedAsync(albumId, userId);
+        if (isSubscribed)
         {
             context.Succeed(requirement);
         }

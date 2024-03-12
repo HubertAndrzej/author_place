@@ -1,8 +1,7 @@
-﻿namespace AuthorPlace.Models.Options
+﻿namespace AuthorPlace.Models.Options;
+
+public class ImageSizeOptions
 {
-    public class ImageSizeOptions
-    {
-        public int Width { get; set; }
-        public int Height { get; set; }
-    }
+    public int Width { get; set; }
+    public int Height { get; set; }
 }

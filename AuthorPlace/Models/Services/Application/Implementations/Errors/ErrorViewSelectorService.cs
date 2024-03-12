@@ -1,4 +1,5 @@
 ﻿using AuthorPlace.Models.Exceptions.Application;
+using AuthorPlace.Models.Exceptions.Infrastructure;
 using AuthorPlace.Models.Services.Application.Interfaces.Errors;
 using AuthorPlace.Models.ValueObjects;
 using Microsoft.AspNetCore.Diagnostics;
@@ -22,6 +23,26 @@ public class ErrorViewSelectorService : IErrorViewSelectorService
                 title: $"Album {e.AlbumId} not found",
                 statusCode: HttpStatusCode.NotFound,
                 viewName: "AlbumNotFound"),
+
+            UserUnknownException => new ErrorViewData(
+                title: "User not found",
+                statusCode: HttpStatusCode.BadRequest,
+                viewName: "Index"),
+
+            AlbumSubscriptionException => new ErrorViewData(
+                title: "The subscription to the album failed",
+                statusCode: HttpStatusCode.BadRequest,
+                viewName: "Index"),
+
+            AlbumSubscriptionNotFoundException => new ErrorViewData(
+                title: "Subscription not found",
+                statusCode: HttpStatusCode.BadRequest,
+                viewName: "Index"),
+
+            PaymentGatewayException => new ErrorViewData(
+                title: $"Something went wrong with the payment",
+                statusCode: HttpStatusCode.InternalServerError,
+                viewName: "Index"),
 
             SendException => new ErrorViewData(
                 title: $"The message could not be sent",

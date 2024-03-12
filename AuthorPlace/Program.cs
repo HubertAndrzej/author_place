@@ -26,9 +26,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Rotativa.AspNetCore;
 using Serilog;
 
 Persistence persistence = Persistence.EFCore;
+PaymentType paymentType = PaymentType.Stripe;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
@@ -52,23 +54,13 @@ builder.Services.AddAntiforgery(options =>
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumUpdateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AlbumDeleteValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AlbumSubscribeValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AlbumVoteValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongCreateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongUpdateValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<SongDeleteValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<UserRoleValidator>();
 builder.Services.AddFluentValidationClientsideAdapters(clientSide => clientSide.Add(typeof(IRemotePropertyValidator), (context, description, validator) => new RemoteClientValidator(description, validator)));
-IServiceCollection? albumService = persistence switch
-{
-    Persistence.AdoNet => builder.Services.AddTransient<IAlbumService, AdoNetAlbumService>(),
-    Persistence.EFCore => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>(),
-    _ => builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>()
-};
-IServiceCollection? songService = persistence switch
-{
-    Persistence.AdoNet => builder.Services.AddTransient<ISongService, AdoNetSongService>(),
-    Persistence.EFCore => builder.Services.AddTransient<ISongService, EFCoreSongService>(),
-    _ => builder.Services.AddScoped<ISongService, EFCoreSongService>()
-};
 IdentityBuilder? identityBuilder = builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.Lockout.AllowedForNewUsers = true;
@@ -90,13 +82,33 @@ IdentityBuilder? identityStore = persistence switch
     Persistence.EFCore => identityBuilder.AddEntityFrameworkStores<AuthorPlaceDbContext>(),
     _ => identityBuilder.AddEntityFrameworkStores<AuthorPlaceDbContext>(),
 };
+IServiceCollection? albumService = persistence switch
+{
+    Persistence.AdoNet => builder.Services.AddTransient<IAlbumService, AdoNetAlbumService>(),
+    Persistence.EFCore => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>(),
+    _ => builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>()
+};
+IServiceCollection? songService = persistence switch
+{
+    Persistence.AdoNet => builder.Services.AddTransient<ISongService, AdoNetSongService>(),
+    Persistence.EFCore => builder.Services.AddTransient<ISongService, EFCoreSongService>(),
+    _ => builder.Services.AddScoped<ISongService, EFCoreSongService>()
+};
+IServiceCollection? paymentGateway = paymentType switch
+{
+    PaymentType.PayPal => builder.Services.AddScoped<IPaymentGateway, PayPalPaymentGateway>(),
+    PaymentType.Stripe => builder.Services.AddScoped<IPaymentGateway, StripePaymentGateway>(),
+    _ => builder.Services.AddTransient<IPaymentGateway, StripePaymentGateway>()
+};
 builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddScoped<IAuthorizationHandler, AlbumAuthorRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, AlbumSubscriberRequirementHandler>();
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
 builder.Services.AddSingleton<IImagePersister, MagickNetImagePersister>();
 builder.Services.AddSingleton<IEmailSender, MailKitEmailSender>();
 builder.Services.AddSingleton<IEmailClient, MailKitEmailSender>();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, MultiAuthorizationPolicyProvider>();
 builder.Services.AddTransient<ICachedAlbumService, MemoryCacheAlbumService>();
 builder.Services.AddTransient<ICachedSongService, MemoryCacheSongService>();
 builder.Services.AddResponseCaching();
@@ -108,6 +120,8 @@ builder.Services.Configure<ImageSizeOptions>(builder.Configuration.GetSection("I
 builder.Services.Configure<KestrelServerOptions>(builder.Configuration.GetSection("Kestrel"));
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 builder.Services.Configure<UsersOptions>(builder.Configuration.GetSection("Users"));
+builder.Services.Configure<PayPalOptions>(builder.Configuration.GetSection("PayPal"));
+builder.Services.Configure<StripeOptions>(builder.Configuration.GetSection("Stripe"));
 builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
 builder.Services.AddAuthentication().AddFacebook(options =>
 {
@@ -120,10 +134,15 @@ builder.Services.AddAuthorization(options =>
     {
         builder.Requirements.Add(new AlbumAuthorRequirement());
     });
+    options.AddPolicy(nameof(Policy.AlbumSubscriber), builder =>
+    {
+        builder.Requirements.Add(new AlbumSubscriberRequirement());
+    });
 });
 builder.Services.AddReCaptcha(builder.Configuration.GetSection("ReCaptcha"));
 
 WebApplication app = builder.Build();
+app.UseRotativa();
 app.UseExceptionHandler("/Error");
 app.UseStatusCodePagesWithReExecute("/Error");
 app.UseStaticFiles();
@@ -131,10 +150,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseResponseCaching();
-app.UseEndpoints(routeBuilder =>
-{
-    routeBuilder.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}").RequireAuthorization();
-    routeBuilder.MapRazorPages().RequireAuthorization();
-});
+app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}").RequireAuthorization();
+app.MapRazorPages().RequireAuthorization();
 app.UseHttpsRedirection();
 app.Run();

@@ -1,4 +1,5 @@
-﻿using AuthorPlace.Models.Enums;
+﻿using AuthorPlace.Controllers;
+using AuthorPlace.Models.Enums;
 using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.Exceptions.Infrastructure;
 using AuthorPlace.Models.Extensions;
@@ -22,15 +23,19 @@ public class AdoNetAlbumService : IAlbumService
     private readonly IImagePersister imagePersister;
     private readonly IHttpContextAccessor httpContextAccessor;
     private readonly IEmailClient emailClient;
+    private readonly IPaymentGateway paymentGateway;
+    private readonly LinkGenerator linkGenerator;
     private readonly IOptionsMonitor<AlbumsOptions> albumsOptions;
     private readonly ILogger logger;
 
-    public AdoNetAlbumService(IDatabaseAccessor databaseAccessor, IImagePersister imagePersister, IHttpContextAccessor httpContextAccessor, IEmailClient emailClient, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
+    public AdoNetAlbumService(IDatabaseAccessor databaseAccessor, IImagePersister imagePersister, IHttpContextAccessor httpContextAccessor, IEmailClient emailClient, IPaymentGateway paymentGateway, LinkGenerator linkGenerator, IOptionsMonitor<AlbumsOptions> albumsOptions, ILoggerFactory loggerFactory)
     {
         this.databaseAccessor = databaseAccessor;
         this.imagePersister = imagePersister;
         this.httpContextAccessor = httpContextAccessor;
         this.emailClient = emailClient;
+        this.paymentGateway = paymentGateway;
+        this.linkGenerator = linkGenerator;
         this.albumsOptions = albumsOptions;
         logger = loggerFactory.CreateLogger("Albums");
     }
@@ -112,7 +117,7 @@ public class AdoNetAlbumService : IAlbumService
         }
         try
         {
-            FormattableString insertQuery = $"INSERT INTO Albums (Title, Author, AuthorId, ImagePath, Rating, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount, Status) VALUES ({title}, {author}, {authorId}, '/placeholder.jpg', 0, 'EUR', 0, 'EUR', 0, {nameof(Status.Drafted)});";
+            FormattableString insertQuery = $"INSERT INTO Albums (Title, Author, AuthorId, ImagePath, Rating, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount, Status) VALUES ({title}, {author}, {authorId}, '/placeholder.jpg', 0, 'EUR', 0, 'EUR', 0, {nameof(Status.Published)});";
             await databaseAccessor.CommandAsync(insertQuery);
             FormattableString albumQuery = $"SELECT last_insert_rowid();";
             int albumId = await databaseAccessor.ScalarAsync<int>(albumQuery);
@@ -250,5 +255,83 @@ public class AdoNetAlbumService : IAlbumService
     {
         FormattableString query = $"SELECT AuthorId FROM Albums WHERE Id={albumId};";
         return databaseAccessor.ScalarAsync<string>(query);
+    }
+
+    public async Task SubscribeAlbumAsync(AlbumSubscribeInputModel inputModel)
+    {
+        try
+        {
+            FormattableString query = $"INSERT INTO Subscriptions (UserId, AlbumId, PaymentDate, PaymentType, Paid_Currency, Paid_Amount, TransactionId) VALUES ({inputModel.UserId}, {inputModel.AlbumId}, {inputModel.PaymentDate}, {inputModel.PaymentType}, {inputModel.Paid!.Currency}, {inputModel.Paid.Amount}, {inputModel.TransactionId});";
+            await databaseAccessor.CommandAsync(query);
+        }
+        catch (ConstraintViolationException)
+        {
+            throw new AlbumSubscriptionException(inputModel.AlbumId);
+        }
+    }
+
+    public Task<bool> IsAlbumSubscribedAsync(int albumId, string userId)
+    {
+        FormattableString query = $"SELECT COUNT(*) FROM Subscriptions WHERE AlbumId={albumId} AND UserId={userId};";
+        return databaseAccessor.ScalarAsync<bool>(query);
+    }
+
+    public async Task<string> GetPaymentUrlAsync(int albumId)
+    {
+        AlbumDetailViewModel viewModel = await GetAlbumAsync(albumId);
+        string? returnUrl = linkGenerator.GetUriByAction(httpContextAccessor.HttpContext!, action: nameof(AlbumsController.Subscribe), controller: "Albums", values: new { id = albumId });
+        string? cancelUrl = linkGenerator.GetUriByAction(httpContextAccessor.HttpContext!, action: nameof(AlbumsController.Detail), controller: "Albums", values: new { id = albumId });
+        AlbumPayInputModel inputModel = new()
+        {
+            AlbumId = albumId,
+            UserId = httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier),
+            Description = viewModel.Title,
+            Price = viewModel.CurrentPrice,
+            ReturnUrl = returnUrl,
+            CancelUrl = cancelUrl
+        };
+        return await paymentGateway.GetPaymentUrlAsync(inputModel);
+    }
+
+    public Task<AlbumSubscribeInputModel> CapturePaymentAsync(int albumId, string token)
+    {
+        return paymentGateway.CapturePaymentAsync(token);
+    }
+
+    public async Task<AlbumSubscriptionViewModel> GetAlbumSubscriptionAsync(int albumId)
+    {
+        string userId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        FormattableString query = $"SELECT Title, PaymentDate, PaymentType, Paid_Amount, Paid_Currency, TransactionId FROM Subscriptions INNER JOIN Albums ON Subscriptions.AlbumId = Albums.Id WHERE Subscriptions.AlbumId={albumId} AND Subscriptions.UserId={userId}";
+        DataSet dataSet = await databaseAccessor.QueryAsync(query);
+        DataTable dataTable = dataSet.Tables[0];
+        if (dataTable.Rows.Count == 0)
+        {
+            throw new AlbumSubscriptionNotFoundException(albumId);
+        }
+        DataRow datarow = dataTable.Rows[0];
+        AlbumSubscriptionViewModel viewModel = datarow.ToAlbumSubscriptionViewModel();
+        return viewModel;
+    }
+
+    public async Task<int?> GetAlbumVoteAsync(int albumId)
+    {
+        string userId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        string vote = await databaseAccessor.ScalarAsync<string>($"SELECT Vote FROM Subscriptions WHERE AlbumId={albumId} AND UserId={userId};");
+        return string.IsNullOrEmpty(vote) ? null : Convert.ToInt32(vote);
+    }
+
+    public async Task VoteAlbumAsync(AlbumVoteInputModel inputModel)
+    {
+        if (inputModel.Vote < 1 || inputModel.Vote > 5)
+        {
+            throw new InvalidVoteException(inputModel.Vote);
+        }
+        string userId = httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        FormattableString query = $"UPDATE Subscriptions SET Vote={inputModel.Vote} WHERE AlbumId={inputModel.Id} AND UserId={userId};";
+        int updatedRows = await databaseAccessor.CommandAsync(query);
+        if (updatedRows == 0)
+        {
+            throw new AlbumSubscriptionNotFoundException(inputModel.Id);
+        }
     }
 }
