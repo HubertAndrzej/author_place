@@ -75,6 +75,11 @@ namespace AuthorPlace.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Compare(nameof(ExpectedTrue), ErrorMessage = "Consent for ecommerce purposes is mandatory.")]
+            public bool EcommerceConsent { get; set; }
+            public bool NewsletterConsent { get; set; }
+            public bool ExpectedTrue => true;
         }
 
 
@@ -95,6 +100,8 @@ namespace AuthorPlace.Areas.Identity.Pages.Account
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 user.FullName = Input.FullName;
+                user.EcommerceConsent = DateTimeOffset.UtcNow;
+                user.NewsletterConsent = Input.NewsletterConsent ? DateTimeOffset.UtcNow : null;
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)

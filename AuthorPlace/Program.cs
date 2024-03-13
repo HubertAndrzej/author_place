@@ -46,6 +46,7 @@ builder.Services.AddMvc(options =>
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AllowAnonymousToPage("/Privacy");
+    options.Conventions.AllowAnonymousToPage("/Terms");
 });
 builder.Services.AddAntiforgery(options =>
 {

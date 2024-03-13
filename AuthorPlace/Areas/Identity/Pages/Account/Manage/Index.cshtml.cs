@@ -29,15 +29,22 @@ namespace AuthorPlace.Areas.Identity.Pages.Account.Manage
         [BindProperty]
         public InputModel Input { get; set; }
 
+        public DateTimeOffset EcommerceConsent { get; set; }
+
+        public DateTimeOffset? NewsletterConsent { get; set; }
+
         public class InputModel
         {
+            [Required]
+            [Display(Name = "Full Name")]
+            public string FullName { get; set; }
+
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
 
-            [Required]
-            [Display(Name = "Full Name")]
-            public string FullName { get; set; }
+            [Display(Name = "Newsletter subscription")]
+            public bool NewsletterConsent { get; set; }
         }
 
         private async Task LoadAsync(ApplicationUser user)
@@ -47,10 +54,14 @@ namespace AuthorPlace.Areas.Identity.Pages.Account.Manage
 
             Username = userName;
 
+            EcommerceConsent = user.EcommerceConsent;
+            NewsletterConsent = user.NewsletterConsent;
+
             Input = new InputModel
             {
+                FullName = user.FullName,
                 PhoneNumber = phoneNumber,
-                FullName = user.FullName
+                NewsletterConsent = NewsletterConsent is not null,
             };
         }
 
@@ -81,10 +92,20 @@ namespace AuthorPlace.Areas.Identity.Pages.Account.Manage
             }
 
             user.FullName = Input.FullName;
+
+            if (Input.NewsletterConsent)
+            {
+                user.NewsletterConsent ??= DateTimeOffset.Now;
+            }
+            else
+            {
+                user.NewsletterConsent = null;
+            }
+
             var identityResult = await _userManager.UpdateAsync(user);
             if (!identityResult.Succeeded)
             {
-                StatusMessage = "Unexpected error when trying to set full name.";
+                StatusMessage = "Unexpected error when trying to save user profile.";
                 return RedirectToPage();
             }
 

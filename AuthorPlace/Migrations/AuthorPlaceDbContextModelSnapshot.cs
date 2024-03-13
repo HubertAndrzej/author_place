@@ -76,6 +76,9 @@ namespace AuthorPlace.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTimeOffset>("EcommerceConsent")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
@@ -90,6 +93,9 @@ namespace AuthorPlace.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset?>("NewsletterConsent")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedEmail")
@@ -394,7 +400,9 @@ namespace AuthorPlace.Migrations
                 {
                     b.HasOne("AuthorPlace.Models.Entities.Album", "Album")
                         .WithMany()
-                        .HasForeignKey("AlbumId");
+                        .HasForeignKey("AlbumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("AuthorPlace.Models.Entities.ApplicationUser", "User")
                         .WithMany()

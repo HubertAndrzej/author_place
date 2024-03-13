@@ -41,9 +41,10 @@ public partial class AuthorPlaceDbContext : IdentityDbContext<ApplicationUser>
             entity.HasMany(album => album.Songs).WithOne(song => song.Album).HasForeignKey(song => song.AlbumId);
             entity.HasMany(album => album.SubscribedUsers).WithMany(user => user.SubscribedAlbums).UsingEntity<Subscription>(
                 entity => entity.HasOne(subscription => subscription.User).WithMany().HasForeignKey(subscription => subscription.UserId),
-                entity => entity.HasOne(subscription => subscription.Album).WithMany().HasForeignKey(subscription => subscription.AlbumId).IsRequired(false),
+                entity => entity.HasOne(subscription => subscription.Album).WithMany().HasForeignKey(subscription => subscription.AlbumId),
                 entity =>
                 {
+                    entity.HasQueryFilter(subscription => subscription.Album!.Status != Status.Erased);
                     entity.ToTable("Subscriptions");
                     entity.OwnsOne(subscription => subscription.Paid, builder =>
                     {
