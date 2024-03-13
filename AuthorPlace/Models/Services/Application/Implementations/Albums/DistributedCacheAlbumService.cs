@@ -98,6 +98,11 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         }
     }
 
+    public Task<List<AlbumDetailViewModel>> GetAlbumsByAuthorAsync(string authorId)
+    {
+        return albumService.GetAlbumsByAuthorAsync(authorId);
+    }
+
     public Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel)
     {
         return albumService.CreateAlbumAsync(inputModel);

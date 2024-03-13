@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Personal Data";
     ViewData["ActivePage"] = ManageNavPages.PersonalData;
+    bool canDownloadUserData = User.HasClaim(claim => claim.Type == ClaimTypes.Role && claim.Value == nameof(Role.Author));
 }
 
 <h3>@ViewData["Title"]</h3>
@@ -10,14 +11,24 @@
 <div class="row">
     <div class="col-md-6">
         <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
+        <form id="download-data" method="post">
+            <div class=" row justify-content-between">
+                <div class="col-md-6">
+                    <button class="btn btn-outline-info my-3" type="submit" asp-page="DownloadPersonalData">Download personal data</button>
+                </div>
+                @if (canDownloadUserData)
+                {
+                    <div class="col-md-6">
+                        <button class="btn btn-outline-info my-3" type="submit" asp-page="DownloadUserData">Download personal content</button>
+                    </div>
+                }
+            </div>
+        </form>
         <p>
             <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
         </p>
-        <form id="download-data" asp-page="DownloadPersonalData" method="post">
-            <button class="btn btn-outline-info my-3" type="submit">Download</button>
-        </form>
         <p>
-            <a class="link-info link-offset-2 link-underline-opacity-0 link-underline-opacity-25-hover" id="delete" asp-page="DeletePersonalData" class="btn btn-danger">Delete</a>
+            <a id="delete" asp-page="DeletePersonalData" class="btn btn-outline-danger">Delete Account</a>
         </p>
     </div>
 </div>

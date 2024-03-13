@@ -13,6 +13,8 @@ using AuthorPlace.Models.Services.Application.Interfaces.Errors;
 using AuthorPlace.Models.Services.Application.Interfaces.Songs;
 using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.Services.Infrastructure.Interfaces;
+using AuthorPlace.Models.Services.Worker.Implemetations;
+using AuthorPlace.Models.Services.Worker.Interfaces;
 using AuthorPlace.Models.Validators.Albums;
 using AuthorPlace.Models.Validators.Identity;
 using AuthorPlace.Models.Validators.Songs;
@@ -87,29 +89,33 @@ IServiceCollection? albumService = persistence switch
 {
     Persistence.AdoNet => builder.Services.AddTransient<IAlbumService, AdoNetAlbumService>(),
     Persistence.EFCore => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>(),
-    _ => builder.Services.AddScoped<IAlbumService, EFCoreAlbumService>()
+    _ => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>()
 };
 IServiceCollection? songService = persistence switch
 {
     Persistence.AdoNet => builder.Services.AddTransient<ISongService, AdoNetSongService>(),
     Persistence.EFCore => builder.Services.AddTransient<ISongService, EFCoreSongService>(),
-    _ => builder.Services.AddScoped<ISongService, EFCoreSongService>()
+    _ => builder.Services.AddTransient<ISongService, EFCoreSongService>()
 };
 IServiceCollection? paymentGateway = paymentType switch
 {
-    PaymentType.PayPal => builder.Services.AddScoped<IPaymentGateway, PayPalPaymentGateway>(),
-    PaymentType.Stripe => builder.Services.AddScoped<IPaymentGateway, StripePaymentGateway>(),
+    PaymentType.PayPal => builder.Services.AddTransient<IPaymentGateway, PayPalPaymentGateway>(),
+    PaymentType.Stripe => builder.Services.AddTransient<IPaymentGateway, StripePaymentGateway>(),
     _ => builder.Services.AddTransient<IPaymentGateway, StripePaymentGateway>()
 };
-builder.Services.AddScoped<IDatabaseAccessor, SqliteDatabaseAccessor>();
+builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddScoped<IAuthorizationHandler, AlbumAuthorRequirementHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, AlbumSubscriberRequirementHandler>();
-builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
 builder.Services.AddSingleton<IImagePersister, MagickNetImagePersister>();
 builder.Services.AddSingleton<IEmailSender, MailKitEmailSender>();
 builder.Services.AddSingleton<IEmailClient, MailKitEmailSender>();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, MultiAuthorizationPolicyProvider>();
+builder.Services.AddHostedService<ClearDataHostedService>();
+builder.Services.AddSingleton<UserDataHostedService>();
+builder.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredService<UserDataHostedService>());
+builder.Services.AddSingleton<IUserDataService>(provider => provider.GetRequiredService<UserDataHostedService>());
+builder.Services.AddTransient<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddTransient<ICachedAlbumService, MemoryCacheAlbumService>();
 builder.Services.AddTransient<ICachedSongService, MemoryCacheSongService>();
 builder.Services.AddResponseCaching();

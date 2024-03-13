@@ -97,6 +97,16 @@ public class EFCoreAlbumService : IAlbumService
         return result.Results!;
     }
 
+    public Task<List<AlbumDetailViewModel>> GetAlbumsByAuthorAsync(string authorId)
+    {
+        return dbContext.Albums!
+            .AsNoTracking()
+            .Include(album => album.Songs)
+            .Where(album => album.AuthorId == authorId)
+            .Select(album => album.ToAlbumDetailViewModel())
+            .ToListAsync();
+    }
+
     public async Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel)
     {
         string title = inputModel.Title!;

@@ -100,6 +100,20 @@ public class AdoNetAlbumService : IAlbumService
         return result.Results!;
     }
 
+    public async Task<List<AlbumDetailViewModel>> GetAlbumsByAuthorAsync(string authorId)
+    {
+        FormattableString query = $@"SELECT Id FROM Albums WHERE AuthorId={authorId} AND Status<>{nameof(Status.Erased)};";
+        DataSet dataSet = await databaseAccessor.QueryAsync(query);
+        DataTable dataTable = dataSet.Tables[0];
+        List<AlbumDetailViewModel> albums = new();
+        foreach (DataRow albumRow in dataTable.Rows)
+        {
+            AlbumDetailViewModel album = await GetAlbumAsync(albumRow.Field<int>("Id"));
+            albums.Add(album);
+        }
+        return albums;
+    }
+
     public async Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel)
     {
         string title = inputModel.Title!;

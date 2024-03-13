@@ -37,7 +37,14 @@ public class AlbumAuthorRequirementHandler : AuthorizationHandler<AlbumAuthorReq
             switch (httpContextAccessor.HttpContext.Request.RouteValues["controller"]!.ToString()!.ToLowerInvariant())
             {
                 case "songs":
-                    albumId = (await songService.GetSongAsync(id)).AlbumId;
+                    if (httpContextAccessor.HttpContext!.Request.RouteValues["action"]!.ToString()!.ToLowerInvariant() == "new")
+                    {
+                        albumId = id;
+                    }
+                    else
+                    {
+                        albumId = (await songService.GetSongAsync(id)).AlbumId;
+                    }
                     break;
                 case "albums":
                     albumId = id;
