@@ -361,5 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/AuthorPlace/*
+/AuthorPlace/wwwroot/Rotativa/*
 /AuthorPlace/Downloads/*.zip
