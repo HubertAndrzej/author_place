@@ -166,8 +166,8 @@ hr {
 }
 
 .size {
+    height: 50px;
     width: 100%;
-    height: 100%;
 }
 
 .tab-selector .nav-link {

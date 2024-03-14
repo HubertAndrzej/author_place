@@ -1,7 +1,9 @@
 ﻿#nullable disable
 
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using AuthorPlace.Models.Entities;
+using AuthorPlace.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -54,6 +56,13 @@ namespace AuthorPlace.Areas.Identity.Pages.Account.Manage
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            var claims = await _userManager.GetClaimsAsync(user);
+            if (claims.Any(claim => claim.Type == ClaimTypes.Role && claim.Value == nameof(Role.Author)))
+            {
+                TempData["ConfirmationMessage"] = $"You cannot delete your account yourself, please contact our support.";
+                return RedirectToPage("PersonalData");
             }
 
             RequirePassword = await _userManager.HasPasswordAsync(user);

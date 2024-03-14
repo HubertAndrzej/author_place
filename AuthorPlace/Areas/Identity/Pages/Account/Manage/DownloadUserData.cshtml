@@ -1,0 +1,9 @@
+﻿@page
+@model AuthorPlace.Areas.Identity.Pages.Account.Manage.DownloadUserDataModel
+@{
+    ViewData["Title"] = "Download your content";
+    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+}
+<h4>@ViewData["Title"]</h4>
+<div class="alert alert-success" role="alert">Your request has been taken care of! It may take some time but we will soon send you an email that will include the link to download the zip file of your content.</div>
+<a asp-page="PersonalData">Back to profile</a>

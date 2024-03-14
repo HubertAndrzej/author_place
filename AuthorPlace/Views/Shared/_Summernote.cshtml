@@ -3,11 +3,6 @@
 <link href="~/summernote.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 <script>
-    jQuery.validator.setDefaults({
-        ignore: ":hidden, [contenteditable='true']:not([name])"
-    });
-</script>
-<script>
     $('[data-summernote]').summernote({
         minHeight: 520,
         toolbar: [
@@ -16,5 +11,10 @@
             ['insert', ['video']],
             ['view', ['codeview']]
         ]
+    });
+</script>
+<script>
+    jQuery.validator.setDefaults({
+        ignore: ":hidden, [contenteditable='true']:not([name])"
     });
 </script>

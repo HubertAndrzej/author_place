@@ -32,6 +32,26 @@
                 <label asp-for="Input.ConfirmPassword"></label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
+            <br />
+            <h4>Privacy</h4>
+            <hr />
+            <br />
+            <h6>Required consent</h6>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" asp-for="Input.EcommerceConsent">
+                <label class="form-check-label" asp-for="Input.EcommerceConsent">I consent to the processing of my personal data for e-commerce purposes (<a asp-page="/Privacy" asp-fragment="ecommerce">read information</a>).</label>
+                <span asp-validation-for="Input.EcommerceConsent" class="text-danger"></span>
+            </div>
+            <br />
+            <h6>Optional consent</h6>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" asp-for="Input.NewsletterConsent">
+                <label class="form-check-label" asp-for="Input.NewsletterConsent">I agree to subscribe to the newsletter (<a asp-page="/Privacy" asp-fragment="newsletter">read information</a>).</label>
+                <span class="form-check-label" asp-validation-for="Input.NewsletterConsent" class="text-danger"></span>
+            </div>
+            <br />
+            <hr />
+            <p>By registering, you accept the <a asp-page="/Terms">terms of use</a>.</p>
             <recaptcha />
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-outline-info my-3">Register</button>
         </form>

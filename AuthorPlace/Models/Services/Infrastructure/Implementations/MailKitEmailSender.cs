@@ -22,14 +22,14 @@ public class MailKitEmailSender : IEmailClient
         return SendEmailAsync(email, string.Empty, subject, htmlMessage);
     }
 
-    public async Task SendEmailAsync(string recipientEmail, string replyToEmail, string subject, string htmlMessage)
+    public async Task SendEmailAsync(string recipientEmail, string? replyToEmail, string subject, string htmlMessage, CancellationToken token = default)
     {
         SmtpOptions options = this.smtpOptionsMonitor.CurrentValue;
         using SmtpClient client = new();
-        await client.ConnectAsync(options.Host, options.Port, options.Security);
+        await client.ConnectAsync(options.Host, options.Port, options.Security, token);
         if (!string.IsNullOrEmpty(configuration["Smtp:Username"]))
         {
-            await client.AuthenticateAsync(configuration["Smtp:Username"], configuration["Smtp:Password"]);
+            await client.AuthenticateAsync(configuration["Smtp:Username"], configuration["Smtp:Password"], token);
         }
         MimeMessage message = new();
         message.From.Add(MailboxAddress.Parse(options.Sender));
@@ -43,7 +43,7 @@ public class MailKitEmailSender : IEmailClient
         {
             Text = htmlMessage
         };
-        await client.SendAsync(message);
-        await client.DisconnectAsync(true);
+        await client.SendAsync(message, token);
+        await client.DisconnectAsync(true, token);
     }
 }

@@ -44,7 +44,7 @@ public class AdoNetAlbumService : IAlbumService
     {
         string orderby = inputModel.OrderBy == "CurrentPrice" ? "CurrentPrice_Amount" : inputModel.OrderBy;
         string direction = inputModel.Ascending ? "ASC" : "DESC";
-        FormattableString selectQuery = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Title LIKE {"%" + inputModel.Search + "%"} AND Status<>{nameof(Status.Erased)} ORDER BY {(Sql)orderby} {(Sql)direction} LIMIT {inputModel.Limit} OFFSET {inputModel.Offset};";
+        FormattableString selectQuery = $"SELECT Id, Title, ImagePath, Author, AuthorId, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency, Status FROM Albums WHERE Title LIKE {"%" + inputModel.Search + "%"} AND Status={nameof(Status.Published)} ORDER BY {(Sql)orderby} {(Sql)direction} LIMIT {inputModel.Limit} OFFSET {inputModel.Offset};";
         DataSet dataSet = await databaseAccessor.QueryAsync(selectQuery);
         DataTable dataTable = dataSet.Tables[0];
         List<AlbumViewModel> albumList = new();
@@ -53,7 +53,7 @@ public class AdoNetAlbumService : IAlbumService
             AlbumViewModel album = albumRow.ToAlbumViewModel();
             albumList.Add(album);
         }
-        FormattableString countQuery = $"SELECT COUNT(*) FROM Albums WHERE Title LIKE {"%" + inputModel.Search + "%"} AND Status<>{nameof(Status.Erased)};";
+        FormattableString countQuery = $"SELECT COUNT(*) FROM Albums WHERE Title LIKE {"%" + inputModel.Search + "%"} AND Status={nameof(Status.Published)};";
         int count = await databaseAccessor.ScalarAsync<int>(countQuery);
         ListViewModel<AlbumViewModel> result = new()
         {
@@ -65,7 +65,7 @@ public class AdoNetAlbumService : IAlbumService
 
     public async Task<AlbumDetailViewModel> GetAlbumAsync(int id)
     {
-        FormattableString albumQuery = $"SELECT Id, Title, Description, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Albums WHERE Id={id} AND Status<>{nameof(Status.Erased)};";
+        FormattableString albumQuery = $"SELECT Id, Title, Description, ImagePath, Author, AuthorId, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency, Status FROM Albums WHERE Id={id} AND Status<>{nameof(Status.Erased)};";
         DataSet dataSet = await databaseAccessor.QueryAsync(albumQuery);
         DataTable albumTable = dataSet.Tables[0];
         if (albumTable.Rows.Count != 1)
@@ -100,6 +100,34 @@ public class AdoNetAlbumService : IAlbumService
         return result.Results!;
     }
 
+    public async Task<List<AlbumViewModel>> GetAlbumsByAuthorAsync(string authorId)
+    {
+        FormattableString query = $@"SELECT Id, Title, ImagePath, Author, AuthorId, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency, Status FROM Albums WHERE AuthorId={authorId} AND Status<>{nameof(Status.Erased)};";
+        DataSet dataSet = await databaseAccessor.QueryAsync(query);
+        DataTable dataTable = dataSet.Tables[0];
+        List<AlbumViewModel> albums = new();
+        foreach (DataRow albumRow in dataTable.Rows)
+        {
+            AlbumViewModel album = albumRow.ToAlbumViewModel();
+            albums.Add(album);
+        }
+        return albums;
+    }
+
+    public async Task<List<AlbumViewModel>> GetAlbumsBySubscriberAsync(string subscriberId)
+    {
+        FormattableString query = $"SELECT Id, Title, ImagePath, Author, AuthorId, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency, Status FROM Albums INNER JOIN Subscriptions ON Albums.Id=Subscriptions.AlbumId WHERE Status<>{nameof(Status.Erased)} AND Subscriptions.UserId={subscriberId};";
+        DataSet dataSet = await databaseAccessor.QueryAsync(query);
+        DataTable dataTable = dataSet.Tables[0];
+        List<AlbumViewModel> albums = new();
+        foreach (DataRow albumRow in dataTable.Rows)
+        {
+            AlbumViewModel album = albumRow.ToAlbumViewModel();
+            albums.Add(album);
+        }
+        return albums;
+    }
+
     public async Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel)
     {
         string title = inputModel.Title!;
@@ -117,7 +145,7 @@ public class AdoNetAlbumService : IAlbumService
         }
         try
         {
-            FormattableString insertQuery = $"INSERT INTO Albums (Title, Author, AuthorId, ImagePath, Rating, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount, Status) VALUES ({title}, {author}, {authorId}, '/placeholder.jpg', 0, 'EUR', 0, 'EUR', 0, {nameof(Status.Published)});";
+            FormattableString insertQuery = $"INSERT INTO Albums (Title, Author, AuthorId, ImagePath, Rating, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount, Status) VALUES ({title}, {author}, {authorId}, '/placeholder.jpg', 0, 'EUR', 0, 'EUR', 0, {nameof(Status.Drafted)});";
             await databaseAccessor.CommandAsync(insertQuery);
             FormattableString albumQuery = $"SELECT last_insert_rowid();";
             int albumId = await databaseAccessor.ScalarAsync<int>(albumQuery);
@@ -133,7 +161,7 @@ public class AdoNetAlbumService : IAlbumService
 
     public async Task<AlbumUpdateInputModel> GetAlbumForEditingAsync(int id)
     {
-        FormattableString query = $"SELECT Id, Title, Description, ImagePath, Email, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency, RowVersion FROM Albums WHERE Id={id} AND Status<>{nameof(Status.Erased)};";
+        FormattableString query = $"SELECT Id, Title, Description, ImagePath, Email, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency, Status, RowVersion FROM Albums WHERE Id={id} AND Status<>{nameof(Status.Erased)};";
         DataSet dataSet = await databaseAccessor.QueryAsync(query);
         DataTable albumTable = dataSet.Tables[0];
         if (albumTable.Rows.Count != 1)
@@ -156,7 +184,7 @@ public class AdoNetAlbumService : IAlbumService
             {
                 imagePath = await imagePersister.SaveAlbumImageAsync(inputModel.Id, inputModel.Image);
             }
-            FormattableString updateQuery = $"UPDATE Albums SET Title={inputModel.Title}, Description={inputModel.Description}, ImagePath=COALESCE({imagePath}, ImagePath), Email={inputModel.Email}, CurrentPrice_Currency={inputModel.CurrentPrice!.Currency}, CurrentPrice_Amount={inputModel.CurrentPrice.Amount}, FullPrice_Currency={inputModel.FullPrice!.Currency}, FullPrice_Amount={inputModel.FullPrice.Amount} WHERE Id={inputModel.Id} AND RowVersion={inputModel.RowVersion} AND Status<>{nameof(Status.Erased)}";
+            FormattableString updateQuery = $"UPDATE Albums SET Title={inputModel.Title}, Description={inputModel.Description}, ImagePath=COALESCE({imagePath}, ImagePath), Email={inputModel.Email}, CurrentPrice_Currency={inputModel.CurrentPrice!.Currency}, CurrentPrice_Amount={inputModel.CurrentPrice.Amount}, FullPrice_Currency={inputModel.FullPrice!.Currency}, FullPrice_Amount={inputModel.FullPrice.Amount}, Status=({(inputModel.IsPublished ? Status.Published : Status.Drafted)}, Status) WHERE Id={inputModel.Id} AND RowVersion={inputModel.RowVersion} AND Status<>{nameof(Status.Erased)}";
             int affectedRows = await databaseAccessor.CommandAsync(updateQuery);
             if (affectedRows == 0)
             {
@@ -188,8 +216,14 @@ public class AdoNetAlbumService : IAlbumService
         return viewModel;
     }
 
-    public async Task RemoveAlbumAsync(AlbumDeleteInputModel inputModel)
+    public async Task DeleteAlbumAsync(AlbumDeleteInputModel inputModel)
     {
+        FormattableString countQuery = $"SELECT COUNT(*) FROM Subscriptions WHERE AlbumId={inputModel.Id};";
+        int count = await databaseAccessor.ScalarAsync<int>(countQuery);
+        if (count > 0)
+        {
+            throw new AlbumDeletionException(inputModel.Id);
+        }
         FormattableString deleteQuery = $"UPDATE Albums SET Status={nameof(Status.Erased)} WHERE Id={inputModel.Id} AND Status<>{nameof(Status.Erased)}";
         int affectedRows = await databaseAccessor.CommandAsync(deleteQuery);
         if (affectedRows == 0)
@@ -259,6 +293,11 @@ public class AdoNetAlbumService : IAlbumService
 
     public async Task SubscribeAlbumAsync(AlbumSubscribeInputModel inputModel)
     {
+        AlbumDetailViewModel album = await GetAlbumAsync(inputModel.AlbumId);
+        if (album.Status != Status.Published)
+        {
+            throw new AlbumSubscriptionException(inputModel.AlbumId);
+        }
         try
         {
             FormattableString query = $"INSERT INTO Subscriptions (UserId, AlbumId, PaymentDate, PaymentType, Paid_Currency, Paid_Amount, TransactionId) VALUES ({inputModel.UserId}, {inputModel.AlbumId}, {inputModel.PaymentDate}, {inputModel.PaymentType}, {inputModel.Paid!.Currency}, {inputModel.Paid.Amount}, {inputModel.TransactionId});";

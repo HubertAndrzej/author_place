@@ -1,0 +1,60 @@
+﻿@model PersonalAlbumViewModel
+@inject IAuthorizationService authorizationService
+@{
+    AuthorizationPolicy authorizationPolicy = new AuthorizationPolicyBuilder().RequireRole(nameof(Role.Author)).Build();
+    AuthorizationResult authorizationResult = await authorizationService.AuthorizeAsync(User, authorizationPolicy);
+    bool canCreate = authorizationResult.Succeeded;
+}
+<h1>
+    @ViewBag.Title
+    @if (canCreate)
+    {
+        <a class="btn btn-outline-info btn-sm" asp-action="New"><i class="fa-solid fa-plus"></i> Create new</a>
+    }
+</h1>
+<ul class="nav nav-tabs tab-selector my-3" id="albumsTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link link-info active" id="subscriber-tab" data-bs-toggle="tab" data-bs-target="#subscriber" role="tab">Subscriber</a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link link-info" id="author-tab" data-bs-toggle="tab" data-bs-target="#author" role="tab">Author</a>
+    </li>
+</ul>
+<div class="tab-content" id="albumsTabsContent">
+    <div class="tab-pane fade show active" id="subscriber" role="tabpanel">
+        <h2 class="mt-3">Subscribed albums</h2>
+        @foreach (AlbumViewModel album in Model.SubscribedAlbums!)
+        {
+            <hr />
+            <partial name="Albums/_AlbumLine" model="@album"></partial>
+        }
+        @if (Model.SubscribedAlbums!.Any())
+        {
+            <hr />
+        }
+        else
+        {
+            <br />
+            <p class="text-center text-muted">You are not a subscriber to any album</p>
+            <br />
+        }
+    </div>
+    <div class="tab-pane fade" id="author" role="tabpanel">
+        <h2 class="mt-3">Authored albums</h2>
+        @foreach (AlbumViewModel album in Model.AuthoredAlbums!)
+        {
+            <partial name="Albums/_AlbumLine" model="@album"></partial>
+        }
+        @if (Model.AuthoredAlbums!.Any())
+        {
+            <hr />
+        }
+        else
+        {
+            <h2 class="mt-3">Authored albums</h2>
+            <br />
+            <p class="text-center text-muted">You are not an author to any album</p>
+            <br />
+        }
+    </div>
+</div>

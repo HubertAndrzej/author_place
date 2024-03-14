@@ -24,6 +24,11 @@ public class ErrorViewSelectorService : IErrorViewSelectorService
                 statusCode: HttpStatusCode.NotFound,
                 viewName: "AlbumNotFound"),
 
+            AlbumDeletionException => new ErrorViewData(
+                title: $"Cannot delete the album since it has subscribers",
+                statusCode: HttpStatusCode.Forbidden,
+                viewName: "AlbumWithSubscribers"),
+
             UserUnknownException => new ErrorViewData(
                 title: "User not found",
                 statusCode: HttpStatusCode.BadRequest,

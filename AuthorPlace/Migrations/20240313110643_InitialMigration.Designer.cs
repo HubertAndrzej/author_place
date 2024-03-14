@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorPlace.Migrations
 {
     [DbContext(typeof(AuthorPlaceDbContext))]
-    [Migration("20240311193154_InitialMigration")]
+    [Migration("20240313110643_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -78,6 +78,9 @@ namespace AuthorPlace.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTimeOffset>("EcommerceConsent")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
@@ -92,6 +95,9 @@ namespace AuthorPlace.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset?>("NewsletterConsent")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedEmail")
@@ -396,7 +402,9 @@ namespace AuthorPlace.Migrations
                 {
                     b.HasOne("AuthorPlace.Models.Entities.Album", "Album")
                         .WithMany()
-                        .HasForeignKey("AlbumId");
+                        .HasForeignKey("AlbumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("AuthorPlace.Models.Entities.ApplicationUser", "User")
                         .WithMany()

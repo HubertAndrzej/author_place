@@ -4,5 +4,5 @@ namespace AuthorPlace.Models.Services.Infrastructure.Interfaces;
 
 public interface IEmailClient : IEmailSender
 {
-    Task SendEmailAsync(string recipientEmail, string replyToEmail, string subject, string htmlMessage);
+    Task SendEmailAsync(string recipientEmail, string? replyToEmail, string subject, string htmlMessage, CancellationToken token = default);
 }

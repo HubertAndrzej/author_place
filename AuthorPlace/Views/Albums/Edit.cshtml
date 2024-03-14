@@ -30,6 +30,15 @@
             </div>
             <div class="col-md-3">
                 <aside>
+                    <div class="form-group mb-3 row">
+                        <label class="display-label">Visibility</label>
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" asp-for="IsPublished" value="false" id="btnradio1" autocomplete="off">
+                            <label class="btn btn-outline-info" for="btnradio1">Draft</label>
+                            <input type="radio" class="btn-check" asp-for="IsPublished" value="true" id="btnradio2" autocomplete="off">
+                            <label class="btn btn-outline-info" for="btnradio2">Public</label>
+                        </div>
+                    </div>
                     <div class="form-group mb-3">
                         <label class="display-label" asp-for="Email"></label>
                         <input type="email" asp-for="Email" class="form-control input">
@@ -60,7 +69,7 @@
                         <div class="mt-3">
                             <input class="form-control input" type="file" asp-for="Image" onchange="updatePreview(this)">
                             <span asp-validation-for="Image"></span>
-                            <p><small>The image must be square. If not, the empty spaces will be filled with the lightcyan color</small></p>
+                            <p><small class="display-label">The image must be square. If not, the empty spaces will be filled with the lightcyan color</small></p>
                         </div>
                     </div>
                 </aside>
