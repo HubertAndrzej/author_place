@@ -1,4 +1,5 @@
 ﻿using AuthorPlace.Models.Enums;
+using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.ValueObjects;
 
 namespace AuthorPlace.Models.Entities;
@@ -9,7 +10,6 @@ public class Album
     {
         ChangeTitle(title);
         ChangeAuthor(author, authorId);
-        ChangeStatus(Status.Published);
         Email = email;
         ImagePath = "/placeholder.jpg";
         FullPrice = new Money(Currency.EUR, 0);
@@ -35,6 +35,7 @@ public class Album
 
     public void ChangeTitle(string title)
     {
+        EnsureNotErased();
         if (string.IsNullOrWhiteSpace(title))
         {
             throw new ArgumentException("The album must have a title");
@@ -44,6 +45,7 @@ public class Album
 
     public void ChangeAuthor(string author, string authorId)
     {
+        EnsureNotErased();
         if (string.IsNullOrWhiteSpace(author))
         {
             throw new ArgumentException("The album must have an author");
@@ -58,6 +60,7 @@ public class Album
 
     public void ChangePrices(Money fullPrice, Money currentPrice)
     {
+        EnsureNotErased();
         if (fullPrice == null || currentPrice == null)
         {
             throw new ArgumentException("The prices must not be null");
@@ -76,6 +79,7 @@ public class Album
 
     public void ChangeEmail(string email)
     {
+        EnsureNotErased();
         if (string.IsNullOrEmpty(email))
         {
             throw new ArgumentException("The email must not be empty");
@@ -85,6 +89,7 @@ public class Album
 
     public void ChangeDescription(string description)
     {
+        EnsureNotErased();
         if (description != null)
         {
             if (description.Length < 50)
@@ -101,12 +106,22 @@ public class Album
 
     public void ChangeImagePath(string imagePath)
     {
+        EnsureNotErased();
         ImagePath = imagePath;
     }
 
-    public void ChangeStatus(Status status)
+    private void ChangeStatus(Status status)
     {
+        EnsureNotErased();
         Status = status;
+    }
+
+    private void EnsureNotErased()
+    {
+        if (Status == Status.Erased)
+        {
+            throw new InvalidOperationException("The album is erased and cannot be modified");
+        }
     }
 
     public void ChangeRating(double? rating)
@@ -116,5 +131,24 @@ public class Album
             return;
         }
         Rating = rating ?? 0;
+    }
+
+    public void Draft()
+    {
+        ChangeStatus(Status.Drafted);
+    }
+
+    public void Publish()
+    {
+        ChangeStatus(Status.Published);
+    }
+
+    public void Erase()
+    {
+        if (SubscribedUsers!.Any())
+        {
+            throw new AlbumDeletionException(Id);
+        }
+        ChangeStatus(Status.Erased);
     }
 }

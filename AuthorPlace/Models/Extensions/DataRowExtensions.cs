@@ -40,6 +40,7 @@ public static class DataRowExtensions
             Description = Convert.ToString(albumRow["Description"]),
             ImagePath = Convert.ToString(albumRow["ImagePath"]),
             Author = Convert.ToString(albumRow["Author"]),
+            AuthorId = Convert.ToString(albumRow["AuthorId"]),
             Rating = Convert.ToDouble(albumRow["Rating"]),
             FullPrice = new Money(
                 Enum.Parse<Currency>((string)albumRow["FullPrice_Currency"]),
@@ -49,6 +50,7 @@ public static class DataRowExtensions
                 Enum.Parse<Currency>((string)albumRow["CurrentPrice_Currency"]),
                 Convert.ToDecimal(albumRow["CurrentPrice_Amount"])
             ),
+            Status = Enum.Parse<Status>((string)albumRow["Status"]),
             Songs = new List<SongViewModel>()
         };
     }
@@ -70,6 +72,7 @@ public static class DataRowExtensions
                 Enum.Parse<Currency>((string)dataRow["CurrentPrice_Currency"]),
                 Convert.ToDecimal(dataRow["CurrentPrice_Amount"])
             ),
+            IsPublished = Enum.Parse<Status>((string)dataRow["Status"]) == Status.Published,
             RowVersion = Convert.ToString(dataRow["RowVersion"])
         };
     }

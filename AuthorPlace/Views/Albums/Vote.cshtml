@@ -12,9 +12,17 @@
 </form>
 <script>
     function highlightVote(vote) {
-        const buttons = $('button[name="Vote"]');
-        buttons.slice(0, vote).find('i').addClass('fas').removeClass('far');
-        buttons.slice(vote).find('i').addClass('far').removeClass('fas');
+        const buttons = document.querySelectorAll('button[name="Vote"]');
+        buttons.forEach((button, index) => {
+            const starIcon = button.querySelector('i');
+            if (index < vote) {
+                starIcon.classList.remove('far');
+                starIcon.classList.add('fas');
+            } else {
+                starIcon.classList.remove('fas');
+                starIcon.classList.add('far');
+            }
+        });
     }
     function resetVote() {
         highlightVote(@Model.Vote);

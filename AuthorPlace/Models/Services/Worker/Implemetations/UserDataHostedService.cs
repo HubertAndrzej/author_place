@@ -68,13 +68,14 @@ public class UserDataHostedService : BackgroundService, IUserDataService
         string zipFilePath = GetUserDataZipFileLocation(userId, zipFileId);
         using FileStream file = File.OpenWrite(zipFilePath);
         using ZipArchive zip = new(file, ZipArchiveMode.Create);
-        List<AlbumDetailViewModel> albums = await albumService.GetAlbumsByAuthorAsync(userId);
-        foreach (AlbumDetailViewModel album in albums)
+        List<AlbumViewModel> albums = await albumService.GetAlbumsByAuthorAsync(userId);
+        foreach (AlbumViewModel album in albums)
         {
-            await AddZipEntry(zip, $"Albums/{album.Id}/Description.txt", $"{album.Title}\r\n{album.Description}", stoppingToken);
+            AlbumDetailViewModel albumDetail = await albumService.GetAlbumAsync(album.Id);
+            await AddZipEntry(zip, $"Albums/{album.Id}/Description.txt", $"{album.Title}\r\n{albumDetail.Description}", stoppingToken);
             using FileStream imageStream = File.OpenRead(Path.Combine(environment.ContentRootPath, "wwwroot", "Albums", $"{album.Id}.jpg"));
             await AddZipEntry(zip, $"Albums/{album.Id}/Image.jpg", imageStream, stoppingToken);
-            foreach (SongViewModel songInAlbum in album.Songs)
+            foreach (SongViewModel songInAlbum in albumDetail.Songs)
             {
                 SongDetailViewModel song = await songService.GetSongAsync(songInAlbum.Id);
                 await AddZipEntry(zip, $"Albums/{album.Id}/Songs/{song.Id}.txt", $"{song.Title}\r\n{song.Description}", stoppingToken);

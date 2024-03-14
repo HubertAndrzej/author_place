@@ -106,6 +106,7 @@ IServiceCollection? paymentGateway = paymentType switch
 builder.Services.AddDbContextPool<AuthorPlaceDbContext>(optionsBuilder => optionsBuilder.UseSqlite(builder.Configuration.GetConnectionString("Default")!));
 builder.Services.AddScoped<IAuthorizationHandler, AlbumAuthorRequirementHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, AlbumSubscriberRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, AlbumViewerRequirementHandler>();
 builder.Services.AddSingleton<IErrorViewSelectorService, ErrorViewSelectorService>();
 builder.Services.AddSingleton<IImagePersister, MagickNetImagePersister>();
 builder.Services.AddSingleton<IEmailSender, MailKitEmailSender>();
@@ -144,6 +145,10 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(nameof(Policy.AlbumSubscriber), builder =>
     {
         builder.Requirements.Add(new AlbumSubscriberRequirement());
+    });
+    options.AddPolicy(nameof(Policy.AlbumViewer), builder =>
+    {
+        builder.Requirements.Add(new AlbumViewerRequirement());
     });
 });
 builder.Services.AddReCaptcha(builder.Configuration.GetSection("ReCaptcha"));

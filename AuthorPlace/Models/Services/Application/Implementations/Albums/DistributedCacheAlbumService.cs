@@ -98,9 +98,14 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         }
     }
 
-    public Task<List<AlbumDetailViewModel>> GetAlbumsByAuthorAsync(string authorId)
+    public Task<List<AlbumViewModel>> GetAlbumsByAuthorAsync(string authorId)
     {
         return albumService.GetAlbumsByAuthorAsync(authorId);
+    }
+
+    public Task<List<AlbumViewModel>> GetAlbumsBySubscriberAsync(string subscriberId)
+    {
+        return albumService.GetAlbumsBySubscriberAsync(subscriberId);
     }
 
     public Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel)
@@ -120,9 +125,9 @@ public class DistributedCacheAlbumService : ICachedAlbumService
         return viewModel;
     }
 
-    public async Task RemoveAlbumAsync(AlbumDeleteInputModel inputModel)
+    public async Task DeleteAlbumAsync(AlbumDeleteInputModel inputModel)
     {
-        await albumService.RemoveAlbumAsync(inputModel);
+        await albumService.DeleteAlbumAsync(inputModel);
         await distributedCache.RemoveAsync($"Album{inputModel.Id}");
     }
 

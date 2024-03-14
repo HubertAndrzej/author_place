@@ -54,7 +54,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Data\" />
     <Folder Include="Downloads\" />
+    <Folder Include="Logs\" />
     <Folder Include="wwwroot\Albums\" />
   </ItemGroup>
 </Project>

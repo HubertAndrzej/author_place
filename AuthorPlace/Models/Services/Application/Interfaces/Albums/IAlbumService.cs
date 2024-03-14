@@ -9,11 +9,12 @@ public interface IAlbumService
     public Task<AlbumDetailViewModel> GetAlbumAsync(int id);
     public Task<List<AlbumViewModel>> GetBestRatingAlbumsAsync();
     public Task<List<AlbumViewModel>> GetMostRecentAlbumsAsync();
-    public Task<List<AlbumDetailViewModel>> GetAlbumsByAuthorAsync(string authorId);
+    public Task<List<AlbumViewModel>> GetAlbumsByAuthorAsync(string authorId);
+    public Task<List<AlbumViewModel>> GetAlbumsBySubscriberAsync(string subscriberId);
     public Task<AlbumDetailViewModel> CreateAlbumAsync(AlbumCreateInputModel inputModel);
     public Task<AlbumUpdateInputModel> GetAlbumForEditingAsync(int id);
     public Task<AlbumDetailViewModel> UpdateAlbumAsync(AlbumUpdateInputModel inputModel);
-    public Task RemoveAlbumAsync(AlbumDeleteInputModel inputModel);
+    public Task DeleteAlbumAsync(AlbumDeleteInputModel inputModel);
     public Task<bool> IsAlbumUniqueAsync(string title, string authorId, int id);
     public Task<string> GetAuthorAsync(int id);
     public Task SendQuestionToAlbumAuthorAsync(int id, string? question);

@@ -51,7 +51,7 @@ public class EFCoreAlbumService : IAlbumService
 
         IQueryable<AlbumViewModel> queryLinq = baseQuery
             .AsNoTracking()
-            .Where(album => album.Title!.Contains(inputModel.Search!))
+            .Where(album => album.Title!.Contains(inputModel.Search!) && album.Status == Status.Published)
             .Select(album => album.ToAlbumViewModel());
         List<AlbumViewModel> albums = await queryLinq
             .Skip(inputModel.Offset)
@@ -97,13 +97,23 @@ public class EFCoreAlbumService : IAlbumService
         return result.Results!;
     }
 
-    public Task<List<AlbumDetailViewModel>> GetAlbumsByAuthorAsync(string authorId)
+    public Task<List<AlbumViewModel>> GetAlbumsByAuthorAsync(string authorId)
     {
         return dbContext.Albums!
             .AsNoTracking()
             .Include(album => album.Songs)
             .Where(album => album.AuthorId == authorId)
-            .Select(album => album.ToAlbumDetailViewModel())
+            .Select(album => album.ToAlbumViewModel())
+            .ToListAsync();
+    }
+
+    public Task<List<AlbumViewModel>> GetAlbumsBySubscriberAsync(string subscriberId)
+    {
+        return dbContext.Albums!
+            .AsNoTracking()
+            .Include(album => album.SubscribedUsers)
+            .Where(album => album.SubscribedUsers!.Any(u => u.Id == subscriberId))
+            .Select(album => album.ToAlbumViewModel())
             .ToListAsync();
     }
 
@@ -166,6 +176,14 @@ public class EFCoreAlbumService : IAlbumService
         album.ChangePrices(inputModel.FullPrice!, inputModel.CurrentPrice!);
         album.ChangeDescription(inputModel.Description!);
         album.ChangeEmail(inputModel.Email!);
+        if (inputModel.IsPublished)
+        {
+            album.Publish();
+        }
+        else
+        {
+            album.Draft();
+        }
         dbContext.Entry(album).Property(album => album.RowVersion).OriginalValue = inputModel.RowVersion!;
         if (inputModel.Image != null)
         {
@@ -197,15 +215,20 @@ public class EFCoreAlbumService : IAlbumService
         return album.ToAlbumDetailViewModel();
     }
 
-    public async Task RemoveAlbumAsync(AlbumDeleteInputModel inputModel)
+    public async Task DeleteAlbumAsync(AlbumDeleteInputModel inputModel)
     {
+        bool hasSubscribers = await dbContext.Subscriptions!.AnyAsync(subscription => subscription.AlbumId == inputModel.Id);
+        if (hasSubscribers)
+        {
+            throw new AlbumDeletionException(inputModel.Id);
+        }
         Album? album = await dbContext.Albums!.FindAsync(inputModel.Id);
         if (album == null)
         {
             logger.LogWarning("Album {inputModel.Id} not found", inputModel.Id);
             throw new AlbumNotFoundException(inputModel.Id);
         }
-        album.ChangeStatus(Status.Erased);
+        album.Erase();
         await dbContext.SaveChangesAsync();
     }
 
@@ -271,6 +294,11 @@ public class EFCoreAlbumService : IAlbumService
 
     public async Task SubscribeAlbumAsync(AlbumSubscribeInputModel inputModel)
     {
+        AlbumDetailViewModel album = await GetAlbumAsync(inputModel.AlbumId);
+        if (album.Status != Status.Published)
+        {
+            throw new AlbumSubscriptionException(inputModel.AlbumId);
+        }
         Subscription subscription = new(inputModel.UserId!, inputModel.AlbumId)
         {
             PaymentDate = inputModel.PaymentDate,

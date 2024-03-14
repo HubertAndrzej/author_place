@@ -1,4 +1,5 @@
 ﻿using AuthorPlace.Models.Entities;
+using AuthorPlace.Models.Enums;
 using AuthorPlace.Models.InputModels.Albums;
 using AuthorPlace.Models.InputModels.Songs;
 using AuthorPlace.Models.ViewModels.Albums;
@@ -30,10 +31,12 @@ public static class EntityExtensions
             Title = album.Title,
             Description = album.Description,
             Author = album.Author,
+            AuthorId = album.AuthorId,
             ImagePath = album.ImagePath,
             Rating = album.Rating,
             CurrentPrice = album.CurrentPrice,
             FullPrice = album.FullPrice,
+            Status = album.Status,
             Songs = album.Songs.OrderBy(song => song.Id).Select(song => song.ToSongViewModel()).ToList()
         };
     }
@@ -49,6 +52,7 @@ public static class EntityExtensions
             ImagePath = album.ImagePath,
             CurrentPrice = album.CurrentPrice,
             FullPrice = album.FullPrice,
+            IsPublished = album.Status == Status.Published,
             RowVersion = album.RowVersion
         };
     }

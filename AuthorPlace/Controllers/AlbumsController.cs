@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Rotativa.AspNetCore;
 using Rotativa.AspNetCore.Options;
+using System.Security.Claims;
 
 namespace AuthorPlace.Controllers;
 
@@ -32,11 +33,24 @@ public class AlbumsController : Controller
         return View(viewModel);
     }
 
-    [AllowAnonymous]
+    [Authorize(Policy = nameof(Policy.AlbumViewer))]
     public async Task<IActionResult> Detail(int id)
     {
         AlbumDetailViewModel viewModel = await albumService.GetAlbumAsync(id);
         ViewBag.Title = viewModel.Title;
+        return View(viewModel);
+    }
+
+    [Authorize]
+    public async Task<IActionResult> Personal()
+    {
+        string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        PersonalAlbumViewModel viewModel = new()
+        {
+            AuthoredAlbums = await albumService.GetAlbumsByAuthorAsync(userId),
+            SubscribedAlbums = await albumService.GetAlbumsBySubscriberAsync(userId)
+        };
+        ViewData["Title"] = "My albums";
         return View(viewModel);
     }
 
@@ -55,12 +69,12 @@ public class AlbumsController : Controller
     }
 
     [Authorize(Policy = nameof(Policy.AlbumSubscriber))]
-    public async Task<IActionResult> Vote(int albumId)
+    public async Task<IActionResult> Vote(int id)
     {
         AlbumVoteInputModel inputModel = new()
         {
-            Id = albumId,
-            Vote = await albumService.GetAlbumVoteAsync(albumId) ?? 0
+            Id = id,
+            Vote = await albumService.GetAlbumVoteAsync(id) ?? 0
         };
         return View(inputModel);
     }
@@ -75,10 +89,10 @@ public class AlbumsController : Controller
     }
 
     [Authorize(Policy = nameof(Policy.AlbumSubscriber))]
-    public async Task<IActionResult> Receipt(int albumId)
+    public async Task<IActionResult> Receipt(int id)
     {
-        AlbumSubscriptionViewModel viewModel = await albumService.GetAlbumSubscriptionAsync(albumId);
-        return new ViewAsPdf
+        AlbumSubscriptionViewModel viewModel = await albumService.GetAlbumSubscriptionAsync(id);
+        ViewAsPdf pdf = new()
         {
             Model = viewModel,
             ViewName = nameof(Receipt),
@@ -87,6 +101,8 @@ public class AlbumsController : Controller
             PageOrientation = Orientation.Portrait,
             FileName = $"{viewModel.Title} - purchase receipt.pdf"
         };
+        byte[] fileContents = await pdf.BuildFile(ControllerContext);
+        return File(fileContents, "application/pdf", pdf.FileName);
     }
 
     [Authorize(Roles = nameof(Role.Author))]
@@ -162,7 +178,7 @@ public class AlbumsController : Controller
     [HttpPost]
     public async Task<IActionResult> Remove(AlbumDeleteInputModel inputModel)
     {
-        await albumService.RemoveAlbumAsync(inputModel);
+        await albumService.DeleteAlbumAsync(inputModel);
         TempData["ConfirmationMessage"] = "Your album has been deleted successfully";
         return RedirectToAction(nameof(Index));
     }

@@ -25,6 +25,8 @@ public class AlbumUpdateInputModel : IValidatableObject
     [Display(Name = "Current Price")]
     public Money? CurrentPrice { get; set; }
 
+    public bool IsPublished { get; set; }
+
     public IFormFile? Image { get; set; }
 
     public string? RowVersion { get; set; }

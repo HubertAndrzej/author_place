@@ -6,6 +6,9 @@
             <a class="nav-link active" asp-area="Identity" asp-page="/Account/Manage/Index">Welcome @User.FindFirst("FullName")!.Value</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link active" asp-controller="Albums" asp-action="Personal">Your albums</a>
+        </li>
+        <li class="nav-item">
             <form method="post" asp-area="Identity" asp-page="/Account/Logout">
                 <button class="nav-link active" type="submit">Logout</button>
             </form>
