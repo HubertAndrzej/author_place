@@ -20,14 +20,13 @@ public class EFCoreSongService : ISongService
         logger = loggerFactory.CreateLogger("Songs");
     }
 
-    public async Task<SongDetailViewModel> GetSongAsync(int id)
+    public SongDetailViewModel GetSong(int id)
     {
         IQueryable<SongDetailViewModel> queryLinq = dbContext.Songs!
             .AsNoTracking()
             .Where(song => song.Id == id)
             .Select(song => song.ToSongDetailViewModel());
-        SongDetailViewModel? viewModel = await queryLinq
-            .FirstOrDefaultAsync();
+        SongDetailViewModel? viewModel = queryLinq.FirstOrDefault();
         if (viewModel == null)
         {
             logger.LogWarning("Song {id} not found", id);
@@ -36,21 +35,21 @@ public class EFCoreSongService : ISongService
         return viewModel;
     }
 
-    public async Task<SongDetailViewModel> CreateSongAsync(SongCreateInputModel inputModel)
+    public SongDetailViewModel CreateSong(SongCreateInputModel inputModel)
     {
         Song song = new(inputModel.Title!, inputModel.AlbumId);
         dbContext.Add(song);
-        await dbContext.SaveChangesAsync();
+        dbContext.SaveChanges();
         return song.ToSongDetailViewModel();
     }
 
-    public async Task<SongUpdateInputModel> GetSongForEditingAsync(int id)
+    public SongUpdateInputModel GetSongForEditing(int id)
     {
         IQueryable<SongUpdateInputModel> queryLinq = dbContext.Songs!
             .AsNoTracking()
             .Where(song => song.Id == id)
             .Select(song => song.ToSongUpdateInputModel());
-        SongUpdateInputModel? inputModel = await queryLinq.FirstOrDefaultAsync();
+        SongUpdateInputModel? inputModel = queryLinq.FirstOrDefault();
         if (inputModel == null)
         {
             logger.LogWarning("Song {id} not found", id);
@@ -59,9 +58,9 @@ public class EFCoreSongService : ISongService
         return inputModel;
     }
 
-    public async Task<SongDetailViewModel> UpdateSongAsync(SongUpdateInputModel inputModel)
+    public SongDetailViewModel UpdateSong(SongUpdateInputModel inputModel)
     {
-        Song? song = await dbContext.Songs!.FindAsync(inputModel.Id);
+        Song? song = dbContext.Songs!.Find(inputModel.Id);
 
         if (song == null)
         {
@@ -74,7 +73,7 @@ public class EFCoreSongService : ISongService
         dbContext.Entry(song).Property(song => song.RowVersion).OriginalValue = inputModel.RowVersion;
         try
         {
-            await dbContext.SaveChangesAsync();
+            dbContext.SaveChanges();
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -83,15 +82,15 @@ public class EFCoreSongService : ISongService
         return song.ToSongDetailViewModel();
     }
 
-    public async Task RemoveSongAsync(SongDeleteInputModel inputModel)
+    public void RemoveSong(SongDeleteInputModel inputModel)
     {
-        Song? song = await dbContext.Songs!.FindAsync(inputModel.Id);
+        Song? song = dbContext.Songs!.Find(inputModel.Id);
         if (song == null)
         {
             logger.LogWarning("Song {inputModel.Id} not found", inputModel.Id);
             throw new SongNotFoundException(inputModel.Id);
         }
         dbContext.Remove(song);
-        await dbContext.SaveChangesAsync();
+        dbContext.SaveChanges();
     }
 }

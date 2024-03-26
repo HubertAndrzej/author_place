@@ -91,12 +91,7 @@ IServiceCollection? albumService = persistence switch
     Persistence.EFCore => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>(),
     _ => builder.Services.AddTransient<IAlbumService, EFCoreAlbumService>()
 };
-IServiceCollection? songService = persistence switch
-{
-    Persistence.AdoNet => builder.Services.AddTransient<ISongService, AdoNetSongService>(),
-    Persistence.EFCore => builder.Services.AddTransient<ISongService, EFCoreSongService>(),
-    _ => builder.Services.AddTransient<ISongService, EFCoreSongService>()
-};
+builder.Services.AddTransient<ISongService, EFCoreSongService>();
 IServiceCollection? paymentGateway = paymentType switch
 {
     PaymentType.PayPal => builder.Services.AddTransient<IPaymentGateway, PayPalPaymentGateway>(),
@@ -118,7 +113,6 @@ builder.Services.AddSingleton<IHostedService>(provider => provider.GetRequiredSe
 builder.Services.AddSingleton<IUserDataService>(provider => provider.GetRequiredService<UserDataHostedService>());
 builder.Services.AddTransient<IDatabaseAccessor, SqliteDatabaseAccessor>();
 builder.Services.AddTransient<ICachedAlbumService, MemoryCacheAlbumService>();
-builder.Services.AddTransient<ICachedSongService, MemoryCacheSongService>();
 builder.Services.AddResponseCaching();
 builder.Services.Configure<ConnectionStringsOptions>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<AlbumsOptions>(builder.Configuration.GetSection("Albums"));

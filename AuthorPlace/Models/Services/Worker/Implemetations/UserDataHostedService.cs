@@ -77,7 +77,7 @@ public class UserDataHostedService : BackgroundService, IUserDataService
             await AddZipEntry(zip, $"Albums/{album.Id}/Image.jpg", imageStream, stoppingToken);
             foreach (SongViewModel songInAlbum in albumDetail.Songs)
             {
-                SongDetailViewModel song = await songService.GetSongAsync(songInAlbum.Id);
+                SongDetailViewModel song = songService.GetSong(songInAlbum.Id);
                 await AddZipEntry(zip, $"Albums/{album.Id}/Songs/{song.Id}.txt", $"{song.Title}\r\n{song.Description}", stoppingToken);
             }
         }

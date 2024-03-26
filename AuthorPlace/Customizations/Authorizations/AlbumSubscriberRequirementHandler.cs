@@ -37,7 +37,7 @@ public class AlbumSubscriberRequirementHandler : AuthorizationHandler<AlbumSubsc
             switch (httpContextAccessor.HttpContext.Request.RouteValues["controller"]!.ToString()!.ToLowerInvariant())
             {
                 case "songs":
-                    albumId = (await songService.GetSongAsync(id)).AlbumId;
+                    albumId = (songService.GetSong(id)).AlbumId;
                     break;
                 case "albums":
                     albumId = id;

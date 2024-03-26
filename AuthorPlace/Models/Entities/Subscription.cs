@@ -15,7 +15,7 @@ public class Subscription
         AlbumId = albumId;
     }
 
-    public string UserId { get; set; }
+    public string? UserId { get; set; }
     public int AlbumId { get; set; }
     public DateTime? PaymentDate { get; set; }
     public string? PaymentType { get; set; }

@@ -5,9 +5,9 @@ namespace AuthorPlace.Models.Services.Application.Interfaces.Songs;
 
 public interface ISongService
 {
-    public Task<SongDetailViewModel> GetSongAsync(int id);
-    public Task<SongDetailViewModel> CreateSongAsync(SongCreateInputModel inputModel);
-    public Task<SongUpdateInputModel> GetSongForEditingAsync(int id);
-    public Task<SongDetailViewModel> UpdateSongAsync(SongUpdateInputModel inputModel);
-    public Task RemoveSongAsync(SongDeleteInputModel inputModel);
+    public SongDetailViewModel GetSong(int id);
+    public SongDetailViewModel CreateSong(SongCreateInputModel inputModel);
+    public SongUpdateInputModel GetSongForEditing(int id);
+    public SongDetailViewModel UpdateSong(SongUpdateInputModel inputModel);
+    public void RemoveSong(SongDeleteInputModel inputModel);
 }

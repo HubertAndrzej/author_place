@@ -43,7 +43,7 @@ public class AlbumAuthorRequirementHandler : AuthorizationHandler<AlbumAuthorReq
                     }
                     else
                     {
-                        albumId = (await songService.GetSongAsync(id)).AlbumId;
+                        albumId = (songService.GetSong(id)).AlbumId;
                     }
                     break;
                 case "albums":
