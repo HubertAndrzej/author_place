@@ -4,6 +4,11 @@ namespace AuthorPlace.Models.Entities;
 
 public class Subscription
 {
+    public Subscription()
+    {
+
+    }
+
     public Subscription(string userId, int albumId)
     {
         UserId = userId;

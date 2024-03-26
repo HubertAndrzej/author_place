@@ -2,6 +2,11 @@
 
 public class Song
 {
+    public Song()
+    {
+
+    }
+
     public Song(string title, int albumId)
     {
         ChangeTitle(title);

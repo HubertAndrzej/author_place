@@ -6,6 +6,11 @@ namespace AuthorPlace.Models.Entities;
 
 public class Album
 {
+    public Album()
+    {
+
+    }
+
     public Album(string title, string author, string authorId, string email)
     {
         ChangeTitle(title);

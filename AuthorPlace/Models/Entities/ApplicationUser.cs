@@ -4,6 +4,11 @@ namespace AuthorPlace.Models.Entities;
 
 public class ApplicationUser : IdentityUser
 {
+    public ApplicationUser()
+    {
+
+    }
+
     [PersonalData]
     public string? FullName { get; set; }
 
