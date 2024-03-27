@@ -14,13 +14,13 @@ public class Song
         Duration = TimeSpan.FromSeconds(0);
     }
 
-    public int Id { get; private set; }
-    public int AlbumId { get; private set; }
-    public string? Title { get; private set; }
-    public string? Description { get; private set; }
-    public TimeSpan Duration { get; private set; }
-    public string? RowVersion { get; private set; }
-    public virtual Album? Album { get; private set; }
+    public int Id { get; set; }
+    public int AlbumId { get; set; }
+    public string? Title { get; set; }
+    public string? Description { get; set; }
+    public TimeSpan Duration { get; set; }
+    public string? RowVersion { get; set; }
+    public virtual Album? Album { get; set; }
 
     public void ChangeTitle(string title)
     {
