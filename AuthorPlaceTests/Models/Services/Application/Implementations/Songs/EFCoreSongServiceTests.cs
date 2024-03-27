@@ -1,6 +1,5 @@
 ﻿using AuthorPlace.Models.Entities;
 using AuthorPlace.Models.Exceptions.Application;
-using AuthorPlace.Models.Extensions;
 using AuthorPlace.Models.InputModels.Songs;
 using AuthorPlace.Models.Services.Application.Implementations.Songs;
 using AuthorPlace.Models.Services.Application.Interfaces.Songs;
@@ -59,6 +58,7 @@ public class EFCoreSongServiceTests
         ctx.Setup(x => x.Songs).Returns(dbSongSet.Object);
         return ctx;
     }
+
     public static Mock<AuthorPlaceDbContext> GetAuthorPlaceDbContext()
     {
         DbContextOptions<AuthorPlaceDbContext> options = new DbContextOptionsBuilder<AuthorPlaceDbContext>().UseInMemoryDatabase(databaseName: "MockAuthorPlaceDB").Options;
@@ -113,6 +113,67 @@ public class EFCoreSongServiceTests
 
         // Act
         Action act = () => songService.GetSong(3);
+
+        // Assert
+        act.Should().Throw<SongNotFoundException>(message);
+    }
+
+    [Test]
+    public void CreateSong_WhenSongCreatedSuccessfully_ReturnSongDetailViewModel()
+    {
+        // Arrange
+        SongCreateInputModel inputModel = new()
+        {
+            AlbumId = 1,
+            Title = "Song 3"
+        };
+        SongDetailViewModel expected = new()
+        {
+            AlbumId = 1,
+            Description = null,
+            Duration = new TimeSpan(),
+            Id = 0,
+            Title = "Song 3"
+        };
+
+        // Act
+        SongDetailViewModel actual = songService.CreateSong(inputModel);
+
+        // Assert
+        expected.Should().BeEquivalentTo(actual);
+    }
+
+    [Test]
+    [TestCase(1)]
+    [TestCase(2)]
+    public void GetSongForEditing_WhenSongExists_ReturnSongUpdateInputModel(int id)
+    {
+        // Arrange
+        SongUpdateInputModel expected = new()
+        {
+            AlbumId = 1,
+            Description = $"Description {id}",
+            Duration = TimeSpan.FromSeconds(30),
+            Id = id,
+            Title = $"Song {id}",
+            RowVersion = null
+        };
+
+        // Act
+        SongUpdateInputModel actual = songService.GetSongForEditing(id);
+
+        // Assert
+        expected.Should().BeEquivalentTo(actual);
+    }
+
+    [Test]
+    public void GetSongForEditing_WhenSongNotExists_ThrowSongNotFoundException()
+    {
+        // Arrange
+        string message = "Song 3 not found";
+
+        // Act
+        Action act = () => songService.GetSongForEditing(3);
 
         // Assert
         act.Should().Throw<SongNotFoundException>(message);
