@@ -49,20 +49,19 @@ public class EFCoreSongServiceTests
 
     public static Mock<AuthorPlaceDbContext> SetSongsDbSet(Mock<AuthorPlaceDbContext> ctx, List<Song> songs)
     {
-        Mock<DbSet<Song>> dbSongSet = new();
+        Mock<DbSet<Song>> dbSongsSet = new();
         IQueryable<Song> dataQueryable = songs.AsQueryable();
-        dbSongSet.As<IQueryable<Song>>().Setup(x => x.Provider).Returns(dataQueryable.Provider);
-        dbSongSet.As<IQueryable<Song>>().Setup(x => x.Expression).Returns(dataQueryable.Expression);
-        dbSongSet.As<IQueryable<Song>>().Setup(x => x.ElementType).Returns(dataQueryable.ElementType);
-        dbSongSet.As<IQueryable<Song>>().Setup(x => x.GetEnumerator()).Returns(dataQueryable.GetEnumerator());
-        ctx.Setup(x => x.Songs).Returns(dbSongSet.Object);
+        dbSongsSet.As<IQueryable<Song>>().Setup(x => x.Provider).Returns(dataQueryable.Provider);
+        dbSongsSet.As<IQueryable<Song>>().Setup(x => x.Expression).Returns(dataQueryable.Expression);
+        dbSongsSet.As<IQueryable<Song>>().Setup(x => x.ElementType).Returns(dataQueryable.ElementType);
+        dbSongsSet.As<IQueryable<Song>>().Setup(x => x.GetEnumerator()).Returns(dataQueryable.GetEnumerator());
+        ctx.Setup(x => x.Songs).Returns(dbSongsSet.Object);
         return ctx;
     }
 
     public static Mock<AuthorPlaceDbContext> GetAuthorPlaceDbContext()
     {
-        DbContextOptions<AuthorPlaceDbContext> options = new DbContextOptionsBuilder<AuthorPlaceDbContext>().UseInMemoryDatabase(databaseName: "MockAuthorPlaceDB").Options;
-        Mock<AuthorPlaceDbContext> ctx = new(options);
+        Mock<AuthorPlaceDbContext> ctx = new();
         ctx = SetAlbumsDbSet(ctx, MockAlbums());
         ctx = SetSongsDbSet(ctx, MockSongs());
         return ctx;
@@ -132,7 +131,7 @@ public class EFCoreSongServiceTests
             AlbumId = 1,
             Description = null,
             Duration = new TimeSpan(),
-            Id = 0,
+            Id = 0, // Should be 3 after being retrieved from DB
             Title = "Song 3"
         };
 
