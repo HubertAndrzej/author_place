@@ -1,4 +1,5 @@
-﻿using AuthorPlace.Models.Entities;
+﻿using AngleSharp.Common;
+using AuthorPlace.Models.Entities;
 using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.InputModels.Songs;
 using AuthorPlace.Models.Services.Application.Implementations.Songs;
@@ -7,16 +8,60 @@ using AuthorPlace.Models.Services.Infrastructure.Implementations;
 using AuthorPlace.Models.ViewModels.Songs;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Org.BouncyCastle.Utilities;
 
 namespace AuthorPlaceTests.Models.Services.Application.Implementations.Songs;
 
 [TestFixture]
 public class EFCoreSongServiceTests
 {
-    private Mock<AuthorPlaceDbContext> ctx;
-    private ISongService songService;
+    private AuthorPlaceDbContext _ctx;
+    private ISongService _songService;
+
+    public EFCoreSongServiceTests()
+    {
+        DbContextOptionsBuilder<AuthorPlaceDbContext> builder = new();
+        DbContextOptions<AuthorPlaceDbContext> options = builder.UseInMemoryDatabase("AuthorPlaceTestDatabase").Options;
+        _ctx = new AuthorPlaceDbContext(options);
+        Mock<ILoggerFactory> loggerFactoryMock = new();
+        Mock<ILogger<EFCoreSongService>> loggerMock = new();
+        loggerFactoryMock.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(loggerMock.Object);
+        _songService = new EFCoreSongService(_ctx, loggerFactoryMock.Object);
+    }
+
+    [SetUp]
+    public void SetUp()
+    {
+        _ctx.Albums!.AddRange(MockAlbums());
+        _ctx.Songs!.AddRange(MockSongs());
+        _ctx.SaveChanges();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        List<Album> albums = _ctx.Albums!.ToList();
+        List<Song> songs = _ctx.Songs!.ToList();
+        _ctx.Albums!.RemoveRange(albums);
+        _ctx.Songs!.RemoveRange(songs);
+        _ctx.SaveChanges();
+        foreach (EntityEntry entry in _ctx.ChangeTracker.Entries())
+        {
+            entry.State = EntityState.Detached;
+        }
+        _ctx.Database.EnsureDeleted();
+        _ctx.Database.EnsureCreated();
+    }
+
+    [OneTimeTearDown]
+    public void OneTimeTearDown()
+    {
+        _ctx.Dispose();
+    }
 
     public static List<Album> MockAlbums()
     {
@@ -30,56 +75,9 @@ public class EFCoreSongServiceTests
     {
         return new List<Song>()
         {
-            new() { Id = 1, AlbumId = 1, Title = "Song 1", Description = "Description 1", Duration = TimeSpan.FromSeconds(30), RowVersion = null, Album = new("Album 1", "Hub Sobo", "A1B2C3D4-E5F6-A7B8-C9D0-E0123456789F", "hub.sobo@example.com") },
-            new() { Id = 2, AlbumId = 1, Title = "Song 2", Description = "Description 2", Duration = TimeSpan.FromSeconds(30), RowVersion = null, Album = new("Album 1", "Hub Sobo", "A1B2C3D4-E5F6-A7B8-C9D0-E0123456789F", "hub.sobo@example.com") }
+            new() { Id = 1, AlbumId = 1, Title = "Song 1", Description = "Description 1", Duration = TimeSpan.FromSeconds(30), RowVersion = "Row Version" },
+            new() { Id = 2, AlbumId = 1, Title = "Song 2", Description = "Description 2", Duration = TimeSpan.FromSeconds(30), RowVersion = "Row Version" }
         };
-    }
-
-    public static Mock<AuthorPlaceDbContext> SetAlbumsDbSet(Mock<AuthorPlaceDbContext> ctx, List<Album> albums)
-    {
-        Mock<DbSet<Album>> dbAlbumsSet = new();
-        IQueryable<Album> dataQueryable = albums.AsQueryable();
-        dbAlbumsSet.As<IQueryable<Album>>().Setup(x => x.Provider).Returns(dataQueryable.Provider);
-        dbAlbumsSet.As<IQueryable<Album>>().Setup(x => x.Expression).Returns(dataQueryable.Expression);
-        dbAlbumsSet.As<IQueryable<Album>>().Setup(x => x.ElementType).Returns(dataQueryable.ElementType);
-        dbAlbumsSet.As<IQueryable<Album>>().Setup(x => x.GetEnumerator()).Returns(dataQueryable.GetEnumerator());
-        ctx.Setup(x => x.Albums).Returns(dbAlbumsSet.Object);
-        return ctx;
-    }
-
-    public static Mock<AuthorPlaceDbContext> SetSongsDbSet(Mock<AuthorPlaceDbContext> ctx, List<Song> songs)
-    {
-        Mock<DbSet<Song>> dbSongsSet = new();
-        IQueryable<Song> dataQueryable = songs.AsQueryable();
-        dbSongsSet.As<IQueryable<Song>>().Setup(x => x.Provider).Returns(dataQueryable.Provider);
-        dbSongsSet.As<IQueryable<Song>>().Setup(x => x.Expression).Returns(dataQueryable.Expression);
-        dbSongsSet.As<IQueryable<Song>>().Setup(x => x.ElementType).Returns(dataQueryable.ElementType);
-        dbSongsSet.As<IQueryable<Song>>().Setup(x => x.GetEnumerator()).Returns(dataQueryable.GetEnumerator());
-        ctx.Setup(x => x.Songs).Returns(dbSongsSet.Object);
-        return ctx;
-    }
-
-    public static Mock<AuthorPlaceDbContext> GetAuthorPlaceDbContext()
-    {
-        Mock<AuthorPlaceDbContext> ctx = new();
-        ctx = SetAlbumsDbSet(ctx, MockAlbums());
-        ctx = SetSongsDbSet(ctx, MockSongs());
-        return ctx;
-    }
-
-    public ISongService GetSongService(Mock<AuthorPlaceDbContext> ctx)
-    {
-        Mock<ILoggerFactory> loggerFactoryMock = new();
-        Mock<ILogger<EFCoreSongService>> loggerMock = new();
-        loggerFactoryMock.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(loggerMock.Object);
-        return new EFCoreSongService(ctx.Object, loggerFactoryMock.Object);
-    }
-
-    [SetUp]
-    public void SetUp()
-    {
-        ctx = GetAuthorPlaceDbContext();
-        songService = GetSongService(ctx);
     }
 
     [Test]
@@ -88,17 +86,18 @@ public class EFCoreSongServiceTests
     public void GetSong_WhenSongExists_ReturnSongDetailViewModel(int id)
     {
         // Arrange
+        Song song = MockSongs().ElementAt(id - 1);
         SongDetailViewModel expected = new()
         {
-            AlbumId = 1,
-            Description = $"Description {id}",
-            Duration = TimeSpan.FromSeconds(30),
-            Id = id,
-            Title = $"Song {id}"
+            AlbumId = song.AlbumId,
+            Description = song.Description,
+            Duration = song.Duration,
+            Id = song.Id,
+            Title = song.Title
         };
 
         // Act
-        SongDetailViewModel actual = songService.GetSong(id);
+        SongDetailViewModel actual = _songService.GetSong(id);
 
         // Assert
         expected.Should().BeEquivalentTo(actual);
@@ -108,10 +107,11 @@ public class EFCoreSongServiceTests
     public void GetSong_WhenSongNotExists_ThrowSongNotFoundException()
     {
         // Arrange
+        int id = 3;
         string message = "Song 3 not found";
 
         // Act
-        Action act = () => songService.GetSong(3);
+        Action act = () => _songService.GetSong(id);
 
         // Assert
         act.Should().Throw<SongNotFoundException>(message);
@@ -131,15 +131,19 @@ public class EFCoreSongServiceTests
             AlbumId = 1,
             Description = null,
             Duration = new TimeSpan(),
-            Id = 0, // Should be 3 after being retrieved from DB
+            Id = 3,
             Title = "Song 3"
         };
+        int beforeCount = _ctx.Songs!.Count();
+        beforeCount.Should().Be(2);
 
         // Act
-        SongDetailViewModel actual = songService.CreateSong(inputModel);
+        SongDetailViewModel actual = _songService.CreateSong(inputModel);
 
         // Assert
         expected.Should().BeEquivalentTo(actual);
+        int afterCount = _ctx.Songs!.Count();
+        afterCount.Should().Be(3);
     }
 
     [Test]
@@ -148,18 +152,19 @@ public class EFCoreSongServiceTests
     public void GetSongForEditing_WhenSongExists_ReturnSongUpdateInputModel(int id)
     {
         // Arrange
+        Song song = MockSongs().ElementAt(id - 1);
         SongUpdateInputModel expected = new()
         {
-            AlbumId = 1,
-            Description = $"Description {id}",
-            Duration = TimeSpan.FromSeconds(30),
-            Id = id,
-            Title = $"Song {id}",
-            RowVersion = null
+            AlbumId = song.AlbumId,
+            Description = song.Description,
+            Duration = song.Duration,
+            Id = song.Id,
+            Title = song.Title,
+            RowVersion = song.RowVersion
         };
 
         // Act
-        SongUpdateInputModel actual = songService.GetSongForEditing(id);
+        SongUpdateInputModel actual = _songService.GetSongForEditing(id);
 
         // Assert
         expected.Should().BeEquivalentTo(actual);
@@ -169,10 +174,127 @@ public class EFCoreSongServiceTests
     public void GetSongForEditing_WhenSongNotExists_ThrowSongNotFoundException()
     {
         // Arrange
+        int id = 3;
         string message = "Song 3 not found";
 
         // Act
-        Action act = () => songService.GetSongForEditing(3);
+        Action act = () => _songService.GetSongForEditing(id);
+
+        // Assert
+        act.Should().Throw<SongNotFoundException>(message);
+    }
+
+    [Test]
+    public void UpdateSong_WhenSongUpdatedSuccessfully_ReturnSongDetailViewModel()
+    {
+        // Arrange
+        SongUpdateInputModel inputModel = new()
+        {
+            Id = 1,
+            AlbumId = 1,
+            Title = "New Title",
+            Description = "New Description",
+            Duration = TimeSpan.FromSeconds(30),
+            RowVersion = "Row Version"
+        };
+        SongDetailViewModel expected = new()
+        {
+            Id = 1,
+            AlbumId = 1,
+            Title = "New Title",
+            Description = "New Description",
+            Duration = TimeSpan.FromSeconds(30)
+        };
+
+        // Act
+        SongDetailViewModel actual = _songService.UpdateSong(inputModel);
+
+        // Assert
+        expected.Should().BeEquivalentTo(actual);
+    }
+
+    [Test]
+    public void UpdateSong_WhenSongNotExists_ThrowSongNotFoundException()
+    {
+        // Arrange
+        SongUpdateInputModel inputModel = new()
+        {
+            Id = 3,
+            AlbumId = 1,
+            Title = "New Title",
+            Description = "New Description",
+            Duration = TimeSpan.FromSeconds(30),
+            RowVersion = "Row Version"
+        };
+        string message = "Song 3 not found";
+
+        // Act
+        Action act = () => _songService.UpdateSong(inputModel);
+
+        // Assert
+        act.Should().Throw<SongNotFoundException>(message);
+    }
+
+    [Test]
+    public void UpdateSong_WhenDbUpdateConcurrencyException_ThrowOptimisticConcurrencyException()
+    {
+        // Arrange
+        SongUpdateInputModel inputModel = new()
+        {
+            Id = 1,
+            AlbumId = 1,
+            Title = "New Title",
+            Description = "New Description",
+            Duration = TimeSpan.FromSeconds(30),
+            RowVersion = "Different Row Version"
+        };
+        string message = "Song 3 not found";
+
+        // Act
+        Action act = () => _songService.UpdateSong(inputModel);
+
+        // Assert
+        act.Should().Throw<OptimisticConcurrencyException>(message);
+        foreach (EntityEntry entry in _ctx.ChangeTracker.Entries())
+        {
+            entry.State = EntityState.Detached;
+        }
+        _ctx.SaveChanges();
+    }
+
+    [Test]
+    public void RemoveSong_WhenSongRemovedSuccessfully_NoReturn()
+    {
+        // Arrange
+        SongDeleteInputModel inputModel = new()
+        {
+            Id = 1,
+            AlbumId = 1
+        };
+        int beforeCount = _ctx.Songs!.Count();
+        beforeCount.Should().Be(2);
+
+        // Act
+        _songService.RemoveSong(inputModel);
+
+        // Assert
+        int afterCount = _ctx.Songs!.Count();
+        afterCount.Should().Be(1);
+    }
+
+    [Test]
+    public void RemoveSong_WhenSongNotExists_ThrowSongNotFoundException()
+    {
+        // Arrange
+        SongDeleteInputModel inputModel = new()
+        {
+            Id = 3,
+            AlbumId = 1
+        };
+        string message = "Song 3 not found";
+
+        // Act
+        Action act = () => _songService.RemoveSong(inputModel);
 
         // Assert
         act.Should().Throw<SongNotFoundException>(message);
