@@ -1,5 +1,4 @@
-﻿using AngleSharp.Common;
-using AuthorPlace.Models.Entities;
+﻿using AuthorPlace.Models.Entities;
 using AuthorPlace.Models.Exceptions.Application;
 using AuthorPlace.Models.InputModels.Songs;
 using AuthorPlace.Models.Services.Application.Implementations.Songs;
@@ -9,10 +8,8 @@ using AuthorPlace.Models.ViewModels.Songs;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Org.BouncyCastle.Utilities;
 
 namespace AuthorPlaceTests.Models.Services.Application.Implementations.Songs;
 
