@@ -16,8 +16,8 @@ namespace AuthorPlaceTests.Models.Services.Application.Implementations.Songs;
 [TestFixture]
 public class EFCoreSongServiceTests
 {
-    private AuthorPlaceDbContext _ctx;
-    private ISongService _songService;
+    private readonly AuthorPlaceDbContext _ctx;
+    private readonly ISongService _songService;
 
     public EFCoreSongServiceTests()
     {
@@ -60,7 +60,7 @@ public class EFCoreSongServiceTests
         _ctx.Dispose();
     }
 
-    public static List<Album> MockAlbums()
+    private static List<Album> MockAlbums()
     {
         return new List<Album>()
         {
@@ -68,7 +68,7 @@ public class EFCoreSongServiceTests
         };
     }
 
-    public static List<Song> MockSongs()
+    private static List<Song> MockSongs()
     {
         return new List<Song>()
         {
